@@ -1,24 +1,23 @@
 // https://docs.expo.dev/guides/using-eslint/
-import { defineConfig } from 'eslint/config';
-import expoConfig from 'eslint-config-expo/flat';
-import '@stylistic/eslint-plugin';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+const { defineConfig } = require('eslint/config')
+const expoConfig = require('eslint-config-expo/flat')
+const eslintPluginPrettierRecommended = require('eslint-plugin-prettier/recommended')
+const stylistic = require('@stylistic/eslint-plugin')
 
-export default defineConfig([
+module.exports = defineConfig([
   expoConfig,
-  eslintPluginPrettierRecommended,
   {
     plugins: {
-      '@stylistic': '@stylistic/eslint-plugin',
+      '@stylistic': stylistic,
     },
     rules: {
       '@stylistic/indent': ['error', 2],
-      '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
-      '@stylistic/semi': ['error', 'never']
-    }
+      '@stylistic/quotes': ['error', 'single'],
+      '@stylistic/semi': ['error', 'never'],
+    },
   },
   {
     ignores: ['dist/*'],
   },
-]);
-
+  // eslintPluginPrettierRecommended,
+])

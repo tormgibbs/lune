@@ -1,4 +1,6 @@
 {
+  "biome.enabled": false,
+
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",

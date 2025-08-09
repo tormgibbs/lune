@@ -52,7 +52,23 @@ export default function RootLayout() {
           <Stack.Screen
             name="entry"
             options={{
-              presentation: 'modal',
+              presentation: Platform.select({
+                ios: 'modal',
+                android: 'formSheet',
+                default: 'formSheet'
+              }),
+              gestureDirection: 'vertical',
+              animation: 'slide_from_bottom',
+            }}
+          />
+          <Stack.Screen
+            name="edit-date"
+            options={{
+              presentation: Platform.select({
+                ios: 'modal',
+                android: 'formSheet',
+                default: 'formSheet'
+              }),
               gestureDirection: 'vertical',
               animation: 'slide_from_bottom',
             }}

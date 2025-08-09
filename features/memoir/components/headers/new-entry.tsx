@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/popover'
 import { Separator } from '@rn-primitives/context-menu'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { PortalHost } from '@rn-primitives/portal'
 import MenuItem from '@/components/menu-item'
+import { cn } from '@/lib/utils'
 
 type HeaderProps = {
   dateLabel: string
@@ -41,7 +41,7 @@ export const Header = forwardRef(
       <View
         style={{
           paddingTop: Platform.select({
-            ios: 20,
+            ios: 25,
             android: insets.top + 10,
             default: 0,
           }),
@@ -49,11 +49,25 @@ export const Header = forwardRef(
           paddingHorizontal: 20,
           backgroundColor: '#E8E6D9',
         }}>
-        <PortalHost name="modal-host" />
         <View className="relative flex-row items-center justify-between">
-          <Tag color="#6C7A45" size={24} />
+          <Tag
+            color="#6C7A45"
+            size={Platform.select({
+              ios: 28,
+              android: 24,
+              default: 24,
+            })}
+          />
 
-          <Text className="absolute text-[#2B311A] text-xl font-medium left-1/2 transform -translate-x-1/2">
+          <Text
+            className={cn(
+              'absolute text-[#161ae2] font-medium left-1/2 transform -translate-x-1/2',
+              Platform.select({
+                ios: 'text-xl',
+                android: 'text-xl',
+                default: 'text-xl',
+              }),
+            )}>
             {dateLabel}
           </Text>
 
@@ -61,17 +75,25 @@ export const Header = forwardRef(
             <Popover onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger ref={triggerRef} asChild>
                 <Pressable className={isPopoverOpen ? 'opacity-50' : ''}>
-                  <CircleEllipsis color="#6C7A45" size={24} />
+                  <CircleEllipsis
+                    color="#6C7A45"
+                    size={Platform.select({
+                      ios: 28,
+                      android: 24,
+                      default: 24,
+                    })}
+                  />
                 </Pressable>
               </PopoverTrigger>
 
               <PopoverContent
-                side="bottom"
+                side="top"
                 portalHost="modal-host"
                 align="end"
                 alignOffset={-4}
                 sideOffset={8}
-                className="w-48 py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">
+                style={{ minWidth: 160 }}
+                className="w-auto py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">
                 <MenuItem
                   label="Edit Date"
                   icon={<CalendarDays size={20} />}
@@ -91,7 +113,17 @@ export const Header = forwardRef(
             </Popover>
 
             <Pressable className="active:opacity-50" onPress={onDone}>
-              <Text className="text-[#6C7A45] text-lg font-medium">Done</Text>
+              <Text
+                className={cn(
+                  'text-[#6C7A45] font-medium',
+                  Platform.select({
+                    ios: 'text-xl',
+                    android: 'text-lg',
+                    default: 'text-lg',
+                  }),
+                )}>
+                Done
+              </Text>
             </Pressable>
           </View>
         </View>

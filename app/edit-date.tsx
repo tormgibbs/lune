@@ -18,9 +18,7 @@ const EditDate = () => {
     <SafeAreaView>
       <Stack.Screen
         options={{
-          presentation: 'formSheet',
           headerShown: true,
-          animation: 'slide_from_bottom',
           header: (props) => (
             <Header {...props} onCancel={handleCancel} onDone={handleDone} />
           ),

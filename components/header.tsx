@@ -48,7 +48,7 @@ const Header = forwardRef(
 
           <Popover>
             <PopoverTrigger ref={triggerRef} asChild>
-              <Button size="icon" className="rounded-full bg-[#EDE9D5]">
+              <Button variant='secondary' size="icon" className="rounded-full bg-[#EDE9D5]">
                 <Ellipsis size={20} />
               </Button>
             </PopoverTrigger>
@@ -56,7 +56,7 @@ const Header = forwardRef(
             <PopoverContent
               side="bottom"
               align="end"
-              className="w-48 py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">
+              className="w-auto py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">
               <MenuItem
                 label="Preferences"
                 icon={<Settings size={20} />}

@@ -1,11 +1,11 @@
 import '@/global.css'
 
-import { ThemeToggle } from '@/components/ThemeToggle'
+// import { ThemeToggle } from '@/components/ThemeToggle'
 import { setAndroidNavigationBar } from '@/lib/android-navigation-bar'
 import { NAV_THEME } from '@/lib/constants'
-import { useColorScheme } from '@/lib/useColorScheme'
+// import { useColorScheme } from '@/lib/useColorScheme'
 import {
-  DarkTheme,
+  // DarkTheme,
   DefaultTheme,
   Theme,
   ThemeProvider,
@@ -20,14 +20,14 @@ const LIGHT_THEME: Theme = {
   ...DefaultTheme,
   colors: NAV_THEME.light,
 }
-const DARK_THEME: Theme = {
-  ...DarkTheme,
-  colors: NAV_THEME.dark,
-}
+// const DARK_THEME: Theme = {
+//   ...DarkTheme,
+//   colors: NAV_THEME.dark,
+// }
 
 export {
   // Catch any errors thrown by the Layout component.
-  ErrorBoundary
+  ErrorBoundary,
 } from 'expo-router'
 
 const usePlatformSpecificSetup = Platform.select({
@@ -38,18 +38,29 @@ const usePlatformSpecificSetup = Platform.select({
 
 export default function RootLayout() {
   usePlatformSpecificSetup()
-  const { isDarkColorScheme } = useColorScheme()
+  // const { isDarkColorScheme } = useColorScheme()
 
   return (
-    <ThemeProvider value={LIGHT_THEME}>
-      <StatusBar style={'dark'} />
-      <Stack>
-        <Stack.Screen
-          name="index"
-        />
-      </Stack>
+    <>
+      <ThemeProvider value={LIGHT_THEME}>
+        <StatusBar style={'dark'} />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}>
+          <Stack.Screen name="index" />
+          <Stack.Screen
+            name="entry"
+            options={{
+              presentation: 'modal',
+              gestureDirection: 'vertical',
+              animation: 'slide_from_bottom',
+            }}
+          />
+        </Stack>
+      </ThemeProvider>
       <PortalHost />
-    </ThemeProvider>
+    </>
   )
 }
 

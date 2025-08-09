@@ -1,4 +1,4 @@
-const { hairlineWidth } = require('nativewind/theme');
+const { hairlineWidth } = require('nativewind/theme')
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -8,6 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        olive: '#2B311A',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -62,4 +63,4 @@ module.exports = {
     },
   },
   plugins: [require('tailwindcss-animate')],
-};
+}

@@ -76,7 +76,9 @@ const EditDate = () => {
   const [currentMonth, setCurrentMonth] = useState(today)
 
   const changeMonth = (months: number) => {
-    const newMonth = dayjs(currentMonth).add(months, 'month').format('YYYY-MM-DD')
+    const newMonth = dayjs(currentMonth)
+      .add(months, 'month')
+      .format('YYYY-MM-DD')
     console.log('Changing month to:', newMonth)
     setCurrentMonth(newMonth)
   }
@@ -156,6 +158,10 @@ const EditDate = () => {
         <Text className="text-sm px-4">USE DATE FROM</Text>
         <Pressable
           className="flex-row items-center justify-between p-3 bg-[#9C988B] rounded-lg my-2"
+          onPress={() => {
+            setSelectedDate(createdDateISO)
+            setCurrentMonth(createdDateISO)
+          }}
         >
           <Text className="text-[#DDD9CC] text-xl">Entry Created</Text>
           <Text className="text-[#F5F4F0] text-xl">{createdDate}</Text>

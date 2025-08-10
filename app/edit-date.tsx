@@ -1,10 +1,86 @@
-import { Text } from 'react-native'
-import React from 'react'
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  TextStyle,
+  View,
+  ViewStyle,
+} from 'react-native'
+import React, { useMemo, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, Stack } from 'expo-router'
 import Header from '@/features/memoir/components/headers/edit-date'
+import { Calendar } from 'react-native-calendars'
+import { formatDate } from '@/lib/date'
+import CalendarHeader from '@/components/calendar-header'
+import dayjs from 'dayjs'
+import { MarkedDates, Theme } from 'react-native-calendars/src/types'
+
+interface CalendarHeaderStyles {
+  dayTextAtIndex0?: TextStyle
+  dayTextAtIndex1?: TextStyle
+  dayTextAtIndex2?: TextStyle
+  dayTextAtIndex3?: TextStyle
+  dayTextAtIndex4?: TextStyle
+  dayTextAtIndex5?: TextStyle
+  dayTextAtIndex6?: TextStyle
+}
+
+interface DayBasicStyles {
+  base?: ViewStyle
+  text?: TextStyle
+}
+
+interface CalendarMainStyles {
+  week?: ViewStyle
+}
+
+const dayHeaderStyle = {
+  textTransform: 'uppercase' as const,
+  fontWeight: '400' as const,
+  color: '#B8B4A7',
+}
+
+const calendarTheme: Theme & {
+  'stylesheet.calendar.header'?: CalendarHeaderStyles
+  'stylesheet.day.basic'?: DayBasicStyles
+  'stylesheet.calendar.main'?: CalendarMainStyles
+} = {
+  backgroundColor: '#9C988B',
+  calendarBackground: '#9C988B',
+
+  todayTextColor: '#E3E9B9',
+  textDayHeaderFontWeight: '400',
+  textDayFontWeight: 'medium',
+
+  textDisabledColor: '#8A8680',
+  dayTextColor: '#333333',
+
+  'stylesheet.calendar.header': {
+    dayTextAtIndex0: dayHeaderStyle,
+    dayTextAtIndex1: dayHeaderStyle,
+    dayTextAtIndex2: dayHeaderStyle,
+    dayTextAtIndex3: dayHeaderStyle,
+    dayTextAtIndex4: dayHeaderStyle,
+    dayTextAtIndex5: dayHeaderStyle,
+    dayTextAtIndex6: dayHeaderStyle,
+  },
+}
 
 const EditDate = () => {
+  const today = new Date().toISOString().split('T')[0]
+  const createdDate = formatDate(new Date())
+  const createdDateISO = dayjs(new Date()).format('YYYY-MM-DD')
+
+  const [selectedDate, setSelectedDate] = useState(today)
+  const [currentMonth, setCurrentMonth] = useState(today)
+
+  const changeMonth = (months: number) => {
+    const newMonth = dayjs(currentMonth).add(months, 'month').format('YYYY-MM-DD')
+    console.log('Changing month to:', newMonth)
+    setCurrentMonth(newMonth)
+  }
+
   const handleCancel = () => {
     router.back()
   }
@@ -14,8 +90,32 @@ const EditDate = () => {
     router.back()
   }
 
+  const markedDates: MarkedDates = useMemo(
+    () => ({
+      [selectedDate]: {
+        customStyles: {
+          container: {
+            borderWidth: 2,
+            borderColor: selectedDate === today ? '#9FB26C' : '#7A8357',
+            borderRadius: 20,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: selectedDate === today ? '#9FB26C' : '#7A8357',
+          },
+          text: {
+            color: selectedDate === today ? '#FFFFFF' : '#D9E3A6',
+            fontWeight: 'bold',
+          },
+        },
+      },
+    }),
+    [selectedDate, today],
+  )
+
   return (
-    <SafeAreaView>
+    <SafeAreaView
+      className="flex-1 p-4 bg-[#E8E6D9]"
+      edges={['left', 'right', 'bottom']}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -24,9 +124,62 @@ const EditDate = () => {
           ),
         }}
       />
-      <Text>EditDate</Text>
+      <Text className="text-sm px-4">SELECT CUSTOM DATE</Text>
+
+      <Calendar
+        firstDay={1}
+        key={currentMonth}
+        current={currentMonth}
+        enableSwipeMonths
+        onMonthChange={(month) => {
+          const newMonth = `${month.year}-${month.month.toString().padStart(2, '0')}-01`
+          setCurrentMonth(newMonth)
+        }}
+        hideExtraDays
+        maxDate={today}
+        hideArrows={true}
+        style={styles.calendar}
+        renderHeader={(date) => (
+          <CalendarHeader
+            date={date}
+            onNextMonth={() => changeMonth(1)}
+            onPreviousMonth={() => changeMonth(-1)}
+          />
+        )}
+        onDayPress={(day) => setSelectedDate(day.dateString)}
+        markedDates={markedDates}
+        markingType="custom"
+        theme={calendarTheme}
+      />
+
+      <View className="mt-10">
+        <Text className="text-sm px-4">USE DATE FROM</Text>
+        <Pressable
+          className="flex-row items-center justify-between p-3 bg-[#9C988B] rounded-lg my-2"
+        >
+          <Text className="text-[#DDD9CC] text-xl">Entry Created</Text>
+          <Text className="text-[#F5F4F0] text-xl">{createdDate}</Text>
+        </Pressable>
+        <Text className="text-sm px-4">
+          Use the date this entry was created.
+        </Text>
+      </View>
     </SafeAreaView>
   )
 }
 
 export default EditDate
+
+const styles = StyleSheet.create({
+  header: {
+    position: 'absolute',
+    left: '50%',
+    transform: [{ translateX: -50 }],
+  },
+  calendar: {
+    height: 370,
+    marginTop: 8,
+    borderRadius: 10,
+    padding: 15,
+  },
+})

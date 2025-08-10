@@ -27,7 +27,10 @@ const Entry = () => {
 
   return (
     <>
-      <SafeAreaView className="flex-1 bg-[#E8E6D9] p-4">
+      <SafeAreaView 
+        className="flex-1 bg-[#E8E6D9]"
+        edges={['left', 'right', 'bottom']}
+      >
         <PortalHost name="modal-host" />
         <Stack.Screen
           options={{
@@ -45,8 +48,8 @@ const Entry = () => {
           }}
         />
 
-        
-        <View className="flex-1 justify-center items-center">
+
+        <View className="flex-1 justify-center items-center z-[-999999]">
           <Text className="text-[#2B311A] text-lg">
             Your entry content goes here...
           </Text>

@@ -17,22 +17,27 @@
 //   },
 // }
 
-
 export const NAV_THEME = {
   light: {
     background: 'hsl(48 27% 95%)', // Warm Off-White (#F5F4EF)
-    border: 'hsl(49 23% 89%)',     // Soft Beige-Tan (#E8E6D9)
-    card: 'hsl(49 23% 89%)',       // Soft Beige-Tan (#E8E6D9)
-    notification: 'hsl(8 45% 44%)',// Muted Brick Red (#A34B3D)
-    primary: 'hsl(75 29% 15%)',    // Dark Olive (#2B311A)
-    text: 'hsl(75 29% 15%)',       // Dark Olive (#2B311A)
+    border: 'hsl(49 23% 89%)', // Soft Beige-Tan (#E8E6D9)
+    card: 'hsl(49 23% 89%)', // Soft Beige-Tan (#E8E6D9)
+    notification: 'hsl(8 45% 44%)', // Muted Brick Red (#A34B3D)
+    primary: 'hsl(75 29% 15%)', // Dark Olive (#2B311A)
+    text: 'hsl(75 29% 15%)', // Dark Olive (#2B311A)
   },
   dark: {
     background: 'hsl(75 29% 15%)', // Dark Olive (#2B311A)
-    border: 'hsl(78 25% 38%)',     // Sage Green (#6C7A45)
-    card: 'hsl(75 29% 15%)',       // Dark Olive (#2B311A)
-    notification: 'hsl(8 45% 44%)',// Muted Brick Red (#A34B3D)
-    primary: 'hsl(48 59% 50%)',    // Golden Mustard (#CBA135)
-    text: 'hsl(48 27% 95%)',       // Warm Off-White (#F5F4EF)
+    border: 'hsl(78 25% 38%)', // Sage Green (#6C7A45)
+    card: 'hsl(75 29% 15%)', // Dark Olive (#2B311A)
+    notification: 'hsl(8 45% 44%)', // Muted Brick Red (#A34B3D)
+    primary: 'hsl(48 59% 50%)', // Golden Mustard (#CBA135)
+    text: 'hsl(48 27% 95%)', // Warm Off-White (#F5F4EF)
   },
+}
+
+export const HEADER_STYLE = {
+  position: 'absolute',
+  left: '50%',
+  transform: [{ translateX: -50 }],
 }

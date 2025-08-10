@@ -45,10 +45,11 @@ export const Header = forwardRef(
             android: insets.top + 10,
             default: 0,
           }),
-          paddingBottom: 15,
+          paddingBottom: 10,
           paddingHorizontal: 20,
           backgroundColor: '#E8E6D9',
-        }}>
+        }}
+      >
         <View className="relative flex-row items-center justify-between">
           <Tag
             color="#6C7A45"
@@ -61,7 +62,7 @@ export const Header = forwardRef(
 
           <Text
             className={cn(
-              'absolute text-[#161ae2] font-medium left-1/2 transform -translate-x-1/2',
+              'absolute text-[#2B311A] font-medium left-1/2 transform -translate-x-1/2',
               Platform.select({
                 ios: 'text-xl',
                 android: 'text-xl',
@@ -71,7 +72,7 @@ export const Header = forwardRef(
             {dateLabel}
           </Text>
 
-          <View className="flex-row items-center gap-4">
+          <View className="flex-row items-center gap-3">
             <Popover onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger ref={triggerRef} asChild>
                 <Pressable className={isPopoverOpen ? 'opacity-50' : ''}>

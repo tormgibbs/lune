@@ -1,4 +1,4 @@
-import { View, Text, Platform, Pressable } from 'react-native'
+import { View, Text, Platform, Pressable, StyleSheet } from 'react-native'
 import React from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { cn } from '@/lib/utils'
@@ -18,10 +18,11 @@ const Header = ({ onCancel, onDone }: HeaderProps) => {
           android: insets.top + 10,
           default: 0,
         }),
-        paddingBottom: 15,
+        paddingBottom: 10,
         paddingHorizontal: 20,
         backgroundColor: '#E8E6D9',
-      }}>
+      }}
+    >
       <View className="relative flex-row items-center justify-between">
         <Pressable className="active:opacity-50" onPress={onCancel}>
           <Text
@@ -38,7 +39,7 @@ const Header = ({ onCancel, onDone }: HeaderProps) => {
         </Pressable>
         <Text
           className={cn(
-            'absolute left-1/2 transform -translate-x-1/2',
+            'text-[#2B311A] absolute left-1/2 transform -translate-x-1/2',
             Platform.select({
               ios: 'text-xl font-medium',
               android: 'text-lg font-medium',
@@ -66,3 +67,11 @@ const Header = ({ onCancel, onDone }: HeaderProps) => {
 }
 
 export default Header
+
+const styles = StyleSheet.create({
+  header: {
+    position: 'absolute',
+    left: '50%',
+    transform: [{ translateX: -50 }],
+  }
+})

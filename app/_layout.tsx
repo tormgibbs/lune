@@ -15,6 +15,7 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import * as React from 'react'
 import { Appearance, Platform } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -41,7 +42,7 @@ export default function RootLayout() {
   // const { isDarkColorScheme } = useColorScheme()
 
   return (
-    <>
+    <GestureHandlerRootView>
       <ThemeProvider value={LIGHT_THEME}>
         <StatusBar style={'dark'} />
         <Stack
@@ -50,24 +51,24 @@ export default function RootLayout() {
           }}>
           <Stack.Screen name="index" />
           <Stack.Screen
-            name="entry"
+            name="memoirs/[id]/index"
             options={{
               presentation: Platform.select({
                 ios: 'modal',
                 android: 'formSheet',
-                default: 'formSheet'
+                default: 'formSheet',
               }),
               gestureDirection: 'vertical',
               animation: 'slide_from_bottom',
             }}
           />
           <Stack.Screen
-            name="edit-date"
+            name="memoirs/[id]/edit-date"
             options={{
               presentation: Platform.select({
                 ios: 'modal',
                 android: 'formSheet',
-                default: 'formSheet'
+                default: 'formSheet',
               }),
               gestureDirection: 'vertical',
               animation: 'slide_from_bottom',
@@ -75,8 +76,8 @@ export default function RootLayout() {
           />
         </Stack>
       </ThemeProvider>
-      <PortalHost />
-    </>
+      <PortalHost name="root-host" />
+    </GestureHandlerRootView>
   )
 }
 

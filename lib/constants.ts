@@ -36,8 +36,9 @@ export const NAV_THEME = {
   },
 }
 
-export const HEADER_STYLE = {
+export const CENTERED_TEXT_STYLE = (color: string = '#2B311A') => ({
   position: 'absolute',
   left: '50%',
-  transform: [{ translateX: -50 }],
-}
+  transform: [{ translateX: '-50%' }], // Use transform instead of Tailwind
+  color,
+} as const)

@@ -1,3 +1,4 @@
+import 'react-native-get-random-values'
 import FloatingActionButton from '@/components/floating-action-button'
 import Header from '@/components/header'
 import { router } from 'expo-router'
@@ -5,6 +6,7 @@ import { Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import LuneLogo from '@/assets/lune.svg'
 import { useRef } from 'react'
+import { nanoid } from 'nanoid'
 
 export default function Index() {
   const headerRef = useRef<{ closePopover: () => void }>(null)
@@ -22,6 +24,11 @@ export default function Index() {
   const handlePreferencesPress = () => {
     headerRef.current?.closePopover()
     console.log('Preferences action')
+  }
+
+  const handleNewEntryPress = () => {
+    const id = nanoid(8)
+    router.push(`/memoirs/${id}`)
   }
 
   return (
@@ -49,7 +56,7 @@ export default function Index() {
       </View>
 
       {/* FAB */}
-      <FloatingActionButton onPress={() => router.push('/entry')}/>
+      <FloatingActionButton onPress={handleNewEntryPress}/>
     </SafeAreaView>
   )
 }

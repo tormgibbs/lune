@@ -17,6 +17,7 @@ import { Separator } from '@rn-primitives/context-menu'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MenuItem from '@/components/menu-item'
 import { cn } from '@/lib/utils'
+import { CENTERED_TEXT_STYLE } from '@/lib/constants'
 
 type HeaderProps = {
   dateLabel: string
@@ -61,8 +62,10 @@ export const Header = forwardRef(
           />
 
           <Text
+            style={CENTERED_TEXT_STYLE()}
             className={cn(
-              'absolute text-[#2B311A] font-medium left-1/2 transform -translate-x-1/2',
+              'font-medium',
+              // 'absolute text-[#2B311A] font-medium left-1/2 transform -translate-x-1/2',
               Platform.select({
                 ios: 'text-xl',
                 android: 'text-xl',
@@ -89,10 +92,10 @@ export const Header = forwardRef(
 
               <PopoverContent
                 side="top"
-                portalHost="modal-host"
+                portalHost="memoirs-host"
                 align="end"
-                alignOffset={-4}
-                sideOffset={8}
+                // alignOffset={-4}
+                // sideOffset={8}
                 style={{ minWidth: 160 }}
                 className="w-auto py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">
                 <MenuItem

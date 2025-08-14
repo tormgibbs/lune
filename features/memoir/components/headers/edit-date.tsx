@@ -2,6 +2,7 @@ import { View, Text, Platform, Pressable, StyleSheet } from 'react-native'
 import React from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { cn } from '@/lib/utils'
+import { CENTERED_TEXT_STYLE } from '@/lib/constants'
 
 interface HeaderProps {
   onCancel: () => void
@@ -38,8 +39,9 @@ const Header = ({ onCancel, onDone }: HeaderProps) => {
           </Text>
         </Pressable>
         <Text
+          style={CENTERED_TEXT_STYLE()}
           className={cn(
-            'text-[#2B311A] absolute left-1/2 transform -translate-x-1/2',
+            // 'text-[#2B311A] absolute left-1/2 transform -translate-x-1/2',
             Platform.select({
               ios: 'text-xl font-medium',
               android: 'text-lg font-medium',

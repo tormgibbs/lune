@@ -54,6 +54,7 @@ const Header = forwardRef(
             </PopoverTrigger>
 
             <PopoverContent
+              portalHost='root-host'
               side="bottom"
               align="end"
               className="w-auto py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">

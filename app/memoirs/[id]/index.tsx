@@ -6,6 +6,7 @@ import {
   Pressable,
   Text,
   Keyboard,
+  Button,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import {
@@ -22,8 +23,8 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import Toolbar from '@/features/memoir/components/toolbar'
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet'
-import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react-native'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
+import TextFormattingSheet from '@/features/memoir/components/bottom-sheets/text-format'
 
 const Index = () => {
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -53,7 +54,7 @@ const Index = () => {
     console.log('Text format action')
   }
 
-  const titleInputRef = useRef<TextInput>(null)
+  // const titleInputRef = useRef<TextInput>(null)
 
   const handleDone = () => {
     headerRef.current?.closePopover()
@@ -70,18 +71,17 @@ const Index = () => {
     console.log('Delete action')
   }
 
-  const handleBottomSheetClose = () => {
-  }
+  const handleBottomSheetClose = () => {}
 
-  useFocusEffect(
-    useCallback(() => {
-      const timer = setTimeout(() => {
-        titleInputRef.current?.focus()
-      }, 100)
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     const timer = setTimeout(() => {
+  //       titleInputRef.current?.focus()
+  //     }, 100)
 
-      return () => clearTimeout(timer)
-    }, []),
-  )
+  //     return () => clearTimeout(timer)
+  //   }, []),
+  // )
 
   return (
     <SafeAreaView
@@ -104,50 +104,36 @@ const Index = () => {
         }}
       />
 
-      <BottomSheet
-        ref={bottomSheetRef}
-        enablePanDownToClose
-        index={-1}
-        handleComponent={null}
-        onClose={handleBottomSheetClose}
-      >
-        <BottomSheetView className='p-4'>
-          <View className='flex-row items-center justify-between'>
-            <Text>Format</Text>
-            <Button variant='secondary' size='icon' className='rounded-full'>
-              <X />
-            </Button>
-          </View>
-        </BottomSheetView>
-      </BottomSheet>
+      <TextFormattingSheet
+        bottomSheetRef={bottomSheetRef}
+        handleBottomSheetClose={handleBottomSheetClose}
+      />
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View className="flex-1 p-4 pt-2 z-[-999999]">
+      <KeyboardAwareScrollView style={{ zIndex: -1 }}>
+        <View className="flex-1 p-4 pt-2">
           <Input
-            ref={titleInputRef}
+            // ref={titleInputRef}
             className="bg-transparent border-0 px-1 text-lg font-medium text-[#55584A]"
             placeholder="Title"
             placeholderClassName="text-[#7A7A7A]"
           />
           <Separator className="bg-[#C2C0B2]" />
           <Input
-            className="bg-transparent flex-1 border-0 px-1 text-lg text-[#55584A]"
+            className="flex-1 bg-transparent border-0 px-1 text-lg text-[#55584A]"
             placeholder="Start writing..."
             multiline
             placeholderClassName="text-[#7A7A7A]"
             textAlignVertical="top"
           />
         </View>
-        <Toolbar
-          onAudioPress={handleAudioRecordPress}
-          onCameraPress={handleCameraPress}
-          onTextFormatPress={handleTextFormatPress}
-          onImagesPress={handleImagePress}
-          onSpeechPress={handleSpeechPress}
-        />
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
+      <Toolbar
+        onAudioPress={handleAudioRecordPress}
+        onCameraPress={handleCameraPress}
+        onTextFormatPress={handleTextFormatPress}
+        onImagesPress={handleImagePress}
+        onSpeechPress={handleSpeechPress}
+      />
     </SafeAreaView>
   )
 }

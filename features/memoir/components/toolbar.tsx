@@ -1,8 +1,18 @@
-import { Pressable, View } from 'react-native'
+import { Pressable, StyleProp, Text, View, ViewStyle } from 'react-native'
 import React from 'react'
-import { AudioLines, Camera, CaseSensitive, Images, Speech } from 'lucide-react-native'
+import {
+  AudioLines,
+  Camera,
+  CaseSensitive,
+  Images,
+  Speech,
+} from 'lucide-react-native'
+import { cn } from '@/lib/utils'
+import { KeyboardStickyView } from 'react-native-keyboard-controller'
 
 interface ToolbarProps {
+  className?: string
+  style?: StyleProp<ViewStyle>
   onAudioPress: () => void
   onCameraPress: () => void
   onTextFormatPress: () => void
@@ -10,7 +20,11 @@ interface ToolbarProps {
   onSpeechPress: () => void
 }
 
+
+
 const Toolbar: React.FC<ToolbarProps> = ({
+  className,
+  style,
   onAudioPress,
   onCameraPress,
   onTextFormatPress,
@@ -18,9 +32,12 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onSpeechPress,
 }) => {
   return (
-    <View 
-      style={{ zIndex: -1 }}
-      className="p-4 flex-row items-center justify-around bg-black border-t border-[#C2C0B2]"
+    <KeyboardStickyView
+      style={[{ zIndex: -1, backgroundColor: '#E0DCCC', borderTopColor: '#BFBDB0' }, style]}
+      className={cn(
+        'p-4 flex-row items-center justify-around bg-[#E0DCCC] border-t-[#BFBDB0]',
+        className,
+      )}
     >
       <Pressable onPress={onTextFormatPress}>
         <CaseSensitive size={24} />
@@ -41,8 +58,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <Pressable onPress={onSpeechPress}>
         <Speech size={24} />
       </Pressable>
-    </View>
+    </KeyboardStickyView>
   )
 }
 
 export default Toolbar
+
+// border-[#C2C0B2]

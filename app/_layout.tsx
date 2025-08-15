@@ -16,6 +16,7 @@ import { StatusBar } from 'expo-status-bar'
 import * as React from 'react'
 import { Appearance, Platform } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -43,40 +44,47 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView>
-      <ThemeProvider value={LIGHT_THEME}>
-        <StatusBar style={'dark'} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen
-            name="memoirs/[id]/index"
-            options={{
-              presentation: Platform.select({
-                ios: 'modal',
-                android: 'formSheet',
-                default: 'formSheet',
-              }),
-              gestureDirection: 'vertical',
-              animation: 'slide_from_bottom',
-            }}
-          />
-          <Stack.Screen
-            name="memoirs/[id]/edit-date"
-            options={{
-              presentation: Platform.select({
-                ios: 'modal',
-                android: 'formSheet',
-                default: 'formSheet',
-              }),
-              gestureDirection: 'vertical',
-              animation: 'slide_from_bottom',
-            }}
-          />
-        </Stack>
-      </ThemeProvider>
-      <PortalHost name="root-host" />
+      <KeyboardProvider
+        navigationBarTranslucent={Platform.OS === 'android'}
+        preserveEdgeToEdge={Platform.OS === 'android'}
+        statusBarTranslucent={Platform.OS === 'android'}
+      >
+        <ThemeProvider value={LIGHT_THEME}>
+          <StatusBar style={'dark'} />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen
+              name="memoirs/[id]/index"
+              options={{
+                presentation: Platform.select({
+                  ios: 'modal',
+                  android: 'formSheet',
+                  default: 'formSheet',
+                }),
+                gestureDirection: 'vertical',
+                animation: 'slide_from_bottom',
+              }}
+            />
+            <Stack.Screen
+              name="memoirs/[id]/edit-date"
+              options={{
+                presentation: Platform.select({
+                  ios: 'modal',
+                  android: 'formSheet',
+                  default: 'formSheet',
+                }),
+                gestureDirection: 'vertical',
+                animation: 'slide_from_bottom',
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
+        <PortalHost name="root-host" />
+
+      </KeyboardProvider>
     </GestureHandlerRootView>
   )
 }

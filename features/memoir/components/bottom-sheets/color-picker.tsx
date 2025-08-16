@@ -1,6 +1,10 @@
 import { View, Text } from 'react-native'
 import React from 'react'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetBackdrop,
+} from '@gorhom/bottom-sheet'
 import ColorPicker, { Panel5 } from 'reanimated-color-picker'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react-native'
@@ -21,12 +25,22 @@ const ColourPickerSheet = ({
     bottomSheetRef.current?.dismiss()
   }
 
+  const renderBackdrop = (props: any) => (
+    <BottomSheetBackdrop
+      {...props}
+      pressBehavior="none"
+      disappearsOnIndex={-1}
+      appearsOnIndex={0}
+    />
+  )
+
   return (
     <BottomSheetModal
       stackBehavior="push"
       enablePanDownToClose
       ref={bottomSheetRef}
       handleComponent={null}
+      backdropComponent={renderBackdrop} // <-- use custom backdrop
       style={{
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -45,11 +59,10 @@ const ColourPickerSheet = ({
             <X color="#6C7A45" />
           </Button>
         </View>
-        <ColorPicker 
+        <ColorPicker
           style={{ width: '100%' }}
           value={selectedColor}
-          onCompleteJS={(colors) => onColorSelect(colors.hex)}
-        >
+          onCompleteJS={(colors) => onColorSelect(colors.hex)}>
           <Panel5 style={{ borderRadius: 8 }} />
         </ColorPicker>
       </BottomSheetView>

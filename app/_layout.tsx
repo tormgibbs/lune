@@ -3,6 +3,7 @@ import '@/global.css'
 // import { ThemeToggle } from '@/components/ThemeToggle'
 import { setAndroidNavigationBar } from '@/lib/android-navigation-bar'
 import { NAV_THEME } from '@/lib/constants'
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
 // import { useColorScheme } from '@/lib/useColorScheme'
 import {
   // DarkTheme,
@@ -44,47 +45,49 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView>
-      <KeyboardProvider
-        navigationBarTranslucent={Platform.OS === 'android'}
-        preserveEdgeToEdge={Platform.OS === 'android'}
-        statusBarTranslucent={Platform.OS === 'android'}
-      >
-        <ThemeProvider value={LIGHT_THEME}>
-          <StatusBar style={'dark'} />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen
-              name="memoirs/[id]/index"
-              options={{
-                presentation: Platform.select({
-                  ios: 'modal',
-                  android: 'formSheet',
-                  default: 'formSheet',
-                }),
-                gestureDirection: 'vertical',
-                animation: 'slide_from_bottom',
-              }}
-            />
-            <Stack.Screen
-              name="memoirs/[id]/edit-date"
-              options={{
-                presentation: Platform.select({
-                  ios: 'modal',
-                  android: 'formSheet',
-                  default: 'formSheet',
-                }),
-                gestureDirection: 'vertical',
-                animation: 'slide_from_bottom',
-              }}
-            />
-          </Stack>
-        </ThemeProvider>
-        <PortalHost name="root-host" />
+      <BottomSheetModalProvider>
+        <KeyboardProvider
+          navigationBarTranslucent={Platform.OS === 'android'}
+          preserveEdgeToEdge={Platform.OS === 'android'}
+          statusBarTranslucent={Platform.OS === 'android'}
+        >
+          <ThemeProvider value={LIGHT_THEME}>
+            <StatusBar style={'dark'} />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+              }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen
+                name="memoirs/[id]/index"
+                options={{
+                  presentation: Platform.select({
+                    ios: 'modal',
+                    android: 'formSheet',
+                    default: 'formSheet',
+                  }),
+                  gestureDirection: 'vertical',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+              <Stack.Screen
+                name="memoirs/[id]/edit-date"
+                options={{
+                  presentation: Platform.select({
+                    ios: 'modal',
+                    android: 'formSheet',
+                    default: 'formSheet',
+                  }),
+                  gestureDirection: 'vertical',
+                  animation: 'slide_from_bottom',
+                }}
+              />
+            </Stack>
+          </ThemeProvider>
+          <PortalHost name="root-host" />
 
-      </KeyboardProvider>
+        </KeyboardProvider>
+      </BottomSheetModalProvider>
     </GestureHandlerRootView>
   )
 }

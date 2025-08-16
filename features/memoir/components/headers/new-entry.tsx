@@ -18,7 +18,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MenuItem from '@/components/menu-item'
 import { cn } from '@/lib/utils'
 import { CENTERED_TEXT_STYLE } from '@/lib/constants'
-import { PortalHost } from '@rn-primitives/portal'
 
 type HeaderProps = {
   dateLabel: string
@@ -41,7 +40,6 @@ export const Header = forwardRef(
 
     return (
       <>
-        {/* <PortalHost name="memoirs-host" /> */}
         <View
           style={{
             paddingTop: Platform.select({

@@ -6,7 +6,7 @@ import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
 import { normalizeColor } from '@/lib/utils'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
 import { FlashList } from '@shopify/flash-list'
 import { Image } from 'expo-image'
@@ -31,55 +31,37 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { VideoView } from 'expo-video'
 import ImageView from 'react-native-image-viewing'
 import VideoPlayer from '@/features/memoir/components/video-player'
+import { useMediaPicker } from '@/hooks/useMediaPicker'
+import { useMediaViewer } from '@/hooks/useMediaViewer'
+import MediaViewer from '@/components/media-viewer'
+import MediaGrid from '@/components/media-grid'
+import MediaPager from '@/components/media-pager'
+import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 
 const Index = () => {
+  const router = useRouter()
   const { id } = useLocalSearchParams<{ id: string }>()
+
   const colorPickerSheetRef = useRef<BottomSheetModal>(null)
   const formattingSheetRef = useRef<BottomSheetModal>(null)
   const richEditorRef = useRef<RichEditor>(null)
-  const router = useRouter()
   const headerRef = useRef<{ closePopover: () => void }>(null)
   const scrollRef = useRef<ScrollView>(null)
+  const audioSheetRef = useRef<BottomSheetModal>(null)
 
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
-  const [viewerVisible, setViewerVisible] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(0)
 
-  type ImageAsset = {
-    uri: string
-    type: 'image' | 'video' | 'livePhoto' | 'pairedVideo' | undefined
-  }
-  const [images, setImages] = useState<ImageAsset[] | null>([])
-
-  const screenWidth = Dimensions.get('window').width
-  const numColumns = 3
-  const imageSize = screenWidth / numColumns - 16
+  const { media, pickMedia, removeMedia } = useMediaPicker()
+  const {
+    visible: viewerVisible,
+    selectedIndex,
+    openViewer,
+    closeViewer,
+  } = useMediaViewer()
 
   const handleAudioRecordPress = () => {
-    console.log('Audio record action')
-  }
-
-  const handleImagePress = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images', 'videos'],
-      allowsMultipleSelection: true,
-      aspect: [4, 3],
-      quality: 1,
-    })
-
-    // Print the result as JSON in the terminal
-    console.log(JSON.stringify(result, null, 2))
-
-    if (!result.canceled) {
-      setImages((prev) => [
-        ...(prev ?? []),
-        ...result.assets.map((asset) => ({
-          uri: asset.uri,
-          type: asset.type,
-        })),
-      ])
-    }
+    audioSheetRef.current?.present()
   }
 
   const handleCameraPress = () => {
@@ -112,6 +94,11 @@ const Index = () => {
     console.log('Delete action')
   }
 
+  const handleRecordingComplete = (audioPath: string) => {
+    console.log('Recording saved to:', audioPath)
+    // Add to your audio list or handle as needed
+  }
+
   const handleBottomSheetClose = () => {}
 
   const handleColorSelect = (color: string) => {
@@ -137,18 +124,6 @@ const Index = () => {
       }
     })
   }, [])
-
-  const styles = StyleSheet.create({
-    grid: {
-      marginBottom: 12,
-    },
-    image: {
-      width: imageSize,
-      height: imageSize,
-      margin: 4,
-      borderRadius: 8,
-    },
-  })
 
   // useFocusEffect(
   //   useCallback(() => {
@@ -200,59 +175,26 @@ const Index = () => {
         activeFormats={activeFormats}
       />
 
-      {viewerVisible &&
-        images[selectedIndex] &&
-        (images[selectedIndex].type === 'image' ? (
-          <ImageView
-            images={images.map((img) => ({ uri: img.uri }))}
-            imageIndex={selectedIndex}
-            visible={viewerVisible}
-            onRequestClose={() => setViewerVisible(false)}
-          />
-        ) : (
-          <Modal visible={viewerVisible} transparent={true}>
-            <VideoPlayer
-              uri={images[selectedIndex].uri}
-              onClose={() => setViewerVisible(false)}
-            />
-          </Modal>
-        ))}
+      <AudioRecorderSheet
+        audioSheetRef={audioSheetRef}
+        onRecordingComplete={handleRecordingComplete}
+      />
+
+      <MediaPager
+        media={media}
+        visible={viewerVisible}
+        selectedIndex={selectedIndex}
+        onClose={closeViewer}
+      />
 
       <KeyboardAwareScrollView ref={scrollRef} style={{ zIndex: -1 }}>
         <View className="flex-1 p-4 pt-2">
-          {images && images.length > 0 && (
-            <FlashList
-              data={images}
-              masonry
-              numColumns={numColumns}
-              estimatedItemSize={imageSize}
-              optimizeItemArrangement
-              renderItem={({ item, index }) => (
-                <Pressable
-                  onPress={() => {
-                    setSelectedIndex(index)
-                    setViewerVisible(true)
-                  }}>
-                  {/* <Image source={{ uri: item.uri }} style={styles.image} /> */}
-                  {item.type === 'image' ? (
-                    <Image source={{ uri: item.uri }} style={styles.image} />
-                  ) : (
-                    <View
-                      style={[
-                        styles.image,
-                        {
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          // backgroundColor: '#000',
-                        },
-                      ]}>
-                      <Text style={{ color: '#fff' }}>▶</Text>
-                    </View>
-                  )}
-                </Pressable>
-              )}
-            />
-          )}
+          <MediaGrid
+            media={media}
+            onMediaPress={openViewer}
+            numColumns={3}
+            onDeletePress={removeMedia}
+          />
 
           <Input
             // ref={titleInputRef}
@@ -285,7 +227,7 @@ const Index = () => {
         onAudioPress={handleAudioRecordPress}
         onCameraPress={handleCameraPress}
         onTextFormatPress={handleTextFormatPress}
-        onImagesPress={handleImagePress}
+        onImagesPress={pickMedia}
         onSpeechPress={handleSpeechPress}
       />
     </SafeAreaView>

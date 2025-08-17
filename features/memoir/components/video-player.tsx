@@ -1,45 +1,40 @@
-import { View, Text, Pressable, Button } from 'react-native'
-import React from 'react'
+import { View } from 'react-native'
+import React, { useEffect } from 'react'
 import { useVideoPlayer, VideoView } from 'expo-video'
-import { useEvent } from 'expo'
 
 interface VideoPlayerProps {
   uri: string
-  onClose: () => void
+  isActive: boolean
+  width: number
+  height: number
 }
 
-const VideoPlayer = ({ uri, onClose }: VideoPlayerProps) => {
+const VideoPlayer = ({ uri, isActive, width, height }: VideoPlayerProps) => {
   const player = useVideoPlayer(uri, (player) => {
     player.loop = true
-    player.play()
+    if (isActive) {
+      player.play()
+    }
   })
 
-  const { isPlaying } = useEvent(player, 'playingChange', {
-    isPlaying: player.playing,
-  })
+  useEffect(() => {
+    if (isActive) {
+      player.play()
+    } else {
+      player.pause()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isActive])
 
   return (
     <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'black',
-      }}>
+      style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center' }}>
       <VideoView
-        style={{ width: '100%', height: 300 }}
+        style={{ width, height }}
         player={player}
         allowsFullscreen
+        allowsPictureInPicture
       />
-      <View style={{ flexDirection: 'row', marginTop: 20 }}>
-        <Button
-          title={isPlaying ? 'Pause' : 'Play'}
-          onPress={() => (isPlaying ? player.pause() : player.play())}
-        />
-        <Pressable onPress={onClose} style={{ marginLeft: 20 }}>
-          <Text style={{ color: 'white', fontSize: 18 }}>✕ Close</Text>
-        </Pressable>
-      </View>
     </View>
   )
 }

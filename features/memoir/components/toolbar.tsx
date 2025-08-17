@@ -63,5 +63,3 @@ const Toolbar: React.FC<ToolbarProps> = ({
 }
 
 export default Toolbar
-
-// border-[#C2C0B2]

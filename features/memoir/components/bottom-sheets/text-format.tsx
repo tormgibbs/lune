@@ -78,9 +78,9 @@ const TextFormattingSheet = ({
     <BottomSheetModal
       ref={bottomSheetRef}
       enablePanDownToClose
-      keyboardBehavior='extend'
-      keyboardBlurBehavior='none'
-      android_keyboardInputMode='adjustResize'
+      keyboardBehavior="extend"
+      keyboardBlurBehavior="none"
+      android_keyboardInputMode="adjustResize"
       handleComponent={null}
       style={{
         borderTopLeftRadius: 20,

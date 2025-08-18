@@ -28,7 +28,9 @@ const VideoPlayer = ({ uri, isActive, width, height }: VideoPlayerProps) => {
 
   return (
     <View
-      style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center' }}>
+      className="flex-1 bg-black justify-center items-center"
+      // style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center' }}
+    >
       <VideoView
         style={{ width, height }}
         player={player}

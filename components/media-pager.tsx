@@ -5,6 +5,7 @@ import { Image } from 'expo-image'
 import { useEffect, useRef, useState } from 'react'
 import { useVideoPlayer, VideoView } from 'expo-video'
 import VideoPlayer from '@/features/memoir/components/video-player'
+import AudioPlayer from './audio-player'
 
 interface MediaPagerProps {
   media: MediaAsset[]
@@ -68,6 +69,18 @@ const MediaPager: React.FC<MediaPagerProps> = ({
             )
           }
 
+          if (item.type === 'audio') {
+            return (
+              <AudioPlayer
+                key={index}
+                audio={item}
+                isActive={currentIndex === index}
+                width={width}
+                height={height}
+              />
+            )
+          }
+
           return null
         })}
       </PagerView>
@@ -76,32 +89,3 @@ const MediaPager: React.FC<MediaPagerProps> = ({
 }
 
 export default MediaPager
-
-// const VideoPage = ({ uri, isActive }: { uri: string; isActive: boolean }) => {
-//   const player = useVideoPlayer(uri, (p) => {
-//     p.loop = true
-//     if (isActive) {
-//       p.play()
-//     }
-//   })
-
-//   useEffect(() => {
-//     if (isActive) {
-//       player.play()
-//     } else {
-//       player.pause()
-//     }
-//   }, [isActive])
-
-//   return (
-//     <View
-//       style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center' }}>
-//       <VideoView
-//         style={{ width, height }}
-//         player={player}
-//         allowsFullscreen
-//         allowsPictureInPicture
-//       />
-//     </View>
-//   )
-// }

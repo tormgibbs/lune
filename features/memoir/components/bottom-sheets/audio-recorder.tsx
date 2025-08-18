@@ -1,19 +1,75 @@
-import { View, Text, Pressable, Animated } from 'react-native'
+import { View, Text, Pressable, Animated, Alert, Linking } from 'react-native'
 import { RefObject, useRef, useState } from 'react'
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import {
+  IWaveformRef,
+  PermissionStatus,
+  RecorderState,
+  UpdateFrequency,
+  Waveform,
+  useAudioPermission,
+} from '@simform_solutions/react-native-audio-waveform'
 
 interface AudioRecorderSheetProps {
   audioSheetRef: RefObject<BottomSheetModal | null>
+  onRecordingComplete?: (path: string) => void
 }
 
-const AudioRecorderSheet = ({ audioSheetRef }: AudioRecorderSheetProps) => {
-  const [isRecording, setIsRecording] = useState(false)
+const AudioRecorderSheet = ({
+  audioSheetRef,
+  onRecordingComplete,
+}: AudioRecorderSheetProps) => {
+  const waveformRef = useRef<IWaveformRef>(null)
+  const [recorderState, setRecorderState] = useState(RecorderState.stopped)
   const animatedValue = useRef(new Animated.Value(0)).current
+  const { checkHasAudioRecorderPermission, getAudioRecorderPermission } =
+    useAudioPermission()
 
-  const handlePress = () => {
+  const isRecording = recorderState === RecorderState.recording
+
+  const startRecording = () => {
+    setTimeout(() => {
+      waveformRef.current
+        ?.startRecord({
+          updateFrequency: UpdateFrequency.high,
+        })
+        .catch((error) => {
+          console.error('Recording start error:', error)
+        })
+    }, 0)
+  }
+
+  const handleRecorderAction = async () => {
+    if (recorderState === RecorderState.stopped) {
+      const hasPermission = await checkHasAudioRecorderPermission()
+
+      if (hasPermission === PermissionStatus.granted) {
+        startRecording()
+      } else if (hasPermission === PermissionStatus.undetermined) {
+        const permissionStatus = await getAudioRecorderPermission()
+        if (permissionStatus === PermissionStatus.granted) {
+          startRecording()
+        }
+      } else {
+        Alert.alert(
+          'Permission Required',
+          'Microphone access is needed to record audio.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ],
+        )
+        return
+      }
+    } else {
+      waveformRef.current?.stopRecord().then((path) => {
+        if (path && onRecordingComplete) {
+          onRecordingComplete(path)
+        }
+      })
+    }
+
     const toValue = isRecording ? 0 : 1
-    setIsRecording(!isRecording)
-
     Animated.spring(animatedValue, {
       toValue,
       useNativeDriver: false,
@@ -22,10 +78,9 @@ const AudioRecorderSheet = ({ audioSheetRef }: AudioRecorderSheetProps) => {
     }).start()
   }
 
-  
   const borderRadius = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [50, 8]
+    outputRange: [50, 8],
   })
 
   const scale = animatedValue.interpolate({
@@ -41,16 +96,53 @@ const AudioRecorderSheet = ({ audioSheetRef }: AudioRecorderSheetProps) => {
       keyboardBlurBehavior="none"
       android_keyboardInputMode="adjustResize"
       handleComponent={null}
+      onDismiss={() => {
+        if (recorderState === RecorderState.recording) {
+          waveformRef.current?.stopRecord().then((path) => {
+            if (path && onRecordingComplete) {
+              onRecordingComplete(path)
+            }
+          })
+        }
+      }}
       style={{
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
       }}>
-      <BottomSheetView className="p-4 pb-6 bg-[#E0DCCC]">
-        <View className="items-center p-10">
-          <Pressable className="p-1 bg-[#6C7A45] rounded-full" onPress={handlePress}>
-            <View className='p-1 rounded-full bg-[#E0DCCC]'>
-              <Animated.View 
+      <BottomSheetView className="px-4 pb-6 pt-8 bg-[#E0DCCC]">
+        <View className="relative mb-2">
+          {!isRecording && (
+            <View className="absolute w-full h-[100px] items-center justify-center">
+              <Text className="text-lg text-[#6C7A45]">
+                Start Audio Recording
+              </Text>
+            </View>
+          )}
+
+          <Waveform
+            mode="live"
+            ref={waveformRef}
+            candleSpace={2}
+            candleWidth={4}
+            candleHeightScale={10}
+            maxCandlesToRender={500}
+            waveColor="#6C7A45"
+            onRecorderStateChange={setRecorderState}
+            containerStyle={{
+              backgroundColor: 'transparent',
+              height: 100,
+              opacity: isRecording ? 1 : 0,
+            }}
+          />
+        </View>
+
+        <View className="items-center p-4">
+          <Pressable
+            className="p-1 bg-[#6C7A45] rounded-full"
+            onPress={handleRecorderAction}>
+            <View className="p-1 rounded-full bg-[#E0DCCC]">
+              <Animated.View
                 className="p-8 bg-red-500"
                 style={{
                   borderRadius,

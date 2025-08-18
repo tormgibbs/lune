@@ -1,6 +1,7 @@
 export type MediaType =
   | 'image'
   | 'video'
+  | 'audio'
   | 'livePhoto'
   | 'pairedVideo'
   | undefined

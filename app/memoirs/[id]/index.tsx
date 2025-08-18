@@ -37,6 +37,8 @@ import MediaViewer from '@/components/media-viewer'
 import MediaGrid from '@/components/media-grid'
 import MediaPager from '@/components/media-pager'
 import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
+import { MediaAsset } from '@/types/media'
+import { useAudioPlayer, createAudioPlayer } from 'expo-audio'
 
 const Index = () => {
   const router = useRouter()
@@ -52,7 +54,7 @@ const Index = () => {
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
 
-  const { media, pickMedia, removeMedia } = useMediaPicker()
+  const { media, pickMedia, removeMedia, setMedia } = useMediaPicker()
   const {
     visible: viewerVisible,
     selectedIndex,
@@ -94,9 +96,35 @@ const Index = () => {
     console.log('Delete action')
   }
 
-  const handleRecordingComplete = (audioPath: string) => {
+  const handleRecordingComplete = async (audioPath: string) => {
     console.log('Recording saved to:', audioPath)
-    // Add to your audio list or handle as needed
+
+    const player = createAudioPlayer({ uri: audioPath })
+
+    await new Promise<void>((resolve) => {
+      const checkLoaded = () => {
+        if (player.isLoaded) {
+          resolve()
+        } else {
+          setTimeout(checkLoaded, 100)
+        }
+      }
+      checkLoaded()
+    })
+
+    const duration = player.duration * 1000
+    player.remove()
+
+    const newAudio: MediaAsset = {
+      uri: audioPath,
+      type: 'audio',
+      id: `${Date.now()}_audio`,
+      duration,
+    }
+
+    console.log('New audio added:', newAudio)
+
+    setMedia((prev) => [...prev, newAudio])
   }
 
   const handleBottomSheetClose = () => {}

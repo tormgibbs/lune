@@ -39,6 +39,7 @@ import MediaPager from '@/components/media-pager'
 import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 import { MediaAsset } from '@/types/media'
 import { useAudioPlayer, createAudioPlayer } from 'expo-audio'
+import CameraModal, { CameraModalRef } from '@/components/camera-modal'
 
 const Index = () => {
   const router = useRouter()
@@ -50,6 +51,7 @@ const Index = () => {
   const headerRef = useRef<{ closePopover: () => void }>(null)
   const scrollRef = useRef<ScrollView>(null)
   const audioSheetRef = useRef<BottomSheetModal>(null)
+  const cameraRef = useRef<CameraModalRef>(null)
 
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
@@ -67,7 +69,7 @@ const Index = () => {
   }
 
   const handleCameraPress = () => {
-    console.log('Camera action')
+    cameraRef.current?.open()
   }
 
   const handleSpeechPress = () => {
@@ -182,6 +184,11 @@ const Index = () => {
             />
           ),
         }}
+      />
+
+      <CameraModal
+        ref={cameraRef}
+        onClose={() => console.log('Camera closed')}
       />
 
       <ColourPickerSheet

@@ -188,6 +188,12 @@ const Index = () => {
 
       <CameraModal
         ref={cameraRef}
+        onCapture={(uri) => {
+          console.log('Photo captured:', uri)
+        }}
+        onVideoCapture={(uri) => {
+          console.log('Video captured:', uri)
+        }}
         onClose={() => console.log('Camera closed')}
       />
 

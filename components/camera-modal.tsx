@@ -1,5 +1,6 @@
-import { useState, forwardRef, useImperativeHandle } from 'react'
+import { useState, forwardRef, useImperativeHandle, useRef } from 'react'
 import {
+  Animated,
   Modal,
   Pressable,
   StyleSheet,
@@ -27,6 +28,69 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
     const [facing, setFacing] = useState<CameraType>('back')
     const [permission, requestPermission] = useCameraPermissions()
 
+    const scaleAnim = useRef(new Animated.Value(1)).current
+    const borderAnim = useRef(new Animated.Value(50)).current
+
+    const [isRecording, setIsRecording] = useState(false)
+
+    const handlePressIn = () => {
+      Animated.spring(scaleAnim, {
+        toValue: 0.85,
+        useNativeDriver: false,
+      }).start()
+    }
+
+    const handlePressOut = () => {
+      if (!isRecording) {
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 3,
+          useNativeDriver: false,
+        }).start()
+      }
+    }
+
+    const handleLongPress = () => {
+      setIsRecording(true)
+
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 0.7,
+          useNativeDriver: false,
+        }),
+        Animated.timing(borderAnim, {
+          toValue: 8,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+      ]).start()
+    }
+
+    const stopRecording = () => {
+      setIsRecording(false)
+
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 3,
+          useNativeDriver: false,
+        }),
+        Animated.timing(borderAnim, {
+          toValue: 50,
+          duration: 200,
+          useNativeDriver: false,
+        }),
+      ]).start()
+    }
+
+    const handleRelease = () => {
+      if (isRecording) {
+        stopRecording()
+      } else {
+        handlePressOut()
+      }
+    }
+
     useImperativeHandle(ref, () => ({
       open: async () => {
         if (!permission?.granted) {
@@ -39,7 +103,13 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
     }))
 
     return (
-      <Modal visible={visible} animationType="slide">
+      <Modal
+        visible={visible}
+        animationType="slide"
+        onRequestClose={() => {
+          setVisible(false)
+          onClose?.()
+        }}>
         <View className="flex-1">
           <CameraView style={{ flex: 1 }} facing={facing}>
             <View className="flex-1 justify-between">
@@ -57,11 +127,31 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
                   <Text className="text-white text-xl">Cancel</Text>
                 </Pressable>
 
-                <View className="p-1 bg-white rounded-full">
+                <Pressable
+                  className="p-1 bg-white rounded-full"
+                  onPressIn={handlePressIn}
+                  onPressOut={handleRelease}
+                  onLongPress={handleLongPress}
+                  delayLongPress={200}
+                  onPress={() => {
+                    if (!isRecording) {
+                      // 📸 capture photo logic here
+                    }
+                  }}>
                   <View className="p-1 bg-black rounded-full">
-                    <View className="p-7 bg-white rounded-full" />
+                    {/* <View className="p-7 bg-white rounded-full" /> */}
+                    <Animated.View
+                      style={{
+                        transform: [{ scale: scaleAnim }],
+                        borderRadius: borderAnim,
+                        backgroundColor: isRecording ? 'red' : 'white',
+                        width: 56,
+                        height: 56,
+                      }}
+                      // className="p-7 bg-white rounded-full"
+                    />
                   </View>
-                </View>
+                </Pressable>
 
                 <Button
                   variant="secondary"

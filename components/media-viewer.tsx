@@ -34,7 +34,7 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
 
   return (
     <Modal visible={visible} transparent={true}>
-      <VideoPlayer uri={currentMedia.uri} onClose={onClose} />
+      <VideoPlayer uri={currentMedia.uri} />
     </Modal>
   )
 }

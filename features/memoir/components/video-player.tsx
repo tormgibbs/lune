@@ -7,6 +7,7 @@ interface VideoPlayerProps {
   isActive: boolean
   width: number
   height: number
+  // onClose?: () => void
 }
 
 const VideoPlayer = ({ uri, isActive, width, height }: VideoPlayerProps) => {

@@ -6,18 +6,11 @@ import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
 import { normalizeColor } from '@/lib/utils'
-import BottomSheet, { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
-import {
-  Dimensions,
-  Modal,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native'
+import { TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
   KeyboardAwareScrollView,
@@ -31,7 +24,7 @@ import MediaGrid from '@/components/media-grid'
 import MediaPager from '@/components/media-pager'
 import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 import { MediaAsset } from '@/types/media'
-import { useAudioPlayer, createAudioPlayer } from 'expo-audio'
+import { createAudioPlayer } from 'expo-audio'
 import CameraModal, { CameraModalRef } from '@/components/camera-modal'
 import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
 
@@ -48,8 +41,6 @@ const Index = () => {
   const cameraRef = useRef<CameraModalRef>(null)
   const voiceInputSheetRef = useRef<BottomSheetModal>(null)
 
-
-
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
 
@@ -62,6 +53,7 @@ const Index = () => {
   } = useMediaViewer()
 
   const handleAudioRecordPress = () => {
+    richEditorRef.current?.blurContentEditor()
     audioSheetRef.current?.present()
   }
 
@@ -70,15 +62,16 @@ const Index = () => {
   }
 
   const handleSpeechPress = () => {
+    richEditorRef.current?.blurContentEditor()
     voiceInputSheetRef.current?.present()
   }
 
   const handleTextFormatPress = async () => {
-    KeyboardController.dismiss()
+    await KeyboardController.dismiss()
     formattingSheetRef.current?.present()
   }
 
-  // const titleInputRef = useRef<TextInput>(null)
+  const titleInputRef = useRef<TextInput>(null)
 
   const handleDone = () => {
     headerRef.current?.closePopover()
@@ -213,7 +206,13 @@ const Index = () => {
         selectedColor={selectedColor}
       />
 
-      <VoiceInputSheet bottomSheetRef={voiceInputSheetRef}/>
+      <VoiceInputSheet
+        bottomSheetRef={voiceInputSheetRef}
+        onTranscript={(transcript) => {
+          console.log('Transcript received:', transcript)
+          richEditorRef.current?.insertText(transcript + ' ')
+        }}
+      />
 
       <TextFormattingSheet
         selectedColor={selectedColor}
@@ -250,13 +249,14 @@ const Index = () => {
           />
 
           <Input
-            // ref={titleInputRef}
+            ref={titleInputRef}
             className="bg-transparent border-0 px-1 text-lg font-medium text-[#55584A]"
             placeholder="Title"
             placeholderClassName="text-[#7A7A7A]"
           />
           <Separator className="bg-[#C2C0B2]" />
           <RichEditor
+            keyboardDisplayRequiresUserAction={false}
             useContainer={true}
             onCursorPosition={(scrollY) => {
               scrollRef.current?.scrollTo({ y: scrollY - 30, animated: true })

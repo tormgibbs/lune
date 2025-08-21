@@ -1,6 +1,6 @@
 import { View, Text, Pressable, Animated, Alert, Linking } from 'react-native'
 import { RefObject, useRef, useState } from 'react'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import {
   IWaveformRef,
   PermissionStatus,
@@ -88,11 +88,21 @@ const AudioRecorderSheet = ({
     outputRange: [1, 0.6],
   })
 
+  const renderBackdrop = (props: any) => (
+    <BottomSheetBackdrop
+      {...props}
+      pressBehavior="none"
+      disappearsOnIndex={-1}
+      appearsOnIndex={0}
+    />
+  )
+
   return (
     <BottomSheetModal
       ref={audioSheetRef}
       enablePanDownToClose
       keyboardBehavior="extend"
+      backdropComponent={renderBackdrop}
       keyboardBlurBehavior="none"
       android_keyboardInputMode="adjustResize"
       handleComponent={null}
@@ -109,8 +119,7 @@ const AudioRecorderSheet = ({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
-      }}
-    >
+      }}>
       <BottomSheetView className="px-4 pb-6 pt-8 bg-[#E0DCCC]">
         <View className="relative mb-2">
           {!isRecording && (

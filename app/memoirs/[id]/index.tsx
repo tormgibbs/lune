@@ -6,11 +6,8 @@ import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
 import { normalizeColor } from '@/lib/utils'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import BottomSheet, { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
-import { FlashList } from '@shopify/flash-list'
-import { Image } from 'expo-image'
-import * as ImagePicker from 'expo-image-picker'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useRef, useState } from 'react'
 import {
@@ -28,18 +25,15 @@ import {
 } from 'react-native-keyboard-controller'
 import { RichEditor } from 'react-native-pell-rich-editor'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { VideoView } from 'expo-video'
-import ImageView from 'react-native-image-viewing'
-import VideoPlayer from '@/features/memoir/components/video-player'
 import { useMediaPicker } from '@/hooks/useMediaPicker'
 import { useMediaViewer } from '@/hooks/useMediaViewer'
-import MediaViewer from '@/components/media-viewer'
 import MediaGrid from '@/components/media-grid'
 import MediaPager from '@/components/media-pager'
 import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 import { MediaAsset } from '@/types/media'
 import { useAudioPlayer, createAudioPlayer } from 'expo-audio'
 import CameraModal, { CameraModalRef } from '@/components/camera-modal'
+import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
 
 const Index = () => {
   const router = useRouter()
@@ -52,6 +46,9 @@ const Index = () => {
   const scrollRef = useRef<ScrollView>(null)
   const audioSheetRef = useRef<BottomSheetModal>(null)
   const cameraRef = useRef<CameraModalRef>(null)
+  const voiceInputSheetRef = useRef<BottomSheetModal>(null)
+
+
 
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
@@ -73,7 +70,7 @@ const Index = () => {
   }
 
   const handleSpeechPress = () => {
-    console.log('Speech action')
+    voiceInputSheetRef.current?.present()
   }
 
   const handleTextFormatPress = async () => {
@@ -190,9 +187,22 @@ const Index = () => {
         ref={cameraRef}
         onCapture={(uri) => {
           console.log('Photo captured:', uri)
+          const newPhoto: MediaAsset = {
+            uri,
+            type: 'image',
+            id: `${Date.now()}_photo`,
+          }
+          setMedia((prev) => [...prev, newPhoto])
         }}
-        onVideoCapture={(uri) => {
+        onVideoCapture={(uri, duration) => {
           console.log('Video captured:', uri)
+          const newVideo: MediaAsset = {
+            uri,
+            type: 'video',
+            id: `${Date.now()}_video`,
+            duration,
+          }
+          setMedia((prev) => [...prev, newVideo])
         }}
         onClose={() => console.log('Camera closed')}
       />
@@ -202,6 +212,8 @@ const Index = () => {
         onColorSelect={handleColorSelect}
         selectedColor={selectedColor}
       />
+
+      <VoiceInputSheet bottomSheetRef={voiceInputSheetRef}/>
 
       <TextFormattingSheet
         selectedColor={selectedColor}

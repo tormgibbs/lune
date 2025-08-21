@@ -109,7 +109,8 @@ const AudioRecorderSheet = ({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
-      }}>
+      }}
+    >
       <BottomSheetView className="px-4 pb-6 pt-8 bg-[#E0DCCC]">
         <View className="relative mb-2">
           {!isRecording && (

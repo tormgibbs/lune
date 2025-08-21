@@ -14,7 +14,7 @@ import MediaPreview from './media-preview'
 type CameraModalProps = {
   onClose?: () => void
   onCapture?: (uri: string) => void
-  onVideoCapture?: (uri: string) => void
+  onVideoCapture?: (uri: string, duration?: number) => void
 }
 
 export type CameraModalRef = {
@@ -57,7 +57,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
         setMode('picture')
         const photo = await cameraRef.current.takePictureAsync({
           quality: 0.8,
-          skipProcessing: true,
+          skipProcessing: false,
         })
         if (photo?.uri) {
           setCapturedPhoto(photo.uri)
@@ -162,11 +162,11 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
                 setCapturedPhoto(null)
                 setCapturedMediaType('image')
               }}
-              onUse={(uri, type) => {
+              onUse={(uri, type, duration) => {
                 if (type === 'image') {
                   onCapture?.(uri)
                 } else {
-                  onVideoCapture?.(uri)
+                  onVideoCapture?.(uri, duration)
                 }
                 setCapturedPhoto(null)
                 setCapturedMediaType('image')

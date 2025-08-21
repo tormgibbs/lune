@@ -8,7 +8,7 @@ interface MediaPreviewProps {
   uri: string
   type: 'image' | 'video'
   onRetake: () => void
-  onUse: (uri: string, type: 'image' | 'video') => void
+  onUse: (uri: string, type: 'image' | 'video', duration?: number) => void
 }
 
 const MediaPreview = ({ uri, type, onRetake, onUse }: MediaPreviewProps) => {
@@ -25,6 +25,15 @@ const MediaPreview = ({ uri, type, onRetake, onUse }: MediaPreviewProps) => {
       player.pause()
     } else {
       player.play()
+    }
+  }
+
+  const handleUse = () => {
+    if (type === 'video') {
+      const duration = player.duration * 1000
+      onUse(uri, type, duration)
+    } else {
+      onUse(uri, type)
     }
   }
 
@@ -55,7 +64,7 @@ const MediaPreview = ({ uri, type, onRetake, onUse }: MediaPreviewProps) => {
           </Pressable>
         )}
 
-        <Pressable onPress={() => onUse(uri, type)} className="px-6 py-3">
+        <Pressable onPress={handleUse} className="px-6 py-3">
           <Text className="text-white font-medium text-lg">
             Use {type === 'video' ? 'Video' : 'Photo'}
           </Text>

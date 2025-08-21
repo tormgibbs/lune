@@ -21,7 +21,9 @@
       "bundleIdentifier": "com.tormgibbs.luneapp"
     },
     "android": {
-      "permissions": ["RECORD_AUDIO"],
+      "permissions": [
+        "RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/lune-adaptive-icon.png",
         "backgroundColor": "#2b311a"
@@ -48,9 +50,10 @@
           "recordAudioAndroid": true
         }
       ],
-      "expo-router",      
+      "expo-router",
       "expo-video",
-      "expo-audio"
+      "expo-audio",
+      "expo-speech-recognition"
     ],
     "experiments": {
       "typedRoutes": true

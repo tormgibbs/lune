@@ -4,9 +4,8 @@ import { FlashList } from '@shopify/flash-list'
 import { Image } from 'expo-image'
 import { MediaAsset } from '../types/media'
 import { Button } from './ui/button'
-import { Play, X } from 'lucide-react-native'
+import { X } from 'lucide-react-native'
 import { cn, formatDuration } from '@/lib/utils'
-import { Waveform } from '@simform_solutions/react-native-audio-waveform'
 import AudioWavePlayer from './audio-wave-player'
 
 interface MediaGridProps {
@@ -69,33 +68,6 @@ const MediaGrid: React.FC<MediaGridProps> = ({
 
         {item.type === 'audio' && (
           <AudioWavePlayer audio={item} style={styles.image} />
-          // <View
-          //   className="relative bg-[#D1D9C8] justify-center items-center p-2"
-          //   style={styles.image}>
-          //   <View className="absolute flex-row items-center top-2 left-2 gap-2">
-          //     <Button
-          //       variant="secondary"
-          //       size="icon"
-          //       className="bg-[#6C7A45] h-6 w-6 items-center justify-center opacity-80 rounded-full">
-          //       <Play color="white" size={12} fill="white" />
-          //     </Button>
-          //     <Text className="font-light text-white drop-shadow-[0_0_10px_#ffffff]">
-          //       {formatDuration(item.duration)}
-          //     </Text>
-          //   </View>
-          //   <Waveform
-          //     mode="static"
-          //     path={item.uri}
-          //     containerStyle={{
-          //       height: 60,
-          //       width: '90%',
-          //     }}
-          //     candleSpace={2}
-          //     candleWidth={2}
-          //     candleHeightScale={4}
-          //     waveColor="#6C7A45"
-          //   />
-          // </View>
         )}
 
         <Button
@@ -120,7 +92,6 @@ const MediaGrid: React.FC<MediaGridProps> = ({
       data={media}
       masonry
       numColumns={numColumns}
-      estimatedItemSize={imageSize}
       optimizeItemArrangement
       renderItem={renderMediaItem}
       style={{ marginBottom: 12 }}

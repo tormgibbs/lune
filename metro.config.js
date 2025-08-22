@@ -7,7 +7,7 @@ config.transformer.assetPlugins = ['expo-asset/tools/hashAssetFiles']
 config.transformer.babelTransformerPath = require.resolve('react-native-svg-transformer')
 
 const assetExts = config.resolver.assetExts.filter(ext => ext !== 'svg')
-const sourceExts = [...config.resolver.sourceExts, 'svg']
+const sourceExts = [...config.resolver.sourceExts, 'svg', 'sql']
 
 config.resolver.assetExts = assetExts
 config.resolver.sourceExts = sourceExts

@@ -27,6 +27,9 @@ import { MediaAsset } from '@/types/media'
 import { createAudioPlayer } from 'expo-audio'
 import CameraModal, { CameraModalRef } from '@/components/camera-modal'
 import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
+import { useMemoirStore } from '@/store/memoir'
+import { MemoirInsert } from '@/db/schema'
+import { addMemoir } from '@/db/memoir'
 
 const Index = () => {
   const router = useRouter()
@@ -43,7 +46,14 @@ const Index = () => {
 
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
+  const [titleVisible, setTitleVisible] = useState(true)
 
+  const selectedDate = useMemoirStore((s) => s.selectedDate)
+
+  const titleRef = useRef('')
+  const contentRef = useRef('')
+
+  const { add } = useMemoirStore()
   const { media, pickMedia, removeMedia, setMedia } = useMediaPicker()
   const {
     visible: viewerVisible,
@@ -51,6 +61,30 @@ const Index = () => {
     openViewer,
     closeViewer,
   } = useMediaViewer()
+
+  const saveMemoir = async () => {
+    const title = titleRef.current.trim()
+    const content = contentRef.current.trim()
+
+    if (!title && !content) return
+
+    const memoir: MemoirInsert = {
+      id,
+      title,
+      content,
+      date: selectedDate,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    try {
+      await addMemoir(memoir)
+      add(memoir)
+      console.log('Memoir saved successfully:', memoir)
+    } catch (error) {
+      console.error('Failed to save memoir:', error)
+    }
+  }
 
   const handleAudioRecordPress = () => {
     richEditorRef.current?.blurContentEditor()
@@ -75,10 +109,14 @@ const Index = () => {
 
   const handleDone = () => {
     headerRef.current?.closePopover()
+    saveMemoir()
     router.back()
   }
 
   const handleEditDate = () => {
+    titleInputRef.current?.blur()
+    richEditorRef.current?.blurContentEditor()
+    KeyboardController.dismiss()
     headerRef.current?.closePopover()
     router.push(`/memoirs/${id}/edit-date`)
   }
@@ -145,16 +183,6 @@ const Index = () => {
     })
   }, [])
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const timer = setTimeout(() => {
-  //       titleInputRef.current?.focus()
-  //     }, 100)
-
-  //     return () => clearTimeout(timer)
-  //   }, []),
-  // )
-
   return (
     <SafeAreaView
       className="flex-1 bg-[#E8E6D9]"
@@ -166,10 +194,15 @@ const Index = () => {
           header: (props) => (
             <Header
               ref={headerRef}
-              dateLabel={formatDate(new Date())}
+              dateLabel={formatDate(new Date(selectedDate))}
               onEditDate={handleEditDate}
               onDelete={handleDelete}
               onDone={handleDone}
+              onHideTitle={() => {
+                headerRef.current?.closePopover()
+                setTitleVisible((prev) => !prev)
+              }}
+              titleVisible={titleVisible}
               {...props}
             />
           ),
@@ -248,13 +281,22 @@ const Index = () => {
             onDeletePress={removeMedia}
           />
 
-          <Input
-            ref={titleInputRef}
-            className="bg-transparent border-0 px-1 text-lg font-medium text-[#55584A]"
-            placeholder="Title"
-            placeholderClassName="text-[#7A7A7A]"
-          />
-          <Separator className="bg-[#C2C0B2]" />
+          {titleVisible && (
+            <>
+              <Input
+                ref={titleInputRef}
+                onChangeText={(text) => {
+                  titleRef.current = text
+                }}
+                autoFocus
+                className="bg-transparent border-0 px-1 text-lg font-medium text-[#55584A]"
+                placeholder="Title"
+                placeholderClassName="text-[#7A7A7A]"
+              />
+              <Separator className="bg-[#C2C0B2]" />
+            </>
+          )}
+
           <RichEditor
             keyboardDisplayRequiresUserAction={false}
             useContainer={true}
@@ -272,6 +314,9 @@ const Index = () => {
               backgroundColor: 'transparent',
               color: '#55584A',
               contentCSSText: 'padding: 10px 4px;',
+            }}
+            onChange={(html) => {
+              contentRef.current = html
             }}
           />
         </View>

@@ -8,13 +8,15 @@ import {
 } from 'react-native'
 import React, { useCallback, useMemo, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { router, Stack } from 'expo-router'
+import { router, Stack, useFocusEffect } from 'expo-router'
 import Header from '@/features/memoir/components/headers/edit-date'
 import { Calendar } from 'react-native-calendars'
 import { formatDate } from '@/lib/date'
 import CalendarHeader from '@/components/calendar-header'
 import dayjs from 'dayjs'
 import { MarkedDates, Theme } from 'react-native-calendars/src/types'
+import { useMemoirStore } from '@/store/memoir'
+import { KeyboardController } from 'react-native-keyboard-controller'
 
 interface CalendarHeaderStyles {
   dayTextAtIndex0?: TextStyle
@@ -71,8 +73,13 @@ const EditDate = () => {
     [],
   )
 
-  const [selectedDate, setSelectedDate] = useState(today)
-  const [currentMonth, setCurrentMonth] = useState(today)
+  const selectedDate = useMemoirStore((s) => s.selectedDate)
+
+  const [localDate, setLocalDate] = useState(selectedDate)
+  const [currentMonth, setCurrentMonth] = useState(selectedDate)
+
+  const setSelectedDate = useMemoirStore((s) => s.setSelectedDate)
+
 
   const changeMonth = useCallback(
     (months: number) => {
@@ -85,28 +92,38 @@ const EditDate = () => {
   )
 
   const handleCancel = useCallback(() => router.back(), [])
-  const handleDone = useCallback(() => router.back(), [])
+  const handleDone = useCallback(() => {
+    setSelectedDate(localDate)
+    router.back()
+  }, [localDate])
+
+  // const dismissKeyboard = useCallback(() => {
+  //   KeyboardController.dismiss()
+  // }, [])
+
+  // useFocusEffect(dismissKeyboard)
+
 
   const markedDates: MarkedDates = useMemo(
     () => ({
-      [selectedDate]: {
+      [localDate]: {
         customStyles: {
           container: {
             borderWidth: 2,
-            borderColor: selectedDate === today ? '#9FB26C' : '#7A8357',
+            borderColor: localDate === today ? '#9FB26C' : '#7A8357',
             borderRadius: 20,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: selectedDate === today ? '#9FB26C' : '#7A8357',
+            backgroundColor: localDate === today ? '#9FB26C' : '#7A8357',
           },
           text: {
-            color: selectedDate === today ? '#FFFFFF' : '#D9E3A6',
+            color: localDate === today ? '#FFFFFF' : '#D9E3A6',
             fontWeight: 'bold',
           },
         },
       },
     }),
-    [selectedDate, today],
+    [localDate, today],
   )
 
   return (
@@ -143,7 +160,7 @@ const EditDate = () => {
             onPreviousMonth={() => changeMonth(-1)}
           />
         )}
-        onDayPress={(day) => setSelectedDate(day.dateString)}
+        onDayPress={(day) => setLocalDate(day.dateString)}
         markedDates={markedDates}
         markingType="custom"
         theme={calendarTheme}
@@ -154,8 +171,9 @@ const EditDate = () => {
         <Pressable
           className="flex-row items-center justify-between p-3 bg-[#9C988B] rounded-lg my-2"
           onPress={() => {
-            setSelectedDate(createdDateISO)
+            setLocalDate(createdDateISO)
             setCurrentMonth(createdDateISO)
+            setSelectedDate(createdDateISO)
           }}>
           <Text className="text-[#DDD9CC] text-xl">Entry Created</Text>
           <Text className="text-[#F5F4F0] text-xl">{createdDate}</Text>

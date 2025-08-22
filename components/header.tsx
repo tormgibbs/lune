@@ -36,7 +36,7 @@ const Header = forwardRef(
     }))
 
     return (
-      <View className="justify-between items-center flex-row w-full">
+      <View className="justify-between items-center flex-row w-full mb-4">
         <Text className="text-3xl font-bold">Lune</Text>
         <View className="flex-row gap-x-3">
           <Button

@@ -19,6 +19,13 @@ import { Appearance, Platform } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
+import migrations from '@/drizzle/migrations'
+import { db } from '@/db'
+
+import { useMemoirStore } from '@/store/memoir'
+import { getAllMemoirs } from '@/db/memoir'
+
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
   colors: NAV_THEME.light,
@@ -41,16 +48,37 @@ const usePlatformSpecificSetup = Platform.select({
 
 export default function RootLayout() {
   usePlatformSpecificSetup()
+  const { success, error } = useMigrations(db, migrations)
+  const setMemoirs = useMemoirStore((s) => s.setMemoirs)
   // const { isDarkColorScheme } = useColorScheme()
 
+
+  React.useEffect(() => {
+    if (!success) return
+    ;(async () => {
+      try {
+        const memoirs = await getAllMemoirs()
+        setMemoirs(memoirs)
+      } catch (err) {
+        console.error('Failed to load memoirs:', err)
+      }
+    })()
+  }, [success])
+
+  if (!success) return null
+
+  if (error) {
+    console.error('Database migration error:', error)
+  }
+
+
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <KeyboardProvider
-          navigationBarTranslucent={Platform.OS === 'android'}
-          preserveEdgeToEdge={Platform.OS === 'android'}
-          statusBarTranslucent={Platform.OS === 'android'}
-        >
+          // navigationBarTranslucent={Platform.OS === 'android'}
+          // preserveEdgeToEdge={Platform.OS === 'android'}
+          statusBarTranslucent={Platform.OS === 'android'}>
           <ThemeProvider value={LIGHT_THEME}>
             <StatusBar style={'dark'} />
             <Stack
@@ -85,7 +113,6 @@ export default function RootLayout() {
             </Stack>
           </ThemeProvider>
           <PortalHost name="root-host" />
-
         </KeyboardProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

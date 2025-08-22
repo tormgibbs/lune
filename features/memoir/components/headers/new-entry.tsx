@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react'
 import { Platform, Pressable, Text, View } from 'react-native'
-import { Tag, CalendarDays, Trash2 } from 'lucide-react-native'
+import { Tag, CalendarDays, Trash2, Eye, EyeOff } from 'lucide-react-native'
 import { CircleEllipsis } from '@/lib/icons/CircleEllipsis'
 import {
   Popover,
@@ -24,10 +24,15 @@ type HeaderProps = {
   onEditDate: () => void
   onDelete: () => void
   onDone: () => void
+  onHideTitle: () => void
+  titleVisible?: boolean
 }
 
 export const Header = forwardRef(
-  ({ dateLabel, onEditDate, onDelete, onDone }: HeaderProps, ref) => {
+  (
+    { dateLabel, onEditDate, onDelete, onDone, onHideTitle, titleVisible = true }: HeaderProps,
+    ref,
+  ) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false)
     const triggerRef = useRef<ComponentRef<typeof PopoverTrigger>>(null)
     const insets = useSafeAreaInsets()
@@ -103,6 +108,13 @@ export const Header = forwardRef(
                     icon={<CalendarDays size={20} />}
                     onPress={onEditDate}
                     rounded="top"
+                  />
+
+                  <Separator className="h-[1px] bg-[#D4CDB3]" />
+                  <MenuItem
+                    label={titleVisible ? 'Hide Title' : 'Show Title'}
+                    icon={titleVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+                    onPress={onHideTitle}
                   />
 
                   <Separator className="h-[1px] bg-[#D4CDB3]" />

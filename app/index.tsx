@@ -10,9 +10,11 @@ import EmptyState from '@/components/empty-state'
 import { FlashList } from '@shopify/flash-list'
 import MemoirItem from '@/components/memoir-item'
 import { View } from 'react-native'
+import { deleteMemoir } from '@/db/memoir'
 
 export default function Index() {
   const memoirs = useMemoirStore((s) => s.memoirs)
+  const remove = useMemoirStore((s) => s.remove)
   const headerRef = useRef<{ closePopover: () => void }>(null)
 
   const handleBackupSyncPress = () => {
@@ -35,12 +37,28 @@ export default function Index() {
     router.push(`/memoirs/${id}`)
   }
 
-  console.log('Memoirs:', JSON.stringify(memoirs, null, 2))
+  const handleDelete = async (id: string) => {
+    try {
+      // memoirItemRef.current?.closePopover()
+      await deleteMemoir(id)
+      remove(id)
+    } catch (err) {
+      console.error('Failed to delete memoir:', err)
+    }
+  }
+
+  const handleEdit = (id: string) => {
+    // memoirItemRef.current?.closePopover()
+    router.push(`/memoirs/${id}`)
+  }
+
+  // console.log('Memoirs:', JSON.stringify(memoirs, null, 2))
 
   return (
     <SafeAreaView className="relative bg-[#F5F4EF] flex-1 items-center">
+      {/* <PortalHost name='root-secondary-host'/> */}
       {/* Header */}
-      <View className='px-4 pt-4'>
+      <View className="px-4 pt-4">
         <Header
           ref={headerRef}
           onBackupSyncPress={handleBackupSyncPress}
@@ -53,12 +71,19 @@ export default function Index() {
       {memoirs.length === 0 ? (
         <EmptyState />
       ) : (
-        <View className='flex-1 w-full'>
+        <View className="flex-1 w-full">
           <FlashList
             data={memoirs}
-            renderItem={({ item }) => <MemoirItem memoir={item} />}
+            renderItem={({ item }) => (
+              <MemoirItem
+                memoir={item}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            )}
             keyExtractor={(item) => item.id}
-            ItemSeparatorComponent={() => <View className='h-4' />}
+            ItemSeparatorComponent={() => <View className="h-4" />}
+            contentContainerStyle={{ zIndex: -1 }}
           />
         </View>
       )}

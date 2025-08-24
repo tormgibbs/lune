@@ -31,6 +31,7 @@ const Header = forwardRef(
 
     useImperativeHandle(ref, () => ({
       closePopover: () => {
+        console.log('Closing popover')
         triggerRef.current?.close?.()
       },
     }))
@@ -66,6 +67,7 @@ const Header = forwardRef(
               />
 
               <Separator className="h-[1px] bg-[#D4CDB3]" />
+
               <MenuItem
                 label="Notifications"
                 icon={<Bell size={20} />}

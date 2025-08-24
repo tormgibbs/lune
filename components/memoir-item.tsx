@@ -10,14 +10,23 @@ import RenderHtml, {
   CustomRendererProps,
 } from 'react-native-render-html'
 import { Button } from './ui/button'
-import Animated, { interpolate, useAnimatedStyle, SharedValue } from 'react-native-reanimated'
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  SharedValue,
+} from 'react-native-reanimated'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import MenuItem from './menu-item'
+import {
+  ComponentRef,
+  useRef,
+} from 'react'
 
 interface MemoirItemProps {
   memoir: Memoir
   onDelete?: (id: string) => void
   onEdit?: (id: string) => void
 }
-
 
 const customHTMLElementModels = {
   font: HTMLElementModel.fromCustomModel({
@@ -45,10 +54,10 @@ const renderers = {
 
 const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
   const width = useWindowDimensions().width - 32
-
+  const popoverRef = useRef<ComponentRef<typeof PopoverTrigger>>(null)
 
   return (
-    <Swipeable 
+    <Swipeable
       renderRightActions={(progress, dragX) => (
         <RightActions
           progress={progress}
@@ -57,35 +66,72 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
           memoirId={memoir.id}
         />
       )}
-      containerStyle={{ paddingHorizontal: 16 }}
     >
-      <View className="px-2 py-2 bg-[#E6E9D8] rounded-xl">
-        <View className="py-2">
-          {memoir.title && (
-            <Text className="text-base font-semibold">{memoir.title}</Text>
-          )}
-          {memoir.content && (
-            <RenderHtml
-              contentWidth={width}
-              source={{ html: memoir.content }}
-              customHTMLElementModels={customHTMLElementModels}
-              renderers={renderers}
-            />
-          )}
-        </View>
-        <Separator className="my-1 bg-[#9CA082]" />
-        <View className="flex-row items-center justify-between">
-          <Text className="text-sm font-medium text-gray-500">
-            {formatDate(memoir.date)}
-          </Text>
-          <Pressable>
-            <Ellipsis size={20} color="gray" />
-          </Pressable>
+      <View className="px-4">
+        <View className="px-2 py-2 bg-[#E6E9D8] rounded-xl">
+          <View className="py-2">
+            {memoir.title && (
+              <Text className="text-base font-semibold">{memoir.title}</Text>
+            )}
+            {memoir.content && (
+              <RenderHtml
+                contentWidth={width}
+                source={{ html: memoir.content }}
+                customHTMLElementModels={customHTMLElementModels}
+                renderers={renderers}
+              />
+            )}
+          </View>
+          <Separator className="my-1 bg-[#9CA082]" />
+          <View className="flex-row items-center justify-between">
+            <Text className="text-sm font-medium text-gray-500">
+              {formatDate(memoir.date)}
+            </Text>
+
+            <Popover>
+              <PopoverTrigger ref={popoverRef} asChild>
+                <Pressable>
+                  <Ellipsis size={20} color="gray" />
+                </Pressable>
+              </PopoverTrigger>
+
+              <PopoverContent
+                portalHost="root-host"
+                side="bottom"
+                align="end"
+                className="w-auto py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">
+                <MenuItem
+                  label="Edit"
+                  icon={<Pen size={16} />}
+                  rounded="top"
+                  onPress={() => {
+                    popoverRef.current?.close?.()
+                    onEdit?.(memoir.id)
+                  }}
+                />
+
+                <Separator className="h-[1px] bg-[#D4CDB3]" />
+
+                <MenuItem
+                  label="Delete"
+                  icon={<Trash2 size={16} color="#A34B3D" />}
+                  rounded="bottom"
+                  danger
+                  onPress={() => {
+                    popoverRef.current?.close?.()
+                    onDelete?.(memoir.id)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </View>
         </View>
       </View>
     </Swipeable>
   )
 }
+
+
 
 export default MemoirItem
 
@@ -101,13 +147,17 @@ const RightActions = ({
   memoirId: string
 }) => {
   const editStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(progress.value, [0, 1], [0.6, 1], 'clamp') }],
-    opacity: interpolate(progress.value, [0, 1], [0, 1], 'clamp'),
+    transform: [
+      { scale: interpolate(progress.value, [0.3, 1], [0.6, 1], 'clamp') },
+    ],
+    opacity: interpolate(progress.value, [0.3, 1], [0, 1], 'clamp'),
   }))
 
   const deleteStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(progress.value, [0, 1], [0.6, 1], 'clamp') }],
-    opacity: interpolate(progress.value, [0, 1], [0, 1], 'clamp'),
+    transform: [
+      { scale: interpolate(progress.value, [0, 0.6], [0.6, 1], 'clamp') },
+    ],
+    opacity: interpolate(progress.value, [0, 0.6], [0, 1], 'clamp'),
   }))
 
   return (
@@ -134,5 +184,3 @@ const RightActions = ({
     </View>
   )
 }
-
-

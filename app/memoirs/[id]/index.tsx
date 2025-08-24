@@ -8,8 +8,13 @@ import { formatDate } from '@/lib/date'
 import { normalizeColor } from '@/lib/utils'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
-import { useCallback, useRef, useState } from 'react'
+import {
+  Stack,
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from 'expo-router'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
@@ -29,11 +34,11 @@ import CameraModal, { CameraModalRef } from '@/components/camera-modal'
 import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
 import { useMemoirStore } from '@/store/memoir'
 import { MemoirInsert } from '@/db/schema'
-import { addMemoir } from '@/db/memoir'
+import { addMemoir, updateMemoir } from '@/db/memoir'
 
 const Index = () => {
   const router = useRouter()
-  const { id } = useLocalSearchParams<{ id: string }>()
+  const { id, date } = useLocalSearchParams<{ id: string; date: string }>()
 
   const colorPickerSheetRef = useRef<BottomSheetModal>(null)
   const formattingSheetRef = useRef<BottomSheetModal>(null)
@@ -47,13 +52,16 @@ const Index = () => {
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
   const [titleVisible, setTitleVisible] = useState(true)
+  const today = useMemo(() => new Date().toISOString().split('T')[0], [])
+  const { memoirs, add, update } = useMemoirStore()
+  const existingMemoir = memoirs.find((m) => m.id === id)
 
-  const selectedDate = useMemoirStore((s) => s.selectedDate)
+  const selectedDate = date && date.length > 0 ? date : today
 
   const titleRef = useRef('')
   const contentRef = useRef('')
 
-  const { add } = useMemoirStore()
+  
   const { media, pickMedia, removeMedia, setMedia } = useMediaPicker()
   const {
     visible: viewerVisible,
@@ -61,6 +69,8 @@ const Index = () => {
     openViewer,
     closeViewer,
   } = useMediaViewer()
+
+  
 
   const saveMemoir = async () => {
     const title = titleRef.current.trim()
@@ -73,14 +83,19 @@ const Index = () => {
       title,
       content,
       date: selectedDate,
-      createdAt: new Date().toISOString(),
+      createdAt: existingMemoir?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
 
     try {
-      await addMemoir(memoir)
-      add(memoir)
-      console.log('Memoir saved successfully:', memoir)
+      if (existingMemoir) {
+        await updateMemoir(id, memoir)
+        update(memoir)
+      } else {
+        await addMemoir(memoir)
+        add(memoir)
+      }
+      console.log('Memoir saved:', memoir)
     } catch (error) {
       console.error('Failed to save memoir:', error)
     }
@@ -118,7 +133,10 @@ const Index = () => {
     richEditorRef.current?.blurContentEditor()
     KeyboardController.dismiss()
     headerRef.current?.closePopover()
-    router.push(`/memoirs/${id}/edit-date`)
+    router.push({
+      pathname: '/memoirs/[id]/edit-date',
+      params: { id, date: selectedDate },
+    })
   }
 
   const handleDelete = () => {
@@ -182,6 +200,13 @@ const Index = () => {
       }
     })
   }, [])
+
+  useEffect(() => {
+    if (existingMemoir) {
+      titleRef.current = existingMemoir.title ?? ''
+      contentRef.current = existingMemoir.content ?? ''
+    }
+  }, [existingMemoir])
 
   return (
     <SafeAreaView
@@ -285,6 +310,7 @@ const Index = () => {
             <>
               <Input
                 ref={titleInputRef}
+                defaultValue={existingMemoir?.title || ''}
                 onChangeText={(text) => {
                   titleRef.current = text
                 }}
@@ -300,6 +326,7 @@ const Index = () => {
           <RichEditor
             keyboardDisplayRequiresUserAction={false}
             useContainer={true}
+            initialContentHTML={existingMemoir?.content || ''}
             onCursorPosition={(scrollY) => {
               scrollRef.current?.scrollTo({ y: scrollY - 30, animated: true })
             }}

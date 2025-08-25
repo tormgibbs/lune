@@ -31,7 +31,7 @@ import { useMemoirStore } from '@/store/memoir'
 import { MemoirInsert } from '@/db/schema'
 import { addMemoir, updateMemoir } from '@/db/memoir'
 import Lazy from '@/components/lazy'
-import { persistMediaAsset } from '@/lib/media'
+import { deleteMediaFiles, persistMediaAsset } from '@/lib/media'
 import { db } from '@/db'
 
 const CameraModal = lazy(() => import('@/components/camera-modal'))
@@ -114,7 +114,15 @@ const Index = () => {
 
     if (!title && !content && media.length === 0) return
 
-    const persistedMedia = await Promise.all(media.map(persistMediaAsset))
+    const newMedia = media.filter((m) => !m.persisted)
+    const persistedMedia = media.filter((m) => m.persisted)
+
+    const savedNewMedia = await Promise.all(newMedia.map(persistMediaAsset))
+
+    const finalMedia = [
+      ...persistedMedia,
+      ...savedNewMedia.map((m) => ({ ...m, persisted: true })),
+    ]
 
     const memoir: MemoirInsert = {
       id,
@@ -123,11 +131,19 @@ const Index = () => {
       date: selectedDate,
       createdAt: existingMemoir?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      media: persistedMedia,
+      media: finalMedia,
     }
 
     try {
       if (existingMemoir) {
+        const removed = (existingMemoir.media ?? []).filter(
+          (old) => !finalMedia.some((m) => m.id === old.id),
+        )
+
+        if (removed.length > 0) {
+          await deleteMediaFiles(removed)
+        }
+
         await updateMemoir(id, memoir)
         update(memoir)
       } else {

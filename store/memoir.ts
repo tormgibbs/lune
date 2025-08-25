@@ -37,6 +37,6 @@ function toMemoir(m: MemoirInsert): Memoir {
     content: m.content ?? null,
     createdAt: m.createdAt ?? null,
     updatedAt: m.updatedAt ?? null,
-    media: m.media ?? []
+    media: (m.media ?? []).map(asset => ({ ...asset, persisted: true }))
   }
 }

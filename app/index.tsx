@@ -11,6 +11,7 @@ import { FlashList } from '@shopify/flash-list'
 import MemoirItem from '@/components/memoir-item'
 import { View } from 'react-native'
 import { deleteMemoir } from '@/db/memoir'
+import dayjs from 'dayjs'
 
 export default function Index() {
   const memoirs = useMemoirStore((s) => s.memoirs)
@@ -34,7 +35,12 @@ export default function Index() {
 
   const handleNewEntryPress = () => {
     const id = nanoid(8)
-    router.push(`/memoirs/${id}`)
+    const today = dayjs().format('YYYY-MM-DD')
+    console.log('Creating new memoir entry with id:', id, 'and date:', today)
+    router.push({
+      pathname: '/memoirs/[id]',
+      params: { id, date: today }
+    })
   }
 
   const handleDelete = async (id: string) => {

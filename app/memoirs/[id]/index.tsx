@@ -10,11 +10,10 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
 import {
   Stack,
-  useFocusEffect,
   useLocalSearchParams,
   useRouter,
 } from 'expo-router'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
@@ -56,12 +55,18 @@ const Index = () => {
   const { memoirs, add, update } = useMemoirStore()
   const existingMemoir = memoirs.find((m) => m.id === id)
 
-  const selectedDate = date && date.length > 0 ? date : today
+  const selectedDate = useMemo(() => {
+    if (typeof date === 'string' && date.length > 0) return date
+    if (existingMemoir?.date) return existingMemoir.date
+    return today
+  }, [date, existingMemoir?.date, today])
 
-  const titleRef = useRef('')
-  const contentRef = useRef('')
+  const initialTitle = existingMemoir?.title ?? ''
+  const initialContent = existingMemoir?.content ?? ''
 
-  
+  const titleRef = useRef(initialTitle)
+  const contentRef = useRef(initialContent)
+
   const { media, pickMedia, removeMedia, setMedia } = useMediaPicker()
   const {
     visible: viewerVisible,
@@ -69,8 +74,6 @@ const Index = () => {
     openViewer,
     closeViewer,
   } = useMediaViewer()
-
-  
 
   const saveMemoir = async () => {
     const title = titleRef.current.trim()
@@ -201,12 +204,12 @@ const Index = () => {
     })
   }, [])
 
-  useEffect(() => {
-    if (existingMemoir) {
-      titleRef.current = existingMemoir.title ?? ''
-      contentRef.current = existingMemoir.content ?? ''
-    }
-  }, [existingMemoir])
+  // useEffect(() => {
+  //   if (existingMemoir) {
+  //     titleRef.current = existingMemoir.title ?? ''
+  //     contentRef.current = existingMemoir.content ?? ''
+  //   }
+  // }, [existingMemoir])
 
   return (
     <SafeAreaView
@@ -310,7 +313,7 @@ const Index = () => {
             <>
               <Input
                 ref={titleInputRef}
-                defaultValue={existingMemoir?.title || ''}
+                defaultValue={initialTitle}
                 onChangeText={(text) => {
                   titleRef.current = text
                 }}
@@ -326,7 +329,7 @@ const Index = () => {
           <RichEditor
             keyboardDisplayRequiresUserAction={false}
             useContainer={true}
-            initialContentHTML={existingMemoir?.content || ''}
+            initialContentHTML={initialContent}
             onCursorPosition={(scrollY) => {
               scrollRef.current?.scrollTo({ y: scrollY - 30, animated: true })
             }}

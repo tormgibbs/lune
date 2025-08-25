@@ -8,14 +8,13 @@ import {
 } from 'react-native'
 import React, { useCallback, useMemo, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router'
+import { router, Stack, useLocalSearchParams } from 'expo-router'
 import Header from '@/features/memoir/components/headers/edit-date'
 import { Calendar } from 'react-native-calendars'
 import { formatDate } from '@/lib/date'
 import CalendarHeader from '@/components/calendar-header'
 import dayjs from 'dayjs'
 import { MarkedDates, Theme } from 'react-native-calendars/src/types'
-import { KeyboardController } from 'react-native-keyboard-controller'
 
 interface CalendarHeaderStyles {
   dayTextAtIndex0?: TextStyle
@@ -77,12 +76,10 @@ const EditDate = () => {
   console.log('today:', today)
 
   const initialDate = date ?? today
-  // const selectedDate = useMemoirStore((s) => s.selectedDate)
 
   const [localDate, setLocalDate] = useState(initialDate)
   const [currentMonth, setCurrentMonth] = useState(initialDate)
 
-  // const setSelectedDate = useMemoirStore((s) => s.setSelectedDate)
 
 
   const changeMonth = useCallback(
@@ -101,14 +98,8 @@ const EditDate = () => {
       pathname: '/memoirs/[id]',
       params: { id, date: localDate },
     })
-    // router.setParams({ date: localDate })
   }
 
-  // const dismissKeyboard = useCallback(() => {
-  //   KeyboardController.dismiss()
-  // }, [])
-
-  // useFocusEffect(dismissKeyboard)
 
 
   const markedDates: MarkedDates = useMemo(

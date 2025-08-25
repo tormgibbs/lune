@@ -4,5 +4,6 @@ CREATE TABLE `memoirs` (
 	`content` text,
 	`date` text,
 	`createdAt` text,
-	`updatedAt` text
+	`updatedAt` text,
+	`media` text
 );

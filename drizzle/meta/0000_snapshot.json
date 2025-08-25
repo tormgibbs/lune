@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b66eaf1f-c66a-4dea-9397-5b50de7caf3b",
+  "id": "f2c234bc-48ae-44a8-8b61-2d193c76df47",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "memoirs": {
@@ -44,6 +44,13 @@
         },
         "updatedAt": {
           "name": "updatedAt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "media": {
+          "name": "media",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

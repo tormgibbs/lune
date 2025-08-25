@@ -17,10 +17,8 @@ import Animated, {
 } from 'react-native-reanimated'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import MenuItem from './menu-item'
-import {
-  ComponentRef,
-  useRef,
-} from 'react'
+import { ComponentRef, useRef } from 'react'
+import ResponsiveMediaGrid from './responsive-media-grid'
 
 interface MemoirItemProps {
   memoir: Memoir
@@ -50,25 +48,110 @@ const renderers = {
       </Text>
     )
   },
+  b: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+    return (
+      <Text style={{ fontWeight: 'bold' }}>
+        <TDefaultRenderer tnode={tnode} {...props} />
+      </Text>
+    )
+  },
+  i: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+    return (
+      <Text style={{ fontStyle: 'italic' }}>
+        <TDefaultRenderer tnode={tnode} {...props} />
+      </Text>
+    )
+  },
+  u: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+    return (
+      <Text style={{ textDecorationLine: 'underline' }}>
+        <TDefaultRenderer tnode={tnode} {...props} />
+      </Text>
+    )
+  },
+  strike: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+    return (
+      <Text style={{ textDecorationLine: 'line-through' }}>
+        <TDefaultRenderer tnode={tnode} {...props} />
+      </Text>
+    )
+  },
+  blockquote: ({
+    tnode,
+    TDefaultRenderer,
+    ...props
+  }: CustomRendererProps<any>) => {
+    return (
+      <View
+        style={{
+          borderLeftWidth: 4,
+          borderLeftColor: '#9CA082',
+          borderRadius: 2,
+          paddingLeft: 5,
+          marginVertical: 2,
+          // backgroundColor: '#F5F5F0',
+          // paddingVertical: 8,
+          // paddingRight: 8,
+        }}>
+        <TDefaultRenderer tnode={tnode} {...props} />
+      </View>
+    )
+  },
+}
+
+const cleanHtml = (html: string) => {
+  return html
+    .replace(
+      /<div[^>]*>\s*(<[^>]*>)*\s*<br\s*\/?>\s*(<\/[^>]*>)*\s*<\/div>/gi,
+      '',
+    )
+
+    .replace(/<div[^>]*>\s*<\/div>/gi, '')
+
+    .replace(/(<\/div>)\s*<br\s*\/?>\s*(<div)/gi, '$1$2')
+
+    .replace(/(<br\s*\/?>)\s*(<br\s*\/?>)+/gi, '$1')
+
+    .replace(/<([^>]+)>\s*<\/\1>/gi, '')
+
+    .trim()
 }
 
 const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
   const width = useWindowDimensions().width - 32
   const popoverRef = useRef<ComponentRef<typeof PopoverTrigger>>(null)
+  const swipeableRef = useRef<ComponentRef<typeof Swipeable>>(null)
+
+  const handleEdit = () => {
+    onEdit?.(memoir.id)
+    swipeableRef.current?.close()
+  }
+
+  const handleDelete = () => {
+    onDelete?.(memoir.id)
+  }
+
+  const cleanedContent = memoir.content ? cleanHtml(memoir.content) : ''
+
+  console.log(JSON.stringify(memoir, null, 2))
 
   return (
     <Swipeable
+      ref={swipeableRef}
       renderRightActions={(progress, dragX) => (
         <RightActions
           progress={progress}
-          onEdit={onEdit}
-          onDelete={onDelete}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
           memoirId={memoir.id}
         />
-      )}
-    >
+      )}>
       <View className="px-4">
         <View className="px-2 py-2 bg-[#E6E9D8] rounded-xl">
+          <ResponsiveMediaGrid
+            media={memoir.media ?? []}
+            onMediaPress={() => {}}
+          />
           <View className="py-2">
             {memoir.title && (
               <Text className="text-base font-semibold">{memoir.title}</Text>
@@ -76,7 +159,7 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
             {memoir.content && (
               <RenderHtml
                 contentWidth={width}
-                source={{ html: memoir.content }}
+                source={{ html: cleanedContent }}
                 customHTMLElementModels={customHTMLElementModels}
                 renderers={renderers}
               />
@@ -130,8 +213,6 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
     </Swipeable>
   )
 }
-
-
 
 export default MemoirItem
 

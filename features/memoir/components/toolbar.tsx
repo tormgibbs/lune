@@ -1,4 +1,4 @@
-import { Pressable, StyleProp, Text, View, ViewStyle } from 'react-native'
+import { Pressable, StyleProp, ViewStyle } from 'react-native'
 import React from 'react'
 import {
   AudioLines,
@@ -39,23 +39,23 @@ const Toolbar: React.FC<ToolbarProps> = ({
         className,
       )}
     >
-      <Pressable onPress={onTextFormatPress}>
+      <Pressable onPress={onTextFormatPress} hitSlop={20}>
         <CaseSensitive size={24} />
       </Pressable>
 
-      <Pressable onPress={onImagesPress}>
+      <Pressable onPress={onImagesPress} hitSlop={20}>
         <Images size={24} />
       </Pressable>
 
-      <Pressable onPress={onCameraPress}>
+      <Pressable onPress={onCameraPress} hitSlop={20}>
         <Camera size={24} />
       </Pressable>
 
-      <Pressable onPress={onAudioPress}>
+      <Pressable onPress={onAudioPress} hitSlop={20}>
         <AudioLines size={24} />
       </Pressable>
 
-      <Pressable onPress={onSpeechPress}>
+      <Pressable onPress={onSpeechPress} hitSlop={20}>
         <Speech size={24} />
       </Pressable>
     </KeyboardStickyView>

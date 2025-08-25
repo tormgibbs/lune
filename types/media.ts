@@ -11,6 +11,7 @@ export interface MediaAsset {
   type: MediaType
   duration?: number
   id?: string
+  persisted?: boolean
 }
 
 export interface MediaViewerState {

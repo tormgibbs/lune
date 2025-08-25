@@ -1,19 +1,15 @@
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import ColourPickerSheet from '@/features/memoir/components/bottom-sheets/color-picker'
-import TextFormattingSheet from '@/features/memoir/components/bottom-sheets/text-format'
+// import ColourPickerSheet from '@/features/memoir/components/bottom-sheets/color-picker'
+// import TextFormattingSheet from '@/features/memoir/components/bottom-sheets/text-format'
 import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
 import { normalizeColor } from '@/lib/utils'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
-import {
-  Stack,
-  useLocalSearchParams,
-  useRouter,
-} from 'expo-router'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { lazy, useCallback, useMemo, useRef, useState } from 'react'
 import { TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
@@ -24,25 +20,63 @@ import { RichEditor } from 'react-native-pell-rich-editor'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMediaPicker } from '@/hooks/useMediaPicker'
 import { useMediaViewer } from '@/hooks/useMediaViewer'
-import MediaGrid from '@/components/media-grid'
-import MediaPager from '@/components/media-pager'
-import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
+// import MediaGrid from '@/components/media-grid'
+// import MediaPager from '@/components/media-pager'
+// import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 import { MediaAsset } from '@/types/media'
 import { createAudioPlayer } from 'expo-audio'
-import CameraModal, { CameraModalRef } from '@/components/camera-modal'
-import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
+import { CameraModalRef } from '@/components/camera-modal'
+// import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
 import { useMemoirStore } from '@/store/memoir'
 import { MemoirInsert } from '@/db/schema'
 import { addMemoir, updateMemoir } from '@/db/memoir'
+import Lazy from '@/components/lazy'
+import { persistMediaAsset } from '@/lib/media'
+import { db } from '@/db'
+
+const CameraModal = lazy(() => import('@/components/camera-modal'))
+
+const ColourPickerSheet = lazy(
+  () => import('@/features/memoir/components/bottom-sheets/color-picker'),
+)
+
+const VoiceInputSheet = lazy(
+  () => import('@/features/memoir/components/bottom-sheets/voice-input'),
+)
+
+const TextFormattingSheet = lazy(
+  () => import('@/features/memoir/components/bottom-sheets/text-format'),
+)
+
+const AudioRecorderSheet = lazy(
+  () => import('@/features/memoir/components/bottom-sheets/audio-recorder'),
+)
+
+const MediaPager = lazy(() => import('@/components/media-pager'))
+
+const MediaGrid = lazy(() => import('@/components/media-grid'))
 
 const Index = () => {
   const router = useRouter()
   const { id, date } = useLocalSearchParams<{ id: string; date: string }>()
 
+  const { memoirs, add, update } = useMemoirStore()
+  const existingMemoir = memoirs.find((m) => m.id === id)
+
+  const initialTitle = existingMemoir?.title ?? ''
+  const initialContent = existingMemoir?.content ?? ''
+
+  // const initialMedia = useMemo(
+  //   () => existingMemoir?.media ?? [],
+  //   [existingMemoir],
+  // )
+
+  const titleRef = useRef(initialTitle)
+  const contentRef = useRef(initialContent)
+
   const colorPickerSheetRef = useRef<BottomSheetModal>(null)
   const formattingSheetRef = useRef<BottomSheetModal>(null)
   const richEditorRef = useRef<RichEditor>(null)
-  const headerRef = useRef<{ closePopover: () => void }>(null)
   const scrollRef = useRef<ScrollView>(null)
   const audioSheetRef = useRef<BottomSheetModal>(null)
   const cameraRef = useRef<CameraModalRef>(null)
@@ -52,8 +86,6 @@ const Index = () => {
   const [activeFormats, setActiveFormats] = useState<string[]>([])
   const [titleVisible, setTitleVisible] = useState(true)
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
-  const { memoirs, add, update } = useMemoirStore()
-  const existingMemoir = memoirs.find((m) => m.id === id)
 
   const selectedDate = useMemo(() => {
     if (typeof date === 'string' && date.length > 0) return date
@@ -61,13 +93,14 @@ const Index = () => {
     return today
   }, [date, existingMemoir?.date, today])
 
-  const initialTitle = existingMemoir?.title ?? ''
-  const initialContent = existingMemoir?.content ?? ''
+  const { media, pickMedia, removeMedia, setMedia } = useMediaPicker(
+    existingMemoir?.media ?? [],
+  )
 
-  const titleRef = useRef(initialTitle)
-  const contentRef = useRef(initialContent)
+  // if (media.length === 0 && initialMedia.length > 0) {
+  //   setMedia(initialMedia)
+  // }
 
-  const { media, pickMedia, removeMedia, setMedia } = useMediaPicker()
   const {
     visible: viewerVisible,
     selectedIndex,
@@ -79,7 +112,9 @@ const Index = () => {
     const title = titleRef.current.trim()
     const content = contentRef.current.trim()
 
-    if (!title && !content) return
+    if (!title && !content && media.length === 0) return
+
+    const persistedMedia = await Promise.all(media.map(persistMediaAsset))
 
     const memoir: MemoirInsert = {
       id,
@@ -88,6 +123,7 @@ const Index = () => {
       date: selectedDate,
       createdAt: existingMemoir?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      media: persistedMedia,
     }
 
     try {
@@ -98,7 +134,7 @@ const Index = () => {
         await addMemoir(memoir)
         add(memoir)
       }
-      console.log('Memoir saved:', memoir)
+      console.log('Memoir saved:', JSON.stringify(memoir, null, 2))
     } catch (error) {
       console.error('Failed to save memoir:', error)
     }
@@ -119,31 +155,31 @@ const Index = () => {
   }
 
   const handleTextFormatPress = async () => {
-    await KeyboardController.dismiss()
+    // await KeyboardController.dismiss()
     formattingSheetRef.current?.present()
   }
 
   const titleInputRef = useRef<TextInput>(null)
 
   const handleDone = () => {
-    headerRef.current?.closePopover()
+    // headerRef.current?.closePopover()
     saveMemoir()
     router.back()
   }
 
-  const handleEditDate = () => {
-    titleInputRef.current?.blur()
-    richEditorRef.current?.blurContentEditor()
-    KeyboardController.dismiss()
-    headerRef.current?.closePopover()
+  const handleEditDate = async () => {
+    // titleInputRef.current?.blur()
+    // richEditorRef.current?.blurContentEditor()
+    // headerRef.current?.closePopover()
     router.push({
       pathname: '/memoirs/[id]/edit-date',
       params: { id, date: selectedDate },
     })
+    await KeyboardController.dismiss()
   }
 
   const handleDelete = () => {
-    headerRef.current?.closePopover()
+    // headerRef.current?.closePopover()
     console.log('Delete action')
   }
 
@@ -204,13 +240,6 @@ const Index = () => {
     })
   }, [])
 
-  // useEffect(() => {
-  //   if (existingMemoir) {
-  //     titleRef.current = existingMemoir.title ?? ''
-  //     contentRef.current = existingMemoir.content ?? ''
-  //   }
-  // }, [existingMemoir])
-
   return (
     <SafeAreaView
       className="flex-1 bg-[#E8E6D9]"
@@ -221,13 +250,11 @@ const Index = () => {
           headerShown: true,
           header: (props) => (
             <Header
-              ref={headerRef}
               dateLabel={formatDate(new Date(selectedDate))}
               onEditDate={handleEditDate}
               onDelete={handleDelete}
               onDone={handleDone}
               onHideTitle={() => {
-                headerRef.current?.closePopover()
                 setTitleVisible((prev) => !prev)
               }}
               titleVisible={titleVisible}
@@ -237,77 +264,91 @@ const Index = () => {
         }}
       />
 
-      <CameraModal
-        ref={cameraRef}
-        onCapture={(uri) => {
-          console.log('Photo captured:', uri)
-          const newPhoto: MediaAsset = {
-            uri,
-            type: 'image',
-            id: `${Date.now()}_photo`,
-          }
-          setMedia((prev) => [...prev, newPhoto])
-        }}
-        onVideoCapture={(uri, duration) => {
-          console.log('Video captured:', uri)
-          const newVideo: MediaAsset = {
-            uri,
-            type: 'video',
-            id: `${Date.now()}_video`,
-            duration,
-          }
-          setMedia((prev) => [...prev, newVideo])
-        }}
-        onClose={() => console.log('Camera closed')}
-      />
+      <Lazy>
+        <CameraModal
+          ref={cameraRef}
+          onCapture={(uri) => {
+            console.log('Photo captured:', uri)
+            const newPhoto: MediaAsset = {
+              uri,
+              type: 'image',
+              id: `${Date.now()}_photo`,
+            }
+            setMedia((prev) => [...prev, newPhoto])
+          }}
+          onVideoCapture={(uri, duration) => {
+            console.log('Video captured:', uri)
+            const newVideo: MediaAsset = {
+              uri,
+              type: 'video',
+              id: `${Date.now()}_video`,
+              duration,
+            }
+            setMedia((prev) => [...prev, newVideo])
+          }}
+          onClose={() => console.log('Camera closed')}
+        />
+      </Lazy>
 
-      <ColourPickerSheet
-        bottomSheetRef={colorPickerSheetRef}
-        onColorSelect={handleColorSelect}
-        selectedColor={selectedColor}
-      />
+      <Lazy>
+        <ColourPickerSheet
+          bottomSheetRef={colorPickerSheetRef}
+          onColorSelect={handleColorSelect}
+          selectedColor={selectedColor}
+        />
+      </Lazy>
 
-      <VoiceInputSheet
-        bottomSheetRef={voiceInputSheetRef}
-        onTranscript={(transcript) => {
-          console.log('Transcript received:', transcript)
-          richEditorRef.current?.insertText(transcript + ' ')
-        }}
-      />
+      <Lazy>
+        <VoiceInputSheet
+          bottomSheetRef={voiceInputSheetRef}
+          onTranscript={(transcript) => {
+            console.log('Transcript received:', transcript)
+            richEditorRef.current?.insertText(transcript + ' ')
+          }}
+        />
+      </Lazy>
 
-      <TextFormattingSheet
-        selectedColor={selectedColor}
-        bottomSheetRef={formattingSheetRef}
-        handleBottomSheetClose={handleBottomSheetClose}
-        editorRef={richEditorRef}
-        onColorPickerPress={() => {
-          richEditorRef.current?.blurContentEditor()
-          KeyboardController.dismiss()
-          colorPickerSheetRef.current?.present()
-        }}
-        activeFormats={activeFormats}
-      />
+      <Lazy>
+        <TextFormattingSheet
+          selectedColor={selectedColor}
+          bottomSheetRef={formattingSheetRef}
+          handleBottomSheetClose={handleBottomSheetClose}
+          editorRef={richEditorRef}
+          onColorPickerPress={() => {
+            richEditorRef.current?.blurContentEditor()
+            KeyboardController.dismiss()
+            colorPickerSheetRef.current?.present()
+          }}
+          activeFormats={activeFormats}
+        />
+      </Lazy>
 
-      <AudioRecorderSheet
-        audioSheetRef={audioSheetRef}
-        onRecordingComplete={handleRecordingComplete}
-      />
+      <Lazy>
+        <AudioRecorderSheet
+          audioSheetRef={audioSheetRef}
+          onRecordingComplete={handleRecordingComplete}
+        />
+      </Lazy>
 
-      <MediaPager
-        media={media}
-        visible={viewerVisible}
-        selectedIndex={selectedIndex}
-        onClose={closeViewer}
-      />
+      <Lazy>
+        <MediaPager
+          media={media}
+          visible={viewerVisible}
+          selectedIndex={selectedIndex}
+          onClose={closeViewer}
+        />
+      </Lazy>
 
       <KeyboardAwareScrollView ref={scrollRef} style={{ zIndex: -1 }}>
         <View className="flex-1 p-4 pt-2">
-          <MediaGrid
-            media={media}
-            onMediaPress={openViewer}
-            numColumns={3}
-            onDeletePress={removeMedia}
-          />
+          <Lazy>
+            <MediaGrid
+              media={media}
+              onMediaPress={openViewer}
+              numColumns={3}
+              onDeletePress={removeMedia}
+            />
+          </Lazy>
 
           {titleVisible && (
             <>
@@ -317,7 +358,7 @@ const Index = () => {
                 onChangeText={(text) => {
                   titleRef.current = text
                 }}
-                autoFocus
+                // autoFocus
                 className="bg-transparent border-0 px-1 text-lg font-medium text-[#55584A]"
                 placeholder="Title"
                 placeholderClassName="text-[#7A7A7A]"
@@ -346,6 +387,7 @@ const Index = () => {
               contentCSSText: 'padding: 10px 4px;',
             }}
             onChange={(html) => {
+              // console.log('Editor content changed:', html)
               contentRef.current = html
             }}
           />

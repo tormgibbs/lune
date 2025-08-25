@@ -106,7 +106,10 @@ export const Header = forwardRef(
                   <MenuItem
                     label="Edit Date"
                     icon={<CalendarDays size={20} />}
-                    onPress={onEditDate}
+                    onPress={() => {
+                      triggerRef.current?.close?.()
+                      onEditDate()
+                    }}
                     rounded="top"
                   />
 
@@ -114,21 +117,30 @@ export const Header = forwardRef(
                   <MenuItem
                     label={titleVisible ? 'Hide Title' : 'Show Title'}
                     icon={titleVisible ? <EyeOff size={20} /> : <Eye size={20} />}
-                    onPress={onHideTitle}
+                    onPress={() => {
+                      triggerRef.current?.close?.()
+                      onHideTitle()
+                    }}
                   />
 
                   <Separator className="h-[1px] bg-[#D4CDB3]" />
                   <MenuItem
                     label="Delete"
                     icon={<Trash2 size={20} color="#A34B3D" />}
-                    onPress={onDelete}
+                    onPress={() => {
+                      triggerRef.current?.close?.()
+                      onDelete()
+                    }}
                     danger
                     rounded="bottom"
                   />
                 </PopoverContent>
               </Popover>
 
-              <Pressable className="active:opacity-50" onPress={onDone}>
+              <Pressable className="active:opacity-50" onPress={() => {
+                triggerRef.current?.close?.()
+                onDone()
+              }}>
                 <Text
                   className={cn(
                     'text-[#6C7A45] font-medium',

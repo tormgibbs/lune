@@ -2,8 +2,8 @@ import { useState } from 'react'
 import * as ImagePicker from 'expo-image-picker'
 import { MediaAsset } from '../types/media'
 
-export const useMediaPicker = () => {
-  const [media, setMedia] = useState<MediaAsset[]>([])
+export const useMediaPicker = (initialMedia: MediaAsset[] = []) => {
+  const [media, setMedia] = useState<MediaAsset[]>(initialMedia)
 
   const pickMedia = async () => {
     try {
@@ -14,7 +14,7 @@ export const useMediaPicker = () => {
         quality: 1,
       })
 
-      console.log('MediaPicker result:', JSON.stringify(result, null, 2))
+      // console.log('MediaPicker result:', JSON.stringify(result, null, 2))
 
       if (!result.canceled) {
         const newAssets: MediaAsset[] = result.assets.map((asset, index) => ({

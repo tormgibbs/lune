@@ -12,6 +12,9 @@ import MemoirItem from '@/components/memoir-item'
 import { View } from 'react-native'
 import { deleteMemoir } from '@/db/memoir'
 import dayjs from 'dayjs'
+import { deleteMediaFiles } from '@/lib/media'
+import * as FileSystem from 'expo-file-system'
+
 
 export default function Index() {
   const memoirs = useMemoirStore((s) => s.memoirs)
@@ -33,19 +36,30 @@ export default function Index() {
     console.log('Preferences action')
   }
 
+  
+
+  async function debugListMediaFiles() {
+    const dir = `${FileSystem.documentDirectory}media`
+    const files = await FileSystem.readDirectoryAsync(dir)
+    console.log('Persisted files:', JSON.stringify(files, null, 2))
+  }
+
   const handleNewEntryPress = () => {
-    const id = nanoid(8)
-    const today = dayjs().format('YYYY-MM-DD')
-    console.log('Creating new memoir entry with id:', id, 'and date:', today)
-    router.push({
-      pathname: '/memoirs/[id]',
-      params: { id, date: today }
-    })
+    debugListMediaFiles()
+    // const id = nanoid(8)
+    // const today = dayjs().format('YYYY-MM-DD')
+    // router.navigate({
+    //   pathname: '/memoirs/[id]',
+    //   params: { id, date: today },
+    // })
   }
 
   const handleDelete = async (id: string) => {
     try {
-      // memoirItemRef.current?.closePopover()
+      const memoir = useMemoirStore.getState().memoirs.find((m) => m.id === id)
+
+      await deleteMediaFiles(memoir?.media)
+
       await deleteMemoir(id)
       remove(id)
     } catch (err) {

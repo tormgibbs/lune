@@ -1,3 +1,4 @@
+import { MediaAsset } from '@/types/media'
 import { sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 export const memoirs = sqliteTable('memoirs', {
@@ -7,6 +8,7 @@ export const memoirs = sqliteTable('memoirs', {
   date: text('date'),
   createdAt: text('createdAt'),
   updatedAt: text('updatedAt'),
+  media: text('media', { mode: 'json'}).$type<MediaAsset[]>(),
 })
 
 export type MemoirInsert = typeof memoirs.$inferInsert

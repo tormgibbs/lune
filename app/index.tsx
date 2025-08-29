@@ -45,13 +45,13 @@ export default function Index() {
   }
 
   const handleNewEntryPress = () => {
-    debugListMediaFiles()
-    // const id = nanoid(8)
-    // const today = dayjs().format('YYYY-MM-DD')
-    // router.navigate({
-    //   pathname: '/memoirs/[id]',
-    //   params: { id, date: today },
-    // })
+    // debugListMediaFiles()
+    const id = nanoid(8)
+    const today = dayjs().format('YYYY-MM-DD')
+    router.navigate({
+      pathname: '/memoirs/[id]',
+      params: { id, date: today },
+    })
   }
 
   const handleDelete = async (id: string) => {

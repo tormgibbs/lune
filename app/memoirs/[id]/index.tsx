@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-// import ColourPickerSheet from '@/features/memoir/components/bottom-sheets/color-picker'
-// import TextFormattingSheet from '@/features/memoir/components/bottom-sheets/text-format'
+import ColourPickerSheet from '@/features/memoir/components/bottom-sheets/color-picker'
+import TextFormattingSheet from '@/features/memoir/components/bottom-sheets/text-format'
 import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
@@ -20,41 +20,40 @@ import { RichEditor } from 'react-native-pell-rich-editor'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMediaPicker } from '@/hooks/useMediaPicker'
 import { useMediaViewer } from '@/hooks/useMediaViewer'
-// import MediaGrid from '@/components/media-grid'
-// import MediaPager from '@/components/media-pager'
-// import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
+import MediaGrid from '@/components/media-grid'
+import MediaPager from '@/components/media-pager'
+import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 import { MediaAsset } from '@/types/media'
 import { createAudioPlayer } from 'expo-audio'
-import { CameraModalRef } from '@/components/camera-modal'
-// import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
+import CameraModal, { CameraModalRef } from '@/components/camera-modal'
+import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
 import { useMemoirStore } from '@/store/memoir'
 import { MemoirInsert } from '@/db/schema'
 import { addMemoir, updateMemoir } from '@/db/memoir'
 import Lazy from '@/components/lazy'
 import { deleteMediaFiles, persistMediaAsset } from '@/lib/media'
-import { db } from '@/db'
 
-const CameraModal = lazy(() => import('@/components/camera-modal'))
+// const CameraModal = lazy(() => import('@/components/camera-modal'))
 
-const ColourPickerSheet = lazy(
-  () => import('@/features/memoir/components/bottom-sheets/color-picker'),
-)
+// const ColourPickerSheet = lazy(
+//   () => import('@/features/memoir/components/bottom-sheets/color-picker'),
+// )
 
-const VoiceInputSheet = lazy(
-  () => import('@/features/memoir/components/bottom-sheets/voice-input'),
-)
+// const VoiceInputSheet = lazy(
+//   () => import('@/features/memoir/components/bottom-sheets/voice-input'),
+// )
 
-const TextFormattingSheet = lazy(
-  () => import('@/features/memoir/components/bottom-sheets/text-format'),
-)
+// const TextFormattingSheet = lazy(
+//   () => import('@/features/memoir/components/bottom-sheets/text-format'),
+// )
 
-const AudioRecorderSheet = lazy(
-  () => import('@/features/memoir/components/bottom-sheets/audio-recorder'),
-)
+// const AudioRecorderSheet = lazy(
+//   () => import('@/features/memoir/components/bottom-sheets/audio-recorder'),
+// )
 
-const MediaPager = lazy(() => import('@/components/media-pager'))
+// const MediaPager = lazy(() => import('@/components/media-pager'))
 
-const MediaGrid = lazy(() => import('@/components/media-grid'))
+// const MediaGrid = lazy(() => import('@/components/media-grid'))
 
 const Index = () => {
   const router = useRouter()
@@ -114,8 +113,14 @@ const Index = () => {
 
     if (!title && !content && media.length === 0) return
 
-    const newMedia = media.filter((m) => !m.persisted)
-    const persistedMedia = media.filter((m) => m.persisted)
+    const { newMedia, persistedMedia } = media.reduce(
+      (acc, m) => {
+        if (m.persisted) acc.persistedMedia.push(m)
+        else acc.newMedia.push(m)
+        return acc
+      },
+      { newMedia: [] as MediaAsset[], persistedMedia: [] as MediaAsset[] },
+    )
 
     const savedNewMedia = await Promise.all(newMedia.map(persistMediaAsset))
 
@@ -141,7 +146,9 @@ const Index = () => {
         )
 
         if (removed.length > 0) {
-          await deleteMediaFiles(removed)
+          deleteMediaFiles(removed).catch((err) =>
+            console.warn('Failed to delete removed media', err),
+          )
         }
 
         await updateMemoir(id, memoir)

@@ -22,6 +22,7 @@ interface TextFormattingSheetProps {
   handleBottomSheetClose: () => void
   editorRef: React.RefObject<RichEditor | null>
   onColorPickerPress: () => void
+  onChange?: (index: number) => void
   selectedColor: string
   activeFormats: string[]
 }
@@ -29,6 +30,7 @@ interface TextFormattingSheetProps {
 const TextFormattingSheet = ({
   bottomSheetRef,
   handleBottomSheetClose,
+  onChange,
   onColorPickerPress,
   editorRef,
   selectedColor,
@@ -36,7 +38,7 @@ const TextFormattingSheet = ({
 }: TextFormattingSheetProps) => {
   const handleClosePress = () => {
     bottomSheetRef.current?.close()
-    editorRef.current?.focusContentEditor?.()
+    // editorRef.current?.focusContentEditor?.()
   }
 
   const sendEditorAction = (action: string) => {
@@ -78,14 +80,19 @@ const TextFormattingSheet = ({
     <BottomSheetModal
       ref={bottomSheetRef}
       enablePanDownToClose
-      keyboardBehavior="extend"
-      keyboardBlurBehavior="none"
-      android_keyboardInputMode="adjustResize"
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      android_keyboardInputMode="adjustPan"
       handleComponent={null}
+      onChange={onChange}
+      backgroundStyle={{
+        backgroundColor: '#E0DCCC',
+      }}
       style={{
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
+        backgroundColor: '#E0DCCC',
       }}>
       <BottomSheetView className="p-4 pb-6 bg-[#E0DCCC] rounded-t-lg">
         <View className="flex-row items-center justify-between">

@@ -19,6 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import MenuItem from './menu-item'
 import { ComponentRef, useRef } from 'react'
 import ResponsiveMediaGrid from './responsive-media-grid'
+import { cn } from '@/lib/utils'
 
 interface MemoirItemProps {
   memoir: Memoir
@@ -152,7 +153,8 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
             media={memoir.media ?? []}
             onMediaPress={() => {}}
           />
-          <View className="py-2">
+          <View
+            className={cn(memoir.title || memoir.content ? 'py-2' : 'py-0')}>
             {memoir.title && (
               <Text className="text-base font-semibold">{memoir.title}</Text>
             )}

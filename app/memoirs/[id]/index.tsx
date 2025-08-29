@@ -6,11 +6,11 @@ import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
 import { normalizeColor } from '@/lib/utils'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { lazy, useCallback, useMemo, useRef, useState } from 'react'
-import { TextInput, View } from 'react-native'
+import { Text, TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
   KeyboardAwareScrollView,
@@ -29,7 +29,7 @@ import CameraModal, { CameraModalRef } from '@/components/camera-modal'
 import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
 import { useMemoirStore } from '@/store/memoir'
 import { MemoirInsert } from '@/db/schema'
-import { addMemoir, updateMemoir } from '@/db/memoir'
+import { addMemoir, deleteMemoir, updateMemoir } from '@/db/memoir'
 import Lazy from '@/components/lazy'
 import { deleteMediaFiles, persistMediaAsset } from '@/lib/media'
 
@@ -59,7 +59,7 @@ const Index = () => {
   const router = useRouter()
   const { id, date } = useLocalSearchParams<{ id: string; date: string }>()
 
-  const { memoirs, add, update } = useMemoirStore()
+  const { memoirs, add, update, remove } = useMemoirStore()
   const existingMemoir = memoirs.find((m) => m.id === id)
 
   const initialTitle = existingMemoir?.title ?? ''
@@ -111,7 +111,27 @@ const Index = () => {
     const title = titleRef.current.trim()
     const content = contentRef.current.trim()
 
-    if (!title && !content && media.length === 0) return
+    if (!title && !content && media.length === 0) {
+      if (existingMemoir) {
+        try {
+          if (existingMemoir.media && existingMemoir.media.length > 0) {
+            deleteMediaFiles(existingMemoir.media).catch((err) =>
+              console.warn(
+                'Failed to delete media files on memoir delete',
+                err,
+              ),
+            )
+          }
+
+          await deleteMemoir(existingMemoir.id)
+          remove(existingMemoir.id)
+          console.log('Memoir deleted:', existingMemoir.id)
+        } catch (error) {
+          console.error('Failed to delete memoir:', error)
+        }
+      }
+      return
+    }
 
     const { newMedia, persistedMedia } = media.reduce(
       (acc, m) => {
@@ -178,6 +198,7 @@ const Index = () => {
   }
 
   const handleTextFormatPress = async () => {
+    console.log('Text format pressed')
     // await KeyboardController.dismiss()
     formattingSheetRef.current?.present()
   }
@@ -353,6 +374,14 @@ const Index = () => {
         />
       </Lazy>
 
+      <BottomSheetModal
+      // ref={formattingSheetRef}
+      >
+        <BottomSheetView>
+          <Text>Text Formatting Options</Text>
+        </BottomSheetView>
+      </BottomSheetModal>
+
       <Lazy>
         <MediaPager
           media={media}
@@ -410,7 +439,6 @@ const Index = () => {
               contentCSSText: 'padding: 10px 4px;',
             }}
             onChange={(html) => {
-              // console.log('Editor content changed:', html)
               contentRef.current = html
             }}
           />

@@ -17,8 +17,8 @@ const ResponsiveMediaGrid: React.FC<ResponsiveMediaGridProps> = ({
 
   const count = media.length
   const screenWidth = Dimensions.get('window').width
-  const gap = 4
-  const radius = 8
+  const gap = 2
+  const radius = 7
 
   // 1 item full width
   if (count === 1) {
@@ -27,8 +27,8 @@ const ResponsiveMediaGrid: React.FC<ResponsiveMediaGridProps> = ({
         <Image
           source={{ uri: media[0].uri }}
           style={{
-            width: screenWidth - 32,
-            aspectRatio: 1,
+            width: 'auto',
+            height: screenWidth * 0.5,
             borderRadius: radius,
           }}
         />

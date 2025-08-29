@@ -76,8 +76,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <KeyboardProvider
+          
           // navigationBarTranslucent={Platform.OS === 'android'}
-          // preserveEdgeToEdge={Platform.OS === 'android'}
+          preserveEdgeToEdge={Platform.OS === 'android'}
           statusBarTranslucent={Platform.OS === 'android'}>
           <ThemeProvider value={LIGHT_THEME}>
             <StatusBar style={'dark'} />

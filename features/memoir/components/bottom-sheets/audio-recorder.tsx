@@ -99,6 +99,9 @@ const AudioRecorderSheet = ({
 
   return (
     <BottomSheetModal
+      backgroundStyle={{
+        backgroundColor: '#E0DCCC'
+      }}
       ref={audioSheetRef}
       enablePanDownToClose
       keyboardBehavior="extend"

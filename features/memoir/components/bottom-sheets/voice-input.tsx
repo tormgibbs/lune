@@ -129,6 +129,9 @@ const VoiceInputSheet = ({
       keyboardBlurBehavior="none"
       android_keyboardInputMode="adjustResize"
       handleComponent={null}
+      backgroundStyle={{
+        backgroundColor: '#E0DCCC',
+      }}
       style={{
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,

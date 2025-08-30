@@ -152,6 +152,7 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
           <ResponsiveMediaGrid
             media={memoir.media ?? []}
             editable={false}
+            mode='preview'
             onMediaPress={() => {}}
           />
           <View

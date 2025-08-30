@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import AudioWavePlayer from '../audio-wave-player'
 import { Button } from '../ui/button'
 import { X } from 'lucide-react-native'
+import { useMediaGrid } from './media-grid-context'
 
 interface MediaItemProps {
   media: MediaAsset
@@ -13,16 +14,19 @@ interface MediaItemProps {
   aspect?: number
   radius?: number
   fill?: boolean
+  children?: React.ReactNode
 }
 
 const MediaItem = ({
   media,
   onPress,
-  onDeletePress,
   aspect = 1,
   radius = 7,
   fill = false,
+  children
 }: MediaItemProps) => {
+
+  const { editable, onDeletePress } = useMediaGrid()
 
   const containerStyle = [
     fill ? { flex: 1 } : { aspectRatio: aspect },
@@ -59,19 +63,23 @@ const MediaItem = ({
           <AudioWavePlayer audio={media} style={StyleSheet.absoluteFill} />
         )}
 
-        {/* <Button
-          onPress={(e) => {
-            e.stopPropagation?.()
-            onDeletePress?.(media.id!)
-          }}
-          variant="secondary"
-          size="icon"
-          className={cn(
-            'absolute top-2 right-2 h-6 w-6 bg-gray-500 opacity-80 rounded-full',
-            media.type === 'audio' ? 'h-4 w-4' : 'h-6 w-6',
-          )}>
-          <X color="white" size={media.type === 'audio' ? 10 : 15} />
-        </Button> */}
+        {children}
+
+        {editable && (
+          <Button
+            onPress={(e) => {
+              e.stopPropagation?.()
+              onDeletePress?.(media.id!)
+            }}
+            variant="secondary"
+            size="icon"
+            className={cn(
+              'absolute top-2 right-2 h-6 w-6 bg-gray-500 opacity-80 rounded-full',
+              media.type === 'audio' ? 'h-4 w-4' : 'h-6 w-6',
+            )}>
+            <X color="white" size={media.type === 'audio' ? 10 : 15} />
+          </Button>
+        )}
 
       </View>
     </Pressable>

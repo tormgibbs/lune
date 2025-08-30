@@ -151,6 +151,7 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
         <View className="px-2 py-2 bg-[#E6E9D8] rounded-xl">
           <ResponsiveMediaGrid
             media={memoir.media ?? []}
+            editable={false}
             onMediaPress={() => {}}
           />
           <View

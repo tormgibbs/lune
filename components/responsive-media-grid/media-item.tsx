@@ -1,0 +1,81 @@
+import { cn, formatDuration } from '@/lib/utils'
+import { MediaAsset } from '@/types/media'
+import { Image } from 'expo-image'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import AudioWavePlayer from '../audio-wave-player'
+import { Button } from '../ui/button'
+import { X } from 'lucide-react-native'
+
+interface MediaItemProps {
+  media: MediaAsset
+  onPress: () => void
+  onDeletePress?: (id: string) => void
+  aspect?: number
+  radius?: number
+  fill?: boolean
+}
+
+const MediaItem = ({
+  media,
+  onPress,
+  onDeletePress,
+  aspect = 1,
+  radius = 7,
+  fill = false,
+}: MediaItemProps) => {
+
+  const containerStyle = [
+    fill ? { flex: 1 } : { aspectRatio: aspect },
+    { borderRadius: radius, overflow: 'hidden' as 'hidden' },
+  ]
+
+  return (
+    <Pressable onPress={onPress} style={{ flex: 1, width: '100%' }}>
+      <View style={containerStyle} className="relative">
+        {media.type === 'image' && (
+          <Image
+            source={{ uri: media.uri }}
+            style={StyleSheet.absoluteFill}
+            contentFit="cover"
+          />
+        )}
+
+        {media.type === 'video' && (
+          <>
+            <Image
+              source={{ uri: media.uri }}
+              style={StyleSheet.absoluteFill}
+              contentFit="cover"
+            />
+            {media.duration && (
+              <Text className="absolute bottom-2 right-2 font-medium text-white drop-shadow-[0_0_10px_#000000]">
+                {formatDuration(media.duration)}
+              </Text>
+            )}
+          </>
+        )}
+
+        {media.type === 'audio' && (
+          <AudioWavePlayer audio={media} style={StyleSheet.absoluteFill} />
+        )}
+
+        {/* <Button
+          onPress={(e) => {
+            e.stopPropagation?.()
+            onDeletePress?.(media.id!)
+          }}
+          variant="secondary"
+          size="icon"
+          className={cn(
+            'absolute top-2 right-2 h-6 w-6 bg-gray-500 opacity-80 rounded-full',
+            media.type === 'audio' ? 'h-4 w-4' : 'h-6 w-6',
+          )}>
+          <X color="white" size={media.type === 'audio' ? 10 : 15} />
+        </Button> */}
+
+      </View>
+    </Pressable>
+  )
+}
+
+export default MediaItem

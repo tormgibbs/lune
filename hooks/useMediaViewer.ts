@@ -8,6 +8,7 @@ export const useMediaViewer = () => {
   })
 
   const openViewer = (index: number) => {
+    console.log('Pressed media index:', index)
     setViewerState({
       visible: true,
       selectedIndex: index,

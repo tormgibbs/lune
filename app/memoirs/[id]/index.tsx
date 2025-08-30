@@ -32,6 +32,7 @@ import { MemoirInsert } from '@/db/schema'
 import { addMemoir, deleteMemoir, updateMemoir } from '@/db/memoir'
 import Lazy from '@/components/lazy'
 import { deleteMediaFiles, persistMediaAsset } from '@/lib/media'
+import ResponsiveMediaGrid from '@/components/responsive-media-grid'
 
 // const CameraModal = lazy(() => import('@/components/camera-modal'))
 
@@ -394,10 +395,9 @@ const Index = () => {
       <KeyboardAwareScrollView ref={scrollRef} style={{ zIndex: -1 }}>
         <View className="flex-1 p-4 pt-2">
           <Lazy>
-            <MediaGrid
+            <ResponsiveMediaGrid
               media={media}
               onMediaPress={openViewer}
-              numColumns={3}
               onDeletePress={removeMedia}
             />
           </Lazy>

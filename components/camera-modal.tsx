@@ -6,10 +6,16 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'
+import {
+  CameraView,
+  CameraType,
+  useCameraPermissions,
+  FlashMode,
+} from 'expo-camera'
 import { Button } from './ui/button'
-import { RefreshCcw, Zap } from 'lucide-react-native'
+import { RefreshCcw } from 'lucide-react-native'
 import MediaPreview from './media-preview'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 type CameraModalProps = {
   onClose?: () => void
@@ -32,7 +38,9 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
       'image' | 'video'
     >('image')
 
-    const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
+    const [capturedMedia, setCapturedMedia] = useState<string | null>(null)
+
+    const [flash, setFlash] = useState<FlashMode>('off')
 
     const cameraRef = useRef<CameraView>(null)
     const recordingRef = useRef(false)
@@ -60,10 +68,8 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
           skipProcessing: false,
         })
         if (photo?.uri) {
-          setCapturedPhoto(photo.uri)
+          setCapturedMedia(photo.uri)
           setCapturedMediaType('image')
-          // onCapture?.(photo.uri)
-          // setVisible(false)
         }
       } catch (err) {
         console.warn('Error taking picture:', err)
@@ -82,9 +88,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
         const video = await cameraRef.current.recordAsync()
         if (video?.uri) {
           setCapturedMediaType('video')
-          setCapturedPhoto(video.uri)
-          // onVideoCapture?.(video.uri)
-          // setVisible(false)
+          setCapturedMedia(video.uri)
         }
       } catch (err) {
         console.warn('Error recording video:', err)
@@ -134,6 +138,32 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
       }
     }
 
+    const toggleFlash = () => {
+      setFlash((prev) => {
+        if (prev === 'off') return 'on'
+        if (prev === 'on') return 'auto'
+        return 'off'
+      })
+    }
+
+    const getFlashIcon = (flash: FlashMode) => {
+      switch (flash) {
+        case 'on':
+          return <MaterialCommunityIcons name="flash" size={30} color="white" />
+        case 'off':
+          return (
+            <MaterialCommunityIcons name="flash-off" size={30} color="white" />
+          )
+        case 'auto':
+          return (
+            <MaterialCommunityIcons name="flash-auto" size={30} color="white" />
+          )
+        default:
+          return (
+            <MaterialCommunityIcons name="flash-off" size={30} color="white" />
+          )
+      }
+    }
     useImperativeHandle(ref, () => ({
       open: async () => {
         if (!permission?.granted) {
@@ -150,16 +180,18 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
         visible={visible}
         animationType="slide"
         onRequestClose={() => {
+          setCapturedMedia(null)
+          setCapturedMediaType('image')
           setVisible(false)
           onClose?.()
         }}>
         <View className="flex-1">
-          {capturedPhoto ? (
+          {capturedMedia ? (
             <MediaPreview
               type={capturedMediaType}
-              uri={capturedPhoto}
+              uri={capturedMedia}
               onRetake={() => {
-                setCapturedPhoto(null)
+                setCapturedMedia(null)
                 setCapturedMediaType('image')
               }}
               onUse={(uri, type, duration) => {
@@ -168,7 +200,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
                 } else {
                   onVideoCapture?.(uri, duration)
                 }
-                setCapturedPhoto(null)
+                setCapturedMedia(null)
                 setCapturedMediaType('image')
                 setVisible(false)
               }}
@@ -178,16 +210,19 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
               ref={cameraRef}
               style={{ flex: 1 }}
               facing={facing}
-              mode={mode}>
+              mode={mode}
+              flash={flash}>
               <View className="flex-1 justify-between">
                 <View className="p-4">
-                  <Pressable className="self-start p-2">
-                    <Zap size={30} color="white" />
+                  <Pressable className="self-start p-2" onPress={toggleFlash}>
+                    {getFlashIcon(flash)}
                   </Pressable>
                 </View>
                 <View className="flex-row p-4 items-center justify-between justify-self-end">
                   <Pressable
                     onPress={() => {
+                      setCapturedMedia(null)
+                      setCapturedMediaType('image')
                       setVisible(false)
                       onClose?.()
                     }}>

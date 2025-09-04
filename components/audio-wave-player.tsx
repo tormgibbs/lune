@@ -7,7 +7,7 @@ import {
   PlayerState,
   Waveform,
 } from '@simform_solutions/react-native-audio-waveform'
-import { formatDuration } from '@/lib/utils'
+import { denormalizeUri, formatDuration } from '@/lib/utils'
 import { Button } from './ui/button'
 import { Pause, Play } from 'lucide-react-native'
 
@@ -59,7 +59,7 @@ const AudioWavePlayer: React.FC<AudioWavePlayerProps> = ({ audio, style }) => {
       <Waveform
         mode="static"
         ref={waveformRef}
-        path={audio.uri}
+        path={denormalizeUri(audio.uri)}
         containerStyle={{ height: 60, width: '90%' }}
         candleSpace={2}
         candleWidth={2}

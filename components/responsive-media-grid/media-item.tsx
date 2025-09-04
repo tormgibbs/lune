@@ -67,6 +67,7 @@ const MediaItem = ({
 
         {editable && (
           <Button
+            hitSlop={10}
             onPress={(e) => {
               e.stopPropagation?.()
               onDeletePress?.(media.id!)

@@ -8,11 +8,7 @@ import { formatDate } from '@/lib/date'
 import { deriveCategories, normalizeColor } from '@/lib/utils'
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
-import {
-  Stack,
-  useLocalSearchParams,
-  useRouter,
-} from 'expo-router'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useCallback, useMemo, useRef, useState } from 'react'
 import { Text, TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
@@ -22,8 +18,8 @@ import {
 } from 'react-native-keyboard-controller'
 import { RichEditor } from 'react-native-pell-rich-editor'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useMediaPicker } from '@/hooks/useMediaPicker'
-import { useMediaViewer } from '@/hooks/useMediaViewer'
+import { useMediaPicker } from '@/hooks/use-media-picker'
+import { useMediaViewer } from '@/hooks/use-media-viewer'
 import MediaPager from '@/components/media-pager'
 import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 import { MediaAsset } from '@/types/media'
@@ -60,7 +56,6 @@ const Index = () => {
   const cameraRef = useRef<CameraModalRef>(null)
   const voiceInputSheetRef = useRef<BottomSheetModal>(null)
 
-  const [categories, setCategories] = useState<Category[]>(existingMemoir?.categories ?? [])
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
   const [titleVisible, setTitleVisible] = useState(
@@ -74,7 +69,7 @@ const Index = () => {
     return today
   }, [date, existingMemoir?.date, today])
 
-  const { media, pickMedia, removeMedia, setMedia } = useMediaPicker(
+  const { media, pickMedia, removeMedia, setMedia, addMedia } = useMediaPicker(
     existingMemoir?.media ?? [],
   )
 
@@ -143,7 +138,7 @@ const Index = () => {
       updatedAt: new Date().toISOString(),
       media: finalMedia,
       titleVisible,
-      categories
+      categories,
     }
 
     try {
@@ -214,6 +209,10 @@ const Index = () => {
     console.log('Delete action')
   }
 
+  function normalizeUri(path: string): string {
+    return path.startsWith('file://') ? path : `file://${path}`
+  }
+
   const handleRecordingComplete = async (audioPath: string) => {
     // console.log('Recording saved to:', audioPath)
 
@@ -234,15 +233,17 @@ const Index = () => {
     player.remove()
 
     const newAudio: MediaAsset = {
-      uri: audioPath,
+      uri: normalizeUri(audioPath),
       type: 'audio',
       id: `${Date.now()}_audio`,
       duration,
+      persisted: false,
     }
 
     // console.log('New audio added:', newAudio)
 
-    setMedia((prev) => [...prev, newAudio])
+    addMedia([newAudio])
+    // setMedia((prev) => [...prev, newAudio])
   }
 
   const handleBottomSheetClose = () => {}
@@ -270,7 +271,6 @@ const Index = () => {
       }
     })
   }, [])
-
 
   return (
     <SafeAreaView
@@ -306,7 +306,8 @@ const Index = () => {
               type: 'image',
               id: `${Date.now()}_photo`,
             }
-            setMedia((prev) => [...prev, newPhoto])
+            addMedia([newPhoto])
+            // setMedia((prev) => [...prev, newPhoto])
           }}
           onVideoCapture={(uri, duration) => {
             console.log('Video captured:', uri)
@@ -316,7 +317,8 @@ const Index = () => {
               id: `${Date.now()}_video`,
               duration,
             }
-            setMedia((prev) => [...prev, newVideo])
+            addMedia([newVideo])
+            // setMedia((prev) => [...prev, newVideo])
           }}
           onClose={() => console.log('Camera closed')}
         />

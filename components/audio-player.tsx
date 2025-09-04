@@ -7,7 +7,7 @@ import {
   PlayerState,
   Waveform,
 } from '@simform_solutions/react-native-audio-waveform'
-import { formatDuration, formatDurationWithDecimals } from '@/lib/utils'
+import { denormalizeUri, formatDuration, formatDurationWithDecimals } from '@/lib/utils'
 import { Pause, Play } from 'lucide-react-native'
 import { Button } from './ui/button'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -73,7 +73,7 @@ const AudioPlayer = ({ audio, width, height, isActive }: AudioPlayerProps) => {
         <Waveform
           mode="static"
           ref={waveformRef}
-          path={audio.uri}
+          path={denormalizeUri(audio.uri)}
           containerStyle={{
             height: 80,
             width: '100%',

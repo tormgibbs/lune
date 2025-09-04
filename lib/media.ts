@@ -9,9 +9,15 @@ export async function persistMediaAsset(asset: MediaAsset): Promise<MediaAsset> 
     intermediates: true,
   }).catch(() => {})
 
-  await FileSystem.copyAsync({ from: asset.uri, to: newPath })
+  try {
+    await FileSystem.copyAsync({ from: asset.uri, to: newPath })
+  } catch (e) {
+    console.error('❌ Failed to persist asset:', asset.uri, e)
+    throw e // so you’ll see the error instead of silently failing
+  }
 
-  return { ...asset, uri: newPath }
+
+  return { ...asset, uri: newPath, persisted: true }
 }
 
 export async function deleteMediaFiles(media: MediaAsset[] | undefined | null) {

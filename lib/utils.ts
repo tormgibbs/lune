@@ -36,22 +36,34 @@ export function formatDurationWithDecimals(ms?: number) {
     .padStart(2, '0')}`
 }
 
-export function deriveCategories(title: string, content: string, media: MediaAsset[]) {
+export function deriveCategories(
+  title: string,
+  content: string,
+  media: MediaAsset[],
+) {
   const categories: Category[] = []
 
   if (title?.trim() || content?.trim()) {
     categories.push('text')
   }
 
-  if (media.some(m => m.type === 'image')) {
+  if (media.some((m) => m.type === 'image')) {
     categories.push('photo')
   }
-  if (media.some(m => m.type === 'video')) {
+  if (media.some((m) => m.type === 'video')) {
     categories.push('video')
   }
-  if (media.some(m => m.type === 'audio')) {
+  if (media.some((m) => m.type === 'audio')) {
     categories.push('audio')
   }
 
   return categories
+}
+
+export function normalizeUri(path: string): string {
+  return path.startsWith('file://') ? path : `file://${path}`
+}
+
+export function denormalizeUri(uri: string): string {
+  return uri.startsWith('file://') ? uri.replace('file://', '') : uri
 }

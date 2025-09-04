@@ -14,12 +14,14 @@ import { deleteMemoir } from '@/db/memoir'
 import dayjs from 'dayjs'
 import { deleteMediaFiles } from '@/lib/media'
 import * as FileSystem from 'expo-file-system'
+import { useMemoirActions } from '@/hooks/use-memoir-actions'
 
 
 export default function Index() {
   const memoirs = useMemoirStore((s) => s.memoirs)
   const remove = useMemoirStore((s) => s.remove)
   const headerRef = useRef<{ closePopover: () => void }>(null)
+  const { handleEdit, handleDelete } = useMemoirActions()
 
   const handleBackupSyncPress = () => {
     headerRef.current?.closePopover()
@@ -54,25 +56,25 @@ export default function Index() {
     })
   }
 
-  const handleDelete = async (id: string) => {
-    try {
-      const memoir = useMemoirStore.getState().memoirs.find((m) => m.id === id)
+  // const handleDelete = async (id: string) => {
+  //   try {
+  //     const memoir = useMemoirStore.getState().memoirs.find((m) => m.id === id)
 
-      await deleteMediaFiles(memoir?.media)
+  //     await deleteMediaFiles(memoir?.media)
 
-      await deleteMemoir(id)
-      remove(id)
-    } catch (err) {
-      console.error('Failed to delete memoir:', err)
-    }
-  }
+  //     await deleteMemoir(id)
+  //     remove(id)
+  //   } catch (err) {
+  //     console.error('Failed to delete memoir:', err)
+  //   }
+  // }
 
-  const handleEdit = (id: string) => {
-    // memoirItemRef.current?.closePopover()
-    router.push(`/memoirs/${id}`)
-  }
+  // const handleEdit = (id: string) => {
+  //   // memoirItemRef.current?.closePopover()
+  //   router.push(`/memoirs/${id}`)
+  // }
 
-  // console.log('Memoirs:', JSON.stringify(memoirs, null, 2))
+  console.log('Memoirs:', JSON.stringify(memoirs, null, 2))
 
   return (
     <SafeAreaView className="relative bg-[#F5F4EF] flex-1 items-center">
@@ -101,9 +103,10 @@ export default function Index() {
                 onDelete={handleDelete}
               />
             )}
+            
             keyExtractor={(item) => item.id}
             ItemSeparatorComponent={() => <View className="h-4" />}
-            contentContainerStyle={{ zIndex: -1 }}
+            contentContainerStyle={{ zIndex: -1, paddingBottom: 50 }}
           />
         </View>
       )}

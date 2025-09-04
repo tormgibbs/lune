@@ -69,6 +69,7 @@
     "react-native-screens": "^4.11.1",
     "react-native-svg": "15.11.2",
     "react-native-svg-transformer": "^1.5.1",
+    "react-native-tag-input": "^0.0.21",
     "react-native-web": "~0.20.0",
     "reanimated-color-picker": "^4.1.0",
     "tailwind-merge": "^2.6.0",

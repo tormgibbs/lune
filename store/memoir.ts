@@ -1,4 +1,4 @@
-import { Memoir, MemoirInsert } from '@/db/schema'
+import { Category, Memoir, MemoirInsert } from '@/db/schema'
 import { create } from 'zustand'
 
 interface MemoirStore {
@@ -7,26 +7,144 @@ interface MemoirStore {
   update: (m: Partial<Memoir> & { id: string }) => void
   remove: (id: string) => void
   setMemoirs: (list: Memoir[]) => void
-  selectedDate: string
-  setSelectedDate: (date: string) => void
+
+  searchQuery: string
+  setSearchQuery: (q: string) => void
+  searchResults: Memoir[]
+
+  selectedCategory: Category | null
+  setSelectedCategory: (cat: Category | null) => void
 }
 
-export const useMemoirStore = create<MemoirStore>((set) => ({
+const computeSearchResults = (
+  memoirs: Memoir[],
+  searchQuery: string,
+  category: Category | null,
+): Memoir[] => {
+  const q = searchQuery.toLowerCase().trim()
+
+  // if nothing typed and no category → no results
+  if (!q && !category) return []
+
+  return memoirs.filter((m) => {
+    // query match (true if no query)
+    const matchesQuery =
+      !q ||
+      (m.title ?? '').toLowerCase().includes(q) ||
+      (m.content ?? '').toLowerCase().includes(q) ||
+      (m.date ?? '').toLowerCase().includes(q)
+
+    // category match (true if no category)
+    const matchesCategory = !category || (m.categories ?? []).includes(category)
+
+    return matchesQuery && matchesCategory
+  })
+}
+
+// const computeSearchResults = (
+//   memoirs: Memoir[],
+//   searchQuery: string,
+//   category: Category | null,
+// ): Memoir[] => {
+//   const q = searchQuery.toLowerCase().trim()
+
+//   return memoirs.filter((m) => {
+//     // text search
+//     // const matchesQuery =
+//     //   !q ||
+//     //   (m.title ?? '').toLowerCase().includes(q) ||
+//     //   (m.content ?? '').toLowerCase().includes(q) ||
+//     //   (m.date ?? '').toLowerCase().includes(q)
+
+//     const matchesQuery =
+//       q.length > 0 &&
+//       ((m.title ?? '').toLowerCase().includes(q) ||
+//         (m.content ?? '').toLowerCase().includes(q) ||
+//         (m.date ?? '').toLowerCase().includes(q))
+
+//     // category filter
+//     const matchesCategory = !category || (m.categories ?? []).includes(category)
+
+//     return matchesQuery && matchesCategory
+//   })
+// }
+
+export const useMemoirStore = create<MemoirStore>((set, get) => ({
   memoirs: [],
-  add: (m) => set((state) => ({ memoirs: [...state.memoirs, toMemoir(m)] })),
+  searchQuery: '',
+  searchResults: [],
+  selectedCategory: null,
+
+  add: (m) =>
+    set((state) => {
+      const newMemoirs = [...state.memoirs, toMemoir(m)]
+      return {
+        memoirs: newMemoirs,
+        searchResults: computeSearchResults(
+          newMemoirs,
+          state.searchQuery,
+          state.selectedCategory,
+        ),
+      }
+    }),
+
   update: (m: Partial<Memoir> & { id: string }) =>
-    set((state) => ({
-      memoirs: state.memoirs.map((memoir) =>
+    set((state) => {
+      const updated = state.memoirs.map((memoir) =>
         memoir.id === m.id ? { ...memoir, ...m } : memoir,
+      )
+      return {
+        memoirs: updated,
+        searchResults: computeSearchResults(
+          updated,
+          state.searchQuery,
+          state.selectedCategory,
+        ),
+      }
+    }),
+
+  remove: (id) =>
+    set((state) => {
+      const filtered = state.memoirs.filter((memoir) => memoir.id !== id)
+      return {
+        memoirs: filtered,
+        searchResults: computeSearchResults(
+          filtered,
+          state.searchQuery,
+          state.selectedCategory,
+        ),
+      }
+    }),
+
+  setMemoirs: (list) =>
+    set((state) => ({
+      memoirs: list,
+      searchResults: computeSearchResults(
+        list,
+        state.searchQuery,
+        state.selectedCategory,
       ),
     })),
-  remove: (id) =>
+
+  setSearchQuery: (q) =>
     set((state) => ({
-      memoirs: state.memoirs.filter((memoir) => memoir.id !== id),
+      searchQuery: q,
+      searchResults: computeSearchResults(
+        state.memoirs,
+        q,
+        state.selectedCategory,
+      ),
     })),
-  setMemoirs: (list) => set({ memoirs: list }),
-  selectedDate: new Date().toISOString(),
-  setSelectedDate: (date) => set({ selectedDate: date }),
+
+  setSelectedCategory: (cat) =>
+    set((state) => ({
+      selectedCategory: cat,
+      searchResults: computeSearchResults(
+        state.memoirs,
+        state.searchQuery,
+        cat,
+      ),
+    })),
 }))
 
 function toMemoir(m: MemoirInsert): Memoir {
@@ -37,6 +155,8 @@ function toMemoir(m: MemoirInsert): Memoir {
     content: m.content ?? null,
     createdAt: m.createdAt ?? null,
     updatedAt: m.updatedAt ?? null,
-    media: (m.media ?? []).map(asset => ({ ...asset, persisted: true }))
+    media: (m.media ?? []).map((asset) => ({ ...asset, persisted: true })),
+    titleVisible: m.titleVisible ?? true,
+    categories: m.categories ?? null,
   }
 }

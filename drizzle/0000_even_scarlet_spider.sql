@@ -5,5 +5,7 @@ CREATE TABLE `memoirs` (
 	`date` text,
 	`createdAt` text,
 	`updatedAt` text,
-	`media` text
+	`media` text,
+	`titleVisible` integer DEFAULT 1 NOT NULL,
+	`features` text
 );

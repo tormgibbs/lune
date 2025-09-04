@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f2c234bc-48ae-44a8-8b61-2d193c76df47",
+  "id": "b5151b17-9df0-4abe-8ed9-3484e81a0582",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "memoirs": {
@@ -51,6 +51,21 @@
         },
         "media": {
           "name": "media",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "titleVisible": {
+          "name": "titleVisible",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "features": {
+          "name": "features",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

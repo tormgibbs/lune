@@ -134,7 +134,7 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
 
   const cleanedContent = memoir.content ? cleanHtml(memoir.content) : ''
 
-  console.log(JSON.stringify(memoir, null, 2))
+  // console.log(JSON.stringify(memoir, null, 2))
 
   return (
     <Swipeable
@@ -157,7 +157,7 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
           />
           <View
             className={cn(memoir.title || memoir.content ? 'py-2' : 'py-0')}>
-            {memoir.title && (
+            {memoir.title && memoir.titleVisible && (
               <Text className="text-base font-semibold">{memoir.title}</Text>
             )}
             {memoir.content && (

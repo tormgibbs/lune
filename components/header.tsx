@@ -41,6 +41,7 @@ const Header = forwardRef(
         <Text className="text-3xl font-bold">Lune</Text>
         <View className="flex-row gap-x-3">
           <Button
+            hitSlop={25}
             size="icon"
             className="rounded-full bg-[#EDE9D5]"
             onPress={() => router.push('/search')}>
@@ -49,13 +50,17 @@ const Header = forwardRef(
 
           <Popover>
             <PopoverTrigger ref={triggerRef} asChild>
-              <Button variant='secondary' size="icon" className="rounded-full bg-[#EDE9D5]">
+              <Button
+                hitSlop={20}
+                variant="secondary"
+                size="icon"
+                className="rounded-full bg-[#EDE9D5]">
                 <Ellipsis size={20} />
               </Button>
             </PopoverTrigger>
 
             <PopoverContent
-              portalHost='root-host'
+              portalHost="root-host"
               side="bottom"
               align="end"
               className="w-auto py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">

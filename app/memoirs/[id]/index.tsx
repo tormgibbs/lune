@@ -5,11 +5,15 @@ import TextFormattingSheet from '@/features/memoir/components/bottom-sheets/text
 import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
-import { normalizeColor } from '@/lib/utils'
+import { deriveCategories, normalizeColor } from '@/lib/utils'
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
-import { lazy, useCallback, useMemo, useRef, useState } from 'react'
+import {
+  Stack,
+  useLocalSearchParams,
+  useRouter,
+} from 'expo-router'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { Text, TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
@@ -20,7 +24,6 @@ import { RichEditor } from 'react-native-pell-rich-editor'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMediaPicker } from '@/hooks/useMediaPicker'
 import { useMediaViewer } from '@/hooks/useMediaViewer'
-import MediaGrid from '@/components/media-grid'
 import MediaPager from '@/components/media-pager'
 import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 import { MediaAsset } from '@/types/media'
@@ -28,33 +31,11 @@ import { createAudioPlayer } from 'expo-audio'
 import CameraModal, { CameraModalRef } from '@/components/camera-modal'
 import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
 import { useMemoirStore } from '@/store/memoir'
-import { MemoirInsert } from '@/db/schema'
+import { Category, MemoirInsert } from '@/db/schema'
 import { addMemoir, deleteMemoir, updateMemoir } from '@/db/memoir'
 import Lazy from '@/components/lazy'
 import { deleteMediaFiles, persistMediaAsset } from '@/lib/media'
 import ResponsiveMediaGrid from '@/components/responsive-media-grid'
-
-// const CameraModal = lazy(() => import('@/components/camera-modal'))
-
-// const ColourPickerSheet = lazy(
-//   () => import('@/features/memoir/components/bottom-sheets/color-picker'),
-// )
-
-// const VoiceInputSheet = lazy(
-//   () => import('@/features/memoir/components/bottom-sheets/voice-input'),
-// )
-
-// const TextFormattingSheet = lazy(
-//   () => import('@/features/memoir/components/bottom-sheets/text-format'),
-// )
-
-// const AudioRecorderSheet = lazy(
-//   () => import('@/features/memoir/components/bottom-sheets/audio-recorder'),
-// )
-
-// const MediaPager = lazy(() => import('@/components/media-pager'))
-
-// const MediaGrid = lazy(() => import('@/components/media-grid'))
 
 const Index = () => {
   const router = useRouter()
@@ -63,15 +44,12 @@ const Index = () => {
   const { memoirs, add, update, remove } = useMemoirStore()
   const existingMemoir = memoirs.find((m) => m.id === id)
 
-  const initialTitle = existingMemoir?.title ?? ''
+  // const initialTitle = existingMemoir?.title ?? ''
   const initialContent = existingMemoir?.content ?? ''
 
-  // const initialMedia = useMemo(
-  //   () => existingMemoir?.media ?? [],
-  //   [existingMemoir],
-  // )
+  const [title, setTitle] = useState(existingMemoir?.title ?? '')
 
-  const titleRef = useRef(initialTitle)
+  const titleRef = useRef(title)
   const contentRef = useRef(initialContent)
 
   const colorPickerSheetRef = useRef<BottomSheetModal>(null)
@@ -82,9 +60,12 @@ const Index = () => {
   const cameraRef = useRef<CameraModalRef>(null)
   const voiceInputSheetRef = useRef<BottomSheetModal>(null)
 
+  const [categories, setCategories] = useState<Category[]>(existingMemoir?.categories ?? [])
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
-  const [titleVisible, setTitleVisible] = useState(true)
+  const [titleVisible, setTitleVisible] = useState(
+    existingMemoir?.titleVisible ?? true,
+  )
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
 
   const selectedDate = useMemo(() => {
@@ -97,10 +78,6 @@ const Index = () => {
     existingMemoir?.media ?? [],
   )
 
-  // if (media.length === 0 && initialMedia.length > 0) {
-  //   setMedia(initialMedia)
-  // }
-
   const {
     visible: viewerVisible,
     selectedIndex,
@@ -112,7 +89,12 @@ const Index = () => {
     const title = titleRef.current.trim()
     const content = contentRef.current.trim()
 
-    if (!title && !content && media.length === 0) {
+    const isEmpty =
+      (!titleVisible || title.length === 0) &&
+      content.length === 0 &&
+      media.length === 0
+
+    if (isEmpty) {
       if (existingMemoir) {
         try {
           if (existingMemoir.media && existingMemoir.media.length > 0) {
@@ -150,6 +132,8 @@ const Index = () => {
       ...savedNewMedia.map((m) => ({ ...m, persisted: true })),
     ]
 
+    const categories = deriveCategories(title, content, finalMedia)
+
     const memoir: MemoirInsert = {
       id,
       title,
@@ -158,6 +142,8 @@ const Index = () => {
       createdAt: existingMemoir?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       media: finalMedia,
+      titleVisible,
+      categories
     }
 
     try {
@@ -229,7 +215,7 @@ const Index = () => {
   }
 
   const handleRecordingComplete = async (audioPath: string) => {
-    console.log('Recording saved to:', audioPath)
+    // console.log('Recording saved to:', audioPath)
 
     const player = createAudioPlayer({ uri: audioPath })
 
@@ -254,7 +240,7 @@ const Index = () => {
       duration,
     }
 
-    console.log('New audio added:', newAudio)
+    // console.log('New audio added:', newAudio)
 
     setMedia((prev) => [...prev, newAudio])
   }
@@ -284,6 +270,7 @@ const Index = () => {
       }
     })
   }, [])
+
 
   return (
     <SafeAreaView
@@ -406,8 +393,9 @@ const Index = () => {
             <>
               <Input
                 ref={titleInputRef}
-                defaultValue={initialTitle}
+                value={title}
                 onChangeText={(text) => {
+                  setTitle(text)
                   titleRef.current = text
                 }}
                 // autoFocus

@@ -1,3 +1,5 @@
+import { Category } from '@/db/schema'
+import { MediaAsset } from '@/types/media'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -32,4 +34,24 @@ export function formatDurationWithDecimals(ms?: number) {
   return `${minutes}:${seconds.toString().padStart(2, '0')}.${centiseconds
     .toString()
     .padStart(2, '0')}`
+}
+
+export function deriveCategories(title: string, content: string, media: MediaAsset[]) {
+  const categories: Category[] = []
+
+  if (title?.trim() || content?.trim()) {
+    categories.push('text')
+  }
+
+  if (media.some(m => m.type === 'image')) {
+    categories.push('photo')
+  }
+  if (media.some(m => m.type === 'video')) {
+    categories.push('video')
+  }
+  if (media.some(m => m.type === 'audio')) {
+    categories.push('audio')
+  }
+
+  return categories
 }

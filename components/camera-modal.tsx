@@ -16,6 +16,7 @@ import { Button } from './ui/button'
 import { RefreshCcw } from 'lucide-react-native'
 import MediaPreview from './media-preview'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { toast, Toaster } from 'sonner-native'
 
 type CameraModalProps = {
   onClose?: () => void
@@ -92,6 +93,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
         }
       } catch (err) {
         console.warn('Error recording video:', err)
+        toast.error('Failed to record video. Please try again.')
       } finally {
         recordingRef.current = false
         isRecording.value = false
@@ -252,6 +254,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
                   </Button>
                 </View>
               </View>
+              <Toaster />
             </CameraView>
           )}
         </View>

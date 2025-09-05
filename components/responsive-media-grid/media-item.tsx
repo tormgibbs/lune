@@ -1,11 +1,12 @@
 import { cn, formatDuration } from '@/lib/utils'
 import { MediaAsset } from '@/types/media'
 import { Image } from 'expo-image'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import AudioWavePlayer from '../audio-wave-player'
 import { Button } from '../ui/button'
 import { X } from 'lucide-react-native'
 import { useMediaGrid } from './media-grid-context'
+import Animated, { JumpingTransition, LinearTransition } from 'react-native-reanimated'
 
 interface MediaItemProps {
   media: MediaAsset
@@ -23,9 +24,8 @@ const MediaItem = ({
   aspect = 1,
   radius = 7,
   fill = false,
-  children
+  children,
 }: MediaItemProps) => {
-
   const { editable, onDeletePress } = useMediaGrid()
 
   const containerStyle = [
@@ -81,10 +81,20 @@ const MediaItem = ({
             <X color="white" size={media.type === 'audio' ? 10 : 15} />
           </Button>
         )}
-
       </View>
     </Pressable>
   )
 }
 
 export default MediaItem
+
+export const AnimatedItem: React.FC<{
+  children: React.ReactNode
+  className?: string
+}> = ({ children, className }) => {
+  return (
+    <Animated.View  layout={LinearTransition} className={cn('flex-1', className)}>
+      {children}
+    </Animated.View>
+  )
+}

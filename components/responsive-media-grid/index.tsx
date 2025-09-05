@@ -30,9 +30,9 @@ const ResponsiveMediaGrid: React.FC<ResponsiveMediaGridProps> = ({
   const radius = 7
   const gap = 2
 
-  if (mode === 'preview' && count >= 6 && !expanded) {
-    return (
-      <MediaGridProvider value={{ editable, onDeletePress }}>
+  return (
+    <MediaGridProvider value={{ editable, onDeletePress }}>
+      {mode === 'preview' && count >= 6 && !expanded ? (
         <View style={{ flexDirection: 'row', gap }}>
           <MediaItem
             media={media[0]}
@@ -76,377 +76,373 @@ const ResponsiveMediaGrid: React.FC<ResponsiveMediaGridProps> = ({
             </View>
           </View>
         </View>
-      </MediaGridProvider>
-    )
-  }
-
-  return (
-    <MediaGridProvider value={{ editable, onDeletePress }}>
-      {count === 1 && (
-        <MediaItem
-          media={media[0]}
-          onPress={() => onMediaPress(0)}
-          onDeletePress={onDeletePress}
-          aspect={2}
-          radius={radius}
-        />
-      )}
-
-      {count === 2 && (
-        <View style={{ flexDirection: 'row', gap }}>
-          {media.map((item, idx) => (
+      ) : (
+        <>
+          {count === 1 && (
             <MediaItem
-              key={item.id}
-              media={item}
-              onPress={() => onMediaPress(idx)}
+              media={media[0]}
+              onPress={() => onMediaPress(0)}
               onDeletePress={onDeletePress}
-              aspect={1}
+              aspect={2}
               radius={radius}
             />
-          ))}
-        </View>
-      )}
+          )}
 
-      {count === 3 && (
-        <View style={{ flexDirection: 'row', gap }}>
-          {/* Left big */}
+          {count === 2 && (
+            <View style={{ flexDirection: 'row', gap }}>
+              {media.map((item, idx) => (
+                <MediaItem
+                  key={item.id}
+                  media={item}
+                  onPress={() => onMediaPress(idx)}
+                  onDeletePress={onDeletePress}
+                  aspect={1}
+                  radius={radius}
+                />
+              ))}
+            </View>
+          )}
 
-          <MediaItem
-            media={media[0]}
-            onPress={() => onMediaPress(0)}
-            onDeletePress={onDeletePress}
-            aspect={1}
-            radius={radius}
-          />
-
-          {/* Right stacked */}
-          <View style={{ flex: 1, flexDirection: 'column', gap }}>
-            {media.slice(1, 3).map((item, idx) => (
+          {count === 3 && (
+            <View style={{ flexDirection: 'row', gap }}>
               <MediaItem
-                key={item.id}
-                media={item}
-                onPress={() => onMediaPress(idx + 1)}
+                media={media[0]}
+                onPress={() => onMediaPress(0)}
                 onDeletePress={onDeletePress}
                 aspect={1}
-                fill
                 radius={radius}
               />
-            ))}
-          </View>
-        </View>
-      )}
 
-      {count === 4 && (
-        <View style={{ flexDirection: 'row', gap }}>
-          {/* Left big */}
-          <MediaItem
-            media={media[0]}
-            onPress={() => onMediaPress(0)}
-            onDeletePress={onDeletePress}
-            aspect={1}
-            radius={radius}
-          />
+              {/* Right stacked */}
+              <View style={{ flex: 1, flexDirection: 'column', gap }}>
+                {media.slice(1, 3).map((item, idx) => (
+                  <MediaItem
+                    key={item.id}
+                    media={item}
+                    onPress={() => onMediaPress(idx + 1)}
+                    onDeletePress={onDeletePress}
+                    aspect={1}
+                    fill
+                    radius={radius}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
 
-          {/* Right column */}
-          <View style={{ flex: 1, flexDirection: 'column', gap }}>
-            {/* Top full-width */}
-            <MediaItem
-              media={media[1]}
-              onPress={() => onMediaPress(1)}
-              onDeletePress={onDeletePress}
-              fill
-              radius={radius}
-            />
+          {count === 4 && (
+            <View style={{ flexDirection: 'row', gap }}>
+              {/* Left big */}
+              <MediaItem
+                media={media[0]}
+                onPress={() => onMediaPress(0)}
+                onDeletePress={onDeletePress}
+                aspect={1}
+                radius={radius}
+              />
 
-            {/* Bottom row split into two */}
-            <View style={{ flexDirection: 'row', gap, flex: 1 }}>
-              {media.slice(2, 4).map((item, idx) => (
+              {/* Right column */}
+              <View style={{ flex: 1, flexDirection: 'column', gap }}>
+                {/* Top full-width */}
                 <MediaItem
-                  key={item.id}
-                  media={item}
-                  onPress={() => onMediaPress(idx + 2)}
+                  media={media[1]}
+                  onPress={() => onMediaPress(1)}
                   onDeletePress={onDeletePress}
                   fill
                   radius={radius}
                 />
-              ))}
+
+                {/* Bottom row split into two */}
+                <View style={{ flexDirection: 'row', gap, flex: 1 }}>
+                  {media.slice(2, 4).map((item, idx) => (
+                    <MediaItem
+                      key={item.id}
+                      media={item}
+                      onPress={() => onMediaPress(idx + 2)}
+                      onDeletePress={onDeletePress}
+                      fill
+                      radius={radius}
+                    />
+                  ))}
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
-      )}
+          )}
 
-      {count === 5 && (
-        <View style={{ flexDirection: 'row', gap }}>
-          {/* Left big */}
-          <MediaItem
-            media={media[0]}
-            onPress={() => onMediaPress(0)}
-            onDeletePress={onDeletePress}
-            aspect={1}
-            radius={radius}
-          />
+          {count === 5 && (
+            <View style={{ flexDirection: 'row', gap }}>
+              {/* Left big */}
+              <MediaItem
+                media={media[0]}
+                onPress={() => onMediaPress(0)}
+                onDeletePress={onDeletePress}
+                aspect={1}
+                radius={radius}
+              />
 
-          {/* Right column */}
-          <View style={{ flex: 1, flexDirection: 'column', gap }}>
-            {/* Top row split */}
-            <View style={{ flexDirection: 'row', gap, flex: 1 }}>
-              {media.slice(1, 3).map((item, idx) => (
-                <MediaItem
-                  key={item.id}
-                  media={item}
-                  onPress={() => onMediaPress(idx + 1)}
-                  onDeletePress={onDeletePress}
-                  fill
-                  radius={radius}
-                />
-              ))}
+              {/* Right column */}
+              <View style={{ flex: 1, flexDirection: 'column', gap }}>
+                {/* Top row split */}
+                <View style={{ flexDirection: 'row', gap, flex: 1 }}>
+                  {media.slice(1, 3).map((item, idx) => (
+                    <MediaItem
+                      key={item.id}
+                      media={item}
+                      onPress={() => onMediaPress(idx + 1)}
+                      onDeletePress={onDeletePress}
+                      fill
+                      radius={radius}
+                    />
+                  ))}
+                </View>
+
+                {/* Bottom row split */}
+                <View style={{ flexDirection: 'row', gap, flex: 1 }}>
+                  {media.slice(3, 5).map((item, idx) => (
+                    <MediaItem
+                      key={item.id}
+                      media={item}
+                      onPress={() => onMediaPress(idx + 3)}
+                      onDeletePress={onDeletePress}
+                      fill
+                      radius={radius}
+                    />
+                  ))}
+                </View>
+              </View>
             </View>
+          )}
 
-            {/* Bottom row split */}
-            <View style={{ flexDirection: 'row', gap, flex: 1 }}>
-              {media.slice(3, 5).map((item, idx) => (
-                <MediaItem
-                  key={item.id}
-                  media={item}
-                  onPress={() => onMediaPress(idx + 3)}
-                  onDeletePress={onDeletePress}
-                  fill
-                  radius={radius}
-                />
-              ))}
-            </View>
-          </View>
-        </View>
-      )}
-
-      {count === 6 && (
-        <View style={{ flexDirection: 'column', gap }}>
-          <BaseFiveLayout
-            media={media}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
-          <MediaItem
-            media={media[5]}
-            onPress={() => onMediaPress(5)}
-            onDeletePress={onDeletePress}
-            aspect={2}
-            radius={radius}
-          />
-        </View>
-      )}
-
-      {count === 7 && (
-        <View style={{ flexDirection: 'column', gap }}>
-          <BaseFiveLayout
-            media={media}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
-          <TwoSideBySide
-            media={media}
-            start={5}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
-        </View>
-      )}
-
-      {count === 8 && (
-        <View style={{ flexDirection: 'column', gap }}>
-          <BaseFiveLayout
-            media={media}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
-
-          <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
-            <TwoStacked
-              media={media}
-              start={5}
-              onMediaPress={onMediaPress}
-              onDeletePress={onDeletePress}
-              radius={radius}
-            />
-            <MediaItem
-              media={media[7]}
-              onPress={() => onMediaPress(7)}
-              onDeletePress={onDeletePress}
-              fill
-              radius={radius}
-            />
-          </View>
-        </View>
-      )}
-
-      {count === 9 && (
-        <View style={{ flexDirection: 'column', gap }}>
-          <BaseFiveLayout
-            media={media}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
-
-          {/* Row 2 = left (stack: 1 + 2), right (single) */}
-          <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
-            {/* Left half */}
-            <View style={{ flex: 1, flexDirection: 'column', gap }}>
-              {/* Top single */}
+          {count === 6 && (
+            <View style={{ flexDirection: 'column', gap }}>
+              <BaseFiveLayout
+                media={media}
+                onMediaPress={onMediaPress}
+                onDeletePress={onDeletePress}
+                radius={radius}
+              />
               <MediaItem
                 media={media[5]}
                 onPress={() => onMediaPress(5)}
                 onDeletePress={onDeletePress}
-                fill
+                aspect={2}
                 radius={radius}
               />
-              {/* Bottom two side-by-side */}
+            </View>
+          )}
+
+          {count === 7 && (
+            <View style={{ flexDirection: 'column', gap }}>
+              <BaseFiveLayout
+                media={media}
+                onMediaPress={onMediaPress}
+                onDeletePress={onDeletePress}
+                radius={radius}
+              />
               <TwoSideBySide
                 media={media}
-                start={6}
+                start={5}
                 onMediaPress={onMediaPress}
                 onDeletePress={onDeletePress}
                 radius={radius}
               />
             </View>
+          )}
 
-            {/* Right half = single full */}
-            <MediaItem
-              media={media[8]}
-              onPress={() => onMediaPress(8)}
-              onDeletePress={onDeletePress}
-              fill
-              radius={radius}
-            />
-          </View>
-        </View>
-      )}
+          {count === 8 && (
+            <View style={{ flexDirection: 'column', gap }}>
+              <BaseFiveLayout
+                media={media}
+                onMediaPress={onMediaPress}
+                onDeletePress={onDeletePress}
+                radius={radius}
+              />
 
-      {count === 10 && (
-        <View style={{ flexDirection: 'column', gap }}>
-          {/* Row 1 = 5-item layout */}
-          <BaseFiveLayout
-            media={media}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
+              <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
+                <TwoStacked
+                  media={media}
+                  start={5}
+                  onMediaPress={onMediaPress}
+                  onDeletePress={onDeletePress}
+                  radius={radius}
+                />
+                <MediaItem
+                  media={media[7]}
+                  onPress={() => onMediaPress(7)}
+                  onDeletePress={onDeletePress}
+                  fill
+                  radius={radius}
+                />
+              </View>
+            </View>
+          )}
 
-          {/* Row 2 = left 2x2 grid, right full */}
-          <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
-            {/* Left 2x2 grid */}
-            <TwoByTwoGrid
-              media={media}
-              start={5}
-              onMediaPress={onMediaPress}
-              onDeletePress={onDeletePress}
-              radius={radius}
-            />
+          {count === 9 && (
+            <View style={{ flexDirection: 'column', gap }}>
+              <BaseFiveLayout
+                media={media}
+                onMediaPress={onMediaPress}
+                onDeletePress={onDeletePress}
+                radius={radius}
+              />
 
-            {/* Right full single */}
-            <MediaItem
-              media={media[9]}
-              onPress={() => onMediaPress(9)}
-              onDeletePress={onDeletePress}
-              fill
-              radius={radius}
-            />
-          </View>
-        </View>
-      )}
+              {/* Row 2 = left (stack: 1 + 2), right (single) */}
+              <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
+                {/* Left half */}
+                <View style={{ flex: 1, flexDirection: 'column', gap }}>
+                  {/* Top single */}
+                  <MediaItem
+                    media={media[5]}
+                    onPress={() => onMediaPress(5)}
+                    onDeletePress={onDeletePress}
+                    fill
+                    radius={radius}
+                  />
+                  {/* Bottom two side-by-side */}
+                  <TwoSideBySide
+                    media={media}
+                    start={6}
+                    onMediaPress={onMediaPress}
+                    onDeletePress={onDeletePress}
+                    radius={radius}
+                  />
+                </View>
 
-      {count === 11 && (
-        <View style={{ flexDirection: 'column', gap }}>
-          <BaseFiveLayout
-            media={media}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
+                {/* Right half = single full */}
+                <MediaItem
+                  media={media[8]}
+                  onPress={() => onMediaPress(8)}
+                  onDeletePress={onDeletePress}
+                  fill
+                  radius={radius}
+                />
+              </View>
+            </View>
+          )}
 
-          {/* 2x2 grid */}
-          <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
-            {/* Left 2x2 grid */}
-            <TwoByTwoGrid
-              media={media}
-              start={5}
-              onMediaPress={onMediaPress}
-              onDeletePress={onDeletePress}
-              radius={radius}
-            />
+          {count === 10 && (
+            <View style={{ flexDirection: 'column', gap }}>
+              {/* Row 1 = 5-item layout */}
+              <BaseFiveLayout
+                media={media}
+                onMediaPress={onMediaPress}
+                onDeletePress={onDeletePress}
+                radius={radius}
+              />
 
-            {/* Right stacked */}
-            <TwoStacked
-              media={media}
-              start={9}
-              onMediaPress={onMediaPress}
-              onDeletePress={onDeletePress}
-              radius={radius}
-            />
-          </View>
-        </View>
-      )}
+              {/* Row 2 = left 2x2 grid, right full */}
+              <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
+                {/* Left 2x2 grid */}
+                <TwoByTwoGrid
+                  media={media}
+                  start={5}
+                  onMediaPress={onMediaPress}
+                  onDeletePress={onDeletePress}
+                  radius={radius}
+                />
 
-      {count === 12 && (
-        <View style={{ flexDirection: 'column', gap: 2 }}>
-          <BaseFiveLayout
-            media={media}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
+                {/* Right full single */}
+                <MediaItem
+                  media={media[9]}
+                  onPress={() => onMediaPress(9)}
+                  onDeletePress={onDeletePress}
+                  fill
+                  radius={radius}
+                />
+              </View>
+            </View>
+          )}
 
-          <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
-            <TwoByTwoGrid
-              media={media}
-              start={5}
-              onMediaPress={onMediaPress}
-              onDeletePress={onDeletePress}
-              radius={radius}
-            />
+          {count === 11 && (
+            <View style={{ flexDirection: 'column', gap }}>
+              <BaseFiveLayout
+                media={media}
+                onMediaPress={onMediaPress}
+                onDeletePress={onDeletePress}
+                radius={radius}
+              />
 
-            <TwoByTwoGrid
-              media={media}
-              start={9}
-              onMediaPress={onMediaPress}
-              onDeletePress={onDeletePress}
-              radius={radius}
-            />
-          </View>
-        </View>
-      )}
+              {/* 2x2 grid */}
+              <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
+                {/* Left 2x2 grid */}
+                <TwoByTwoGrid
+                  media={media}
+                  start={5}
+                  onMediaPress={onMediaPress}
+                  onDeletePress={onDeletePress}
+                  radius={radius}
+                />
 
-      {count === 13 && (
-        <View style={{ flexDirection: 'column', gap: 2 }}>
-          <BaseFiveLayout
-            media={media}
-            onMediaPress={onMediaPress}
-            onDeletePress={onDeletePress}
-            radius={radius}
-          />
+                {/* Right stacked */}
+                <TwoStacked
+                  media={media}
+                  start={9}
+                  onMediaPress={onMediaPress}
+                  onDeletePress={onDeletePress}
+                  radius={radius}
+                />
+              </View>
+            </View>
+          )}
 
-          <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
-            <TwoByTwoGrid
-              media={media}
-              start={5}
-              onMediaPress={onMediaPress}
-              onDeletePress={onDeletePress}
-              radius={radius}
-            />
+          {count === 12 && (
+            <View style={{ flexDirection: 'column', gap: 2 }}>
+              <BaseFiveLayout
+                media={media}
+                onMediaPress={onMediaPress}
+                onDeletePress={onDeletePress}
+                radius={radius}
+              />
 
-            <TwoByTwoGrid
-              media={media}
-              start={9}
-              onMediaPress={onMediaPress}
-              onDeletePress={onDeletePress}
-              radius={radius}
-            />
-          </View>
-        </View>
+              <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
+                <TwoByTwoGrid
+                  media={media}
+                  start={5}
+                  onMediaPress={onMediaPress}
+                  onDeletePress={onDeletePress}
+                  radius={radius}
+                />
+
+                <TwoByTwoGrid
+                  media={media}
+                  start={9}
+                  onMediaPress={onMediaPress}
+                  onDeletePress={onDeletePress}
+                  radius={radius}
+                />
+              </View>
+            </View>
+          )}
+
+          {count === 13 && (
+            <View style={{ flexDirection: 'column', gap: 2 }}>
+              <BaseFiveLayout
+                media={media}
+                onMediaPress={onMediaPress}
+                onDeletePress={onDeletePress}
+                radius={radius}
+              />
+
+              <View style={{ flexDirection: 'row', gap, aspectRatio: 2 }}>
+                <TwoByTwoGrid
+                  media={media}
+                  start={5}
+                  onMediaPress={onMediaPress}
+                  onDeletePress={onDeletePress}
+                  radius={radius}
+                />
+
+                <TwoByTwoGrid
+                  media={media}
+                  start={9}
+                  onMediaPress={onMediaPress}
+                  onDeletePress={onDeletePress}
+                  radius={radius}
+                />
+              </View>
+            </View>
+          )}
+        </>
       )}
     </MediaGridProvider>
   )

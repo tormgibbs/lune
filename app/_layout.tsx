@@ -18,6 +18,7 @@ import * as React from 'react'
 import { Appearance, Platform } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
+import { Toaster } from 'sonner-native'
 
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import migrations from '@/drizzle/migrations'
@@ -112,8 +113,9 @@ export default function RootLayout() {
                 }}
               />
             </Stack>
+            {/* <Toaster /> */}
+            <PortalHost name="root-host" />
           </ThemeProvider>
-          <PortalHost name="root-host" />
         </KeyboardProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

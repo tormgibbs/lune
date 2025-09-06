@@ -190,6 +190,21 @@ const Index = () => {
 
   const titleInputRef = useRef<TextInput>(null)
 
+  const handleMediaPress = (index: number) => {
+    const memoir = useMemoirStore.getState().memoirs.find((m) => m.id === id)
+    if (!memoir) return
+
+    useMemoirStore.getState().update({
+      id,
+      media: [...(memoir.media ?? []), ...media],
+    })
+
+    router.push({
+      pathname: '/memoirs/[id]/media',
+      params: { id, mediaIndex: index.toString() },
+    })
+  }
+
   const handleDone = () => {
     // headerRef.current?.closePopover()
     saveMemoir()
@@ -373,14 +388,6 @@ const Index = () => {
         />
       </Lazy>
 
-      <BottomSheetModal
-      // ref={formattingSheetRef}
-      >
-        <BottomSheetView>
-          <Text>Text Formatting Options</Text>
-        </BottomSheetView>
-      </BottomSheetModal>
-
       <Lazy>
         <MediaPager
           media={media}
@@ -395,7 +402,7 @@ const Index = () => {
           <Lazy>
             <ResponsiveMediaGrid
               media={media}
-              onMediaPress={openViewer}
+              onMediaPress={handleMediaPress}
               onDeletePress={removeMedia}
             />
           </Lazy>

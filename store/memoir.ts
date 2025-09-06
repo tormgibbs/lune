@@ -38,7 +38,6 @@ const computeSearchResults = (
   })
 }
 
-
 export const useMemoirStore = create<MemoirStore>((set, get) => ({
   memoirs: [],
   searchQuery: '',
@@ -128,5 +127,19 @@ function toMemoir(m: MemoirInsert): Memoir {
     media: (m.media ?? []).map((asset) => ({ ...asset, persisted: true })),
     titleVisible: m.titleVisible ?? true,
     categories: m.categories ?? null,
+  }
+}
+
+export function createBlankMemoir(id: string, date: string): MemoirInsert {
+  return {
+    id,
+    title: '',
+    content: '',
+    media: [],
+    date,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    titleVisible: true,
+    categories: [],
   }
 }

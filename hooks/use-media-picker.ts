@@ -2,6 +2,7 @@ import { useState } from 'react'
 import * as ImagePicker from 'expo-image-picker'
 import { MediaAsset } from '../types/media'
 import { Alert } from 'react-native'
+import { useMemoirStore } from '@/store/memoir'
 
 export const useMediaPicker = (
   initialMedia: MediaAsset[] = [],
@@ -32,9 +33,8 @@ export const useMediaPicker = (
             },
           ],
         )
-        return prev // don’t change now, wait for alert action
+        return prev
       }
-      // still under limit → append safely
       const combined = [...prev, ...newAssets]
       return combined.slice(0, maxSelection)
     })
@@ -67,8 +67,6 @@ export const useMediaPicker = (
         }
 
         addMedia(newAssets)
-
-        // setMedia((prev) => [...prev, ...newAssets])
       }
     } catch (error) {
       console.error('Error picking media:', error)

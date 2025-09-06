@@ -5,7 +5,7 @@ import { router } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRef } from 'react'
 import { nanoid } from 'nanoid'
-import { useMemoirStore } from '@/store/memoir'
+import { createBlankMemoir, useMemoirStore } from '@/store/memoir'
 import EmptyState from '@/components/empty-state'
 import { FlashList } from '@shopify/flash-list'
 import MemoirItem from '@/components/memoir-item'
@@ -36,10 +36,17 @@ export default function Index() {
   const handleNewEntryPress = () => {
     const id = nanoid(8)
     const today = dayjs().format('YYYY-MM-DD')
+
+    useMemoirStore.getState().add(createBlankMemoir(id, today))
+
     router.navigate({
       pathname: '/memoirs/[id]',
       params: { id, date: today },
     })
+
+    // setTimeout(() => {
+    //   useMemoirStore.getState().add(createBlankMemoir(id, today))
+    // }, 500)
   }
 
   return (
@@ -64,10 +71,12 @@ export default function Index() {
                 memoir={item}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onMediaPress={(mediaIndex) => router.push({
-                  pathname: '/memoirs/[id]/media',
-                  params: { id: item.id, mediaIndex },
-                })}
+                onMediaPress={(mediaIndex) =>
+                  router.push({
+                    pathname: '/memoirs/[id]/media',
+                    params: { id: item.id, mediaIndex },
+                  })
+                }
               />
             )}
             keyExtractor={(item) => item.id}

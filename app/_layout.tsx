@@ -18,7 +18,6 @@ import * as React from 'react'
 import { Appearance, Platform } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
-import { Toaster } from 'sonner-native'
 
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import migrations from '@/drizzle/migrations'
@@ -26,6 +25,8 @@ import { db } from '@/db'
 
 import { useMemoirStore } from '@/store/memoir'
 import { getAllMemoirs } from '@/db/memoir'
+
+
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,

@@ -32,6 +32,7 @@ import { addMemoir, deleteMemoir, updateMemoir } from '@/db/memoir'
 import Lazy from '@/components/lazy'
 import { deleteMediaFiles, persistMediaAsset } from '@/lib/media'
 import ResponsiveMediaGrid from '@/components/responsive-media-grid'
+import { useMemoirActions } from '@/hooks/use-memoir-actions'
 
 const Index = () => {
   const router = useRouter()
@@ -69,9 +70,11 @@ const Index = () => {
     return today
   }, [date, existingMemoir?.date, today])
 
-  const { media, pickMedia, removeMedia, setMedia, addMedia } = useMediaPicker(
+  const { media, pickMedia, removeMedia, addMedia } = useMediaPicker(
     existingMemoir?.media ?? [],
   )
+
+  const { handleDelete: deleteMemoir } = useMemoirActions()
 
   const {
     visible: viewerVisible,
@@ -204,9 +207,15 @@ const Index = () => {
     await KeyboardController.dismiss()
   }
 
-  const handleDelete = () => {
-    // headerRef.current?.closePopover()
-    console.log('Delete action')
+  const handleDelete = async () => {
+    try {
+      if (existingMemoir) {
+        await deleteMemoir(id)
+      }
+      router.back()
+    } catch (err) {
+      console.error('Failed to delete memoir:', err)
+    }
   }
 
   function normalizeUri(path: string): string {

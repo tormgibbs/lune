@@ -68,7 +68,7 @@ const AudioPlayer = ({ audio, width, height, isActive }: AudioPlayerProps) => {
   return (
     <View
       className="flex-1 relative bg-[#E8E6D9] justify-center items-center"
-      style={{ width, height }}>
+    >
       <View className="absolute w-[90%] flex-row bg-transparent p-4 rounded-lg items-center justify-center">
         <Waveform
           mode="static"

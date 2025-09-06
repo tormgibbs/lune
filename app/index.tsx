@@ -10,16 +10,11 @@ import EmptyState from '@/components/empty-state'
 import { FlashList } from '@shopify/flash-list'
 import MemoirItem from '@/components/memoir-item'
 import { View } from 'react-native'
-import { deleteMemoir } from '@/db/memoir'
 import dayjs from 'dayjs'
-import { deleteMediaFiles } from '@/lib/media'
-import * as FileSystem from 'expo-file-system'
 import { useMemoirActions } from '@/hooks/use-memoir-actions'
-
 
 export default function Index() {
   const memoirs = useMemoirStore((s) => s.memoirs)
-  const remove = useMemoirStore((s) => s.remove)
   const headerRef = useRef<{ closePopover: () => void }>(null)
   const { handleEdit, handleDelete } = useMemoirActions()
 
@@ -38,16 +33,7 @@ export default function Index() {
     console.log('Preferences action')
   }
 
-  
-
-  async function debugListMediaFiles() {
-    const dir = `${FileSystem.documentDirectory}media`
-    const files = await FileSystem.readDirectoryAsync(dir)
-    console.log('Persisted files:', JSON.stringify(files, null, 2))
-  }
-
   const handleNewEntryPress = () => {
-    // debugListMediaFiles()
     const id = nanoid(8)
     const today = dayjs().format('YYYY-MM-DD')
     router.navigate({
@@ -56,30 +42,8 @@ export default function Index() {
     })
   }
 
-  // const handleDelete = async (id: string) => {
-  //   try {
-  //     const memoir = useMemoirStore.getState().memoirs.find((m) => m.id === id)
-
-  //     await deleteMediaFiles(memoir?.media)
-
-  //     await deleteMemoir(id)
-  //     remove(id)
-  //   } catch (err) {
-  //     console.error('Failed to delete memoir:', err)
-  //   }
-  // }
-
-  // const handleEdit = (id: string) => {
-  //   // memoirItemRef.current?.closePopover()
-  //   router.push(`/memoirs/${id}`)
-  // }
-
-  console.log('Memoirs:', JSON.stringify(memoirs, null, 2))
-
   return (
     <SafeAreaView className="relative bg-[#F5F4EF] flex-1 items-center">
-      {/* <PortalHost name='root-secondary-host'/> */}
-      {/* Header */}
       <View className="px-4 pt-4">
         <Header
           ref={headerRef}
@@ -89,7 +53,6 @@ export default function Index() {
         />
       </View>
 
-      {/* Center */}
       {memoirs.length === 0 ? (
         <EmptyState />
       ) : (
@@ -101,9 +64,12 @@ export default function Index() {
                 memoir={item}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onMediaPress={(mediaIndex) => router.push({
+                  pathname: '/memoirs/[id]/media',
+                  params: { id: item.id, mediaIndex },
+                })}
               />
             )}
-            
             keyExtractor={(item) => item.id}
             ItemSeparatorComponent={() => <View className="h-4" />}
             contentContainerStyle={{ zIndex: -1, paddingBottom: 50 }}
@@ -111,7 +77,6 @@ export default function Index() {
         </View>
       )}
 
-      {/* FAB */}
       <FloatingActionButton onPress={handleNewEntryPress} />
     </SafeAreaView>
   )

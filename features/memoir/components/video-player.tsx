@@ -1,5 +1,5 @@
-import { View } from 'react-native'
-import React, { useEffect } from 'react'
+import { View, StyleSheet } from 'react-native'
+import { useEffect } from 'react'
 import { useVideoPlayer, VideoView } from 'expo-video'
 
 interface VideoPlayerProps {
@@ -30,10 +30,9 @@ const VideoPlayer = ({ uri, isActive, width, height }: VideoPlayerProps) => {
   return (
     <View
       className="flex-1 bg-black justify-center items-center"
-      // style={{ flex: 1, backgroundColor: 'black', justifyContent: 'center' }}
     >
       <VideoView
-        style={{ width, height }}
+        style={styles.video}
         player={player}
         allowsFullscreen
         allowsPictureInPicture
@@ -41,5 +40,12 @@ const VideoPlayer = ({ uri, isActive, width, height }: VideoPlayerProps) => {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  video: {
+    width: '100%',
+    height: '100%',
+  }
+})
 
 export default VideoPlayer

@@ -93,7 +93,11 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
         }
       } catch (err) {
         console.warn('Error recording video:', err)
-        toast.error('Failed to record video. Please try again.')
+        toast.error('Failed to record video. Please try again.', {
+          id: 'camera-toast',
+          position: 'bottom-center',
+          invert: true,
+        })
       } finally {
         recordingRef.current = false
         isRecording.value = false
@@ -254,7 +258,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
                   </Button>
                 </View>
               </View>
-              <Toaster />
+              <Toaster offset={80} swipeToDismissDirection='left'/>
             </CameraView>
           )}
         </View>

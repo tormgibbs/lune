@@ -23,51 +23,21 @@ const computeSearchResults = (
 ): Memoir[] => {
   const q = searchQuery.toLowerCase().trim()
 
-  // if nothing typed and no category → no results
   if (!q && !category) return []
 
   return memoirs.filter((m) => {
-    // query match (true if no query)
     const matchesQuery =
       !q ||
       (m.title ?? '').toLowerCase().includes(q) ||
       (m.content ?? '').toLowerCase().includes(q) ||
       (m.date ?? '').toLowerCase().includes(q)
 
-    // category match (true if no category)
     const matchesCategory = !category || (m.categories ?? []).includes(category)
 
     return matchesQuery && matchesCategory
   })
 }
 
-// const computeSearchResults = (
-//   memoirs: Memoir[],
-//   searchQuery: string,
-//   category: Category | null,
-// ): Memoir[] => {
-//   const q = searchQuery.toLowerCase().trim()
-
-//   return memoirs.filter((m) => {
-//     // text search
-//     // const matchesQuery =
-//     //   !q ||
-//     //   (m.title ?? '').toLowerCase().includes(q) ||
-//     //   (m.content ?? '').toLowerCase().includes(q) ||
-//     //   (m.date ?? '').toLowerCase().includes(q)
-
-//     const matchesQuery =
-//       q.length > 0 &&
-//       ((m.title ?? '').toLowerCase().includes(q) ||
-//         (m.content ?? '').toLowerCase().includes(q) ||
-//         (m.date ?? '').toLowerCase().includes(q))
-
-//     // category filter
-//     const matchesCategory = !category || (m.categories ?? []).includes(category)
-
-//     return matchesQuery && matchesCategory
-//   })
-// }
 
 export const useMemoirStore = create<MemoirStore>((set, get) => ({
   memoirs: [],

@@ -25,6 +25,7 @@ interface MemoirItemProps {
   memoir: Memoir
   onDelete?: (id: string) => void
   onEdit?: (id: string) => void
+  onMediaPress: (mediaIndex: number) => void
 }
 
 const customHTMLElementModels = {
@@ -118,7 +119,7 @@ const cleanHtml = (html: string) => {
     .trim()
 }
 
-const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
+const MemoirItem = ({ memoir, onDelete, onEdit, onMediaPress }: MemoirItemProps) => {
   const width = useWindowDimensions().width - 32
   const popoverRef = useRef<ComponentRef<typeof PopoverTrigger>>(null)
   const swipeableRef = useRef<ComponentRef<typeof Swipeable>>(null)
@@ -153,7 +154,7 @@ const MemoirItem = ({ memoir, onDelete, onEdit }: MemoirItemProps) => {
             media={memoir.media ?? []}
             editable={false}
             mode='preview'
-            onMediaPress={() => {}}
+            onMediaPress={onMediaPress}
           />
           <View
             className={cn(memoir.title || memoir.content ? 'py-2' : 'py-0')}>

@@ -19,6 +19,13 @@ export default function Index() {
   const headerRef = useRef<{ closePopover: () => void }>(null)
   const { handleEdit, handleDelete } = useMemoirActions()
 
+  const visibleMemoirs = memoirs.filter(
+    (m) =>
+      (m.title && m.titleVisible) ||
+      (m.content && m.content.trim() !== '') ||
+      (m.media && m.media.length > 0),
+  )
+
   const handleBackupSyncPress = () => {
     headerRef.current?.closePopover()
     console.log('Backup/Sync action')
@@ -42,16 +49,16 @@ export default function Index() {
   }
 
   const handleNewEntryPress = () => {
-    // debugListMediaFiles()
-    const id = nanoid(8)
-    const today = dayjs().format('YYYY-MM-DD')
+    debugListMediaFiles()
+    // const id = nanoid(8)
+    // const today = dayjs().format('YYYY-MM-DD')
 
-    useMemoirStore.getState().add(createBlankMemoir(id, today))
+    // useMemoirStore.getState().add(createBlankMemoir(id, today))
 
-    router.navigate({
-      pathname: '/memoirs/[id]',
-      params: { id, date: today },
-    })
+    // router.navigate({
+    //   pathname: '/memoirs/[id]',
+    //   params: { id, date: today },
+    // })
   }
 
   return (
@@ -65,12 +72,12 @@ export default function Index() {
         />
       </View>
 
-      {memoirs.length === 0 ? (
+      {visibleMemoirs.length === 0 ? (
         <EmptyState />
       ) : (
         <View className="flex-1 w-full">
           <FlashList
-            data={memoirs}
+            data={visibleMemoirs}
             renderItem={({ item }) => (
               <MemoirItem
                 memoir={item}

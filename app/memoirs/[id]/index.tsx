@@ -10,11 +10,11 @@ import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
 import {
   Stack,
-  useFocusEffect,
   useLocalSearchParams,
+  useNavigation,
   useRouter,
 } from 'expo-router'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
@@ -39,18 +39,26 @@ import { useMemoirActions } from '@/hooks/use-memoir-actions'
 
 const Index = () => {
   const router = useRouter()
+  const navigation = useNavigation()
+
   const { id, date } = useLocalSearchParams<{ id: string; date: string }>()
 
   const { memoirs, update, remove } = useMemoirStore()
   const existingMemoir = memoirs.find((m) => m.id === id)
 
-  // const initialTitle = existingMemoir?.title ?? ''
-  const initialContent = existingMemoir?.content ?? ''
+  const titleRef = useRef(existingMemoir?.title ?? '')
+  const contentRef = useRef(existingMemoir?.content ?? '')
+  const titleVisibleRef = useRef(existingMemoir?.titleVisible ?? true)
+  const mediaRef = useRef<MediaAsset[]>([])
 
-  const [title, setTitle] = useState(existingMemoir?.title ?? '')
+  // const initialContent = existingMemoir?.content ?? ''
 
-  const titleRef = useRef(title)
-  const contentRef = useRef(initialContent)
+  const [title, setTitle] = useState(titleRef.current)
+  const [titleVisible, setTitleVisible] = useState(titleVisibleRef.current)
+  const { media, pickMedia, removeMedia, addMedia } = useMediaPicker(id)
+
+  // const titleRef = useRef(title)
+  // const contentRef = useRef(initialContent)
   const doneRef = useRef(false)
 
   const colorPickerSheetRef = useRef<BottomSheetModal>(null)
@@ -63,9 +71,9 @@ const Index = () => {
 
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
-  const [titleVisible, setTitleVisible] = useState(
-    existingMemoir?.titleVisible ?? true,
-  )
+  // const [titleVisible, setTitleVisible] = useState(
+  //   existingMemoir?.titleVisible ?? true,
+  // )
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
 
   const selectedDate = useMemo(() => {
@@ -74,18 +82,19 @@ const Index = () => {
     return today
   }, [date, existingMemoir?.date, today])
 
-  const { media, pickMedia, removeMedia, addMedia } = useMediaPicker(id)
+  // const { media, pickMedia, removeMedia, addMedia } = useMediaPicker(id)
 
   const { handleDelete: deleteMemoir } = useMemoirActions()
 
-  const saveMemoir = useCallback(async () => {
+  const saveMemoir = async () => {
     const title = titleRef.current.trim()
     const content = contentRef.current.trim()
+    const currentMedia = mediaRef.current
 
     const isEmpty =
       (!titleVisible || title.length === 0) &&
       content.length === 0 &&
-      media.length === 0
+      currentMedia.length === 0
 
     if (isEmpty) {
       try {
@@ -98,7 +107,7 @@ const Index = () => {
       return
     }
 
-    const { newMedia, persistedMedia } = media.reduce(
+    const { newMedia, persistedMedia } = currentMedia.reduce(
       (acc, m) => {
         if (m.persisted) acc.persistedMedia.push(m)
         else acc.newMedia.push(m)
@@ -136,16 +145,9 @@ const Index = () => {
     } catch (error) {
       console.error('Failed to save memoir:', error)
     }
-  }, [
-    id,
-    selectedDate,
-    existingMemoir,
-    titleVisible,
-    media,
-    deleteMemoir,
-    remove,
-    update,
-  ])
+  }
+
+  const saveMemoirRef = useRef(saveMemoir)
 
   const handleAudioRecordPress = () => {
     richEditorRef.current?.blurContentEditor()
@@ -206,7 +208,6 @@ const Index = () => {
   }
 
   const handleRecordingComplete = async (audioPath: string) => {
-
     const player = createAudioPlayer({ uri: audioPath })
 
     await new Promise<void>((resolve) => {
@@ -263,21 +264,40 @@ const Index = () => {
     })
   }, [])
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     return () => {
-  //       if (!doneRef.current) {
-  //         ;(async () => {
-  //           try {
-  //             await saveMemoir()
-  //           } catch (err) {
-  //             console.error('Failed to save memoir:', err)
-  //           }
-  //         })()
-  //       }
-  //     }
-  //   }, [saveMemoir]),
-  // )
+  useEffect(() => {
+    titleRef.current = title
+  }, [title])
+
+  useEffect(() => {
+    titleVisibleRef.current = titleVisible
+  }, [titleVisible])
+
+  useEffect(() => {
+    mediaRef.current = media
+  }, [media])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (titleRef.current !== existingMemoir?.title) {
+        update({ id, title: titleRef.current })
+      }
+      if (contentRef.current !== existingMemoir?.content) {
+        update({ id, content: contentRef.current })
+      }
+    }, 300)
+
+    return () => clearInterval(interval)
+  }, [id, update, existingMemoir?.title, existingMemoir?.content])
+
+  saveMemoirRef.current = saveMemoir
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', () => {
+      saveMemoirRef.current()
+    })
+
+    return unsubscribe
+  }, [navigation])
 
   return (
     <SafeAreaView
@@ -402,7 +422,7 @@ const Index = () => {
           <RichEditor
             keyboardDisplayRequiresUserAction={false}
             useContainer={true}
-            initialContentHTML={initialContent}
+            initialContentHTML={contentRef.current}
             onCursorPosition={(scrollY) => {
               scrollRef.current?.scrollTo({ y: scrollY - 30, animated: true })
             }}

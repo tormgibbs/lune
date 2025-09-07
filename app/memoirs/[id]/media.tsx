@@ -51,6 +51,9 @@ const MediaViewer = () => {
 
     const newMedia = [...media]
     newMedia.splice(currentIndex, 1)
+
+    const wasLastItem = newMedia.length === 0
+
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : 0))
     useMemoirStore.getState().update({ id: memoir.id, media: newMedia })
     bottomSheetRef.current?.close()
@@ -70,6 +73,10 @@ const MediaViewer = () => {
 
       router.back()
       return
+    }
+
+    if (wasLastItem) {
+      router.back()
     }
 
     ;(async () => {

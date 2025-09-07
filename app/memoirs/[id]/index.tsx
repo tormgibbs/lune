@@ -6,11 +6,16 @@ import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
 import { deriveCategories, normalizeColor } from '@/lib/utils'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import {
+  Stack,
+  useFocusEffect,
+  useLocalSearchParams,
+  useRouter,
+} from 'expo-router'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { Text, TextInput, View } from 'react-native'
+import { TextInput, View } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import {
   KeyboardAwareScrollView,
@@ -19,18 +24,16 @@ import {
 import { RichEditor } from 'react-native-pell-rich-editor'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMediaPicker } from '@/hooks/use-media-picker'
-import { useMediaViewer } from '@/hooks/use-media-viewer'
-import MediaPager from '@/components/media-pager'
 import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
 import { MediaAsset } from '@/types/media'
 import { createAudioPlayer } from 'expo-audio'
 import CameraModal, { CameraModalRef } from '@/components/camera-modal'
 import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
 import { useMemoirStore } from '@/store/memoir'
-import { Category, MemoirInsert } from '@/db/schema'
-import { addMemoir, deleteMemoir, updateMemoir } from '@/db/memoir'
+import { MemoirInsert } from '@/db/schema'
+import { upsertMemoir } from '@/db/memoir'
 import Lazy from '@/components/lazy'
-import { deleteMediaFiles, persistMediaAsset } from '@/lib/media'
+import { persistMediaAsset } from '@/lib/media'
 import ResponsiveMediaGrid from '@/components/responsive-media-grid'
 import { useMemoirActions } from '@/hooks/use-memoir-actions'
 
@@ -38,7 +41,7 @@ const Index = () => {
   const router = useRouter()
   const { id, date } = useLocalSearchParams<{ id: string; date: string }>()
 
-  const { memoirs, add, update, remove } = useMemoirStore()
+  const { memoirs, update, remove } = useMemoirStore()
   const existingMemoir = memoirs.find((m) => m.id === id)
 
   // const initialTitle = existingMemoir?.title ?? ''
@@ -48,6 +51,7 @@ const Index = () => {
 
   const titleRef = useRef(title)
   const contentRef = useRef(initialContent)
+  const doneRef = useRef(false)
 
   const colorPickerSheetRef = useRef<BottomSheetModal>(null)
   const formattingSheetRef = useRef<BottomSheetModal>(null)
@@ -70,20 +74,11 @@ const Index = () => {
     return today
   }, [date, existingMemoir?.date, today])
 
-  const { media, pickMedia, removeMedia, addMedia } = useMediaPicker(
-    existingMemoir?.media ?? [],
-  )
+  const { media, pickMedia, removeMedia, addMedia } = useMediaPicker(id)
 
   const { handleDelete: deleteMemoir } = useMemoirActions()
 
-  const {
-    visible: viewerVisible,
-    selectedIndex,
-    openViewer,
-    closeViewer,
-  } = useMediaViewer()
-
-  const saveMemoir = async () => {
+  const saveMemoir = useCallback(async () => {
     const title = titleRef.current.trim()
     const content = contentRef.current.trim()
 
@@ -93,23 +88,12 @@ const Index = () => {
       media.length === 0
 
     if (isEmpty) {
-      if (existingMemoir) {
-        try {
-          if (existingMemoir.media && existingMemoir.media.length > 0) {
-            deleteMediaFiles(existingMemoir.media).catch((err) =>
-              console.warn(
-                'Failed to delete media files on memoir delete',
-                err,
-              ),
-            )
-          }
-
-          await deleteMemoir(existingMemoir.id)
-          remove(existingMemoir.id)
-          console.log('Memoir deleted:', existingMemoir.id)
-        } catch (error) {
-          console.error('Failed to delete memoir:', error)
-        }
+      try {
+        await deleteMemoir(id)
+        remove(id)
+        console.log('Memoir deleted:', id)
+      } catch (error) {
+        console.error('Failed to delete memoir:', error)
       }
       return
     }
@@ -145,28 +129,23 @@ const Index = () => {
     }
 
     try {
-      if (existingMemoir) {
-        const removed = (existingMemoir.media ?? []).filter(
-          (old) => !finalMedia.some((m) => m.id === old.id),
-        )
+      await upsertMemoir(memoir)
+      update(memoir)
 
-        if (removed.length > 0) {
-          deleteMediaFiles(removed).catch((err) =>
-            console.warn('Failed to delete removed media', err),
-          )
-        }
-
-        await updateMemoir(id, memoir)
-        update(memoir)
-      } else {
-        await addMemoir(memoir)
-        add(memoir)
-      }
-      console.log('Memoir saved:', JSON.stringify(memoir, null, 2))
+      // console.log('Memoir saved:', JSON.stringify(memoir, null, 2))
     } catch (error) {
       console.error('Failed to save memoir:', error)
     }
-  }
+  }, [
+    id,
+    selectedDate,
+    existingMemoir,
+    titleVisible,
+    media,
+    deleteMemoir,
+    remove,
+    update,
+  ])
 
   const handleAudioRecordPress = () => {
     richEditorRef.current?.blurContentEditor()
@@ -191,14 +170,6 @@ const Index = () => {
   const titleInputRef = useRef<TextInput>(null)
 
   const handleMediaPress = (index: number) => {
-    const memoir = useMemoirStore.getState().memoirs.find((m) => m.id === id)
-    if (!memoir) return
-
-    useMemoirStore.getState().update({
-      id,
-      media: [...(memoir.media ?? []), ...media],
-    })
-
     router.push({
       pathname: '/memoirs/[id]/media',
       params: { id, mediaIndex: index.toString() },
@@ -206,15 +177,12 @@ const Index = () => {
   }
 
   const handleDone = () => {
-    // headerRef.current?.closePopover()
+    doneRef.current = true
     saveMemoir()
     router.back()
   }
 
   const handleEditDate = async () => {
-    // titleInputRef.current?.blur()
-    // richEditorRef.current?.blurContentEditor()
-    // headerRef.current?.closePopover()
     router.push({
       pathname: '/memoirs/[id]/edit-date',
       params: { id, date: selectedDate },
@@ -238,7 +206,6 @@ const Index = () => {
   }
 
   const handleRecordingComplete = async (audioPath: string) => {
-    // console.log('Recording saved to:', audioPath)
 
     const player = createAudioPlayer({ uri: audioPath })
 
@@ -295,6 +262,22 @@ const Index = () => {
       }
     })
   }, [])
+
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     return () => {
+  //       if (!doneRef.current) {
+  //         ;(async () => {
+  //           try {
+  //             await saveMemoir()
+  //           } catch (err) {
+  //             console.error('Failed to save memoir:', err)
+  //           }
+  //         })()
+  //       }
+  //     }
+  //   }, [saveMemoir]),
+  // )
 
   return (
     <SafeAreaView
@@ -385,15 +368,6 @@ const Index = () => {
         <AudioRecorderSheet
           audioSheetRef={audioSheetRef}
           onRecordingComplete={handleRecordingComplete}
-        />
-      </Lazy>
-
-      <Lazy>
-        <MediaPager
-          media={media}
-          visible={viewerVisible}
-          selectedIndex={selectedIndex}
-          onClose={closeViewer}
         />
       </Lazy>
 

@@ -2,7 +2,6 @@ import { db } from '.'
 import { MemoirInsert, memoirs } from './schema'
 import { eq } from 'drizzle-orm'
 
-// Insert
 export async function addMemoir(memoir: MemoirInsert) {
   try {
     return await db.insert(memoirs).values(memoir)
@@ -12,7 +11,6 @@ export async function addMemoir(memoir: MemoirInsert) {
   }
 }
 
-// Update
 export async function updateMemoir(id: string, memoir: Partial<MemoirInsert>) {
   try {
     return await db.update(memoirs).set(memoir).where(eq(memoirs.id, id))
@@ -22,7 +20,6 @@ export async function updateMemoir(id: string, memoir: Partial<MemoirInsert>) {
   }
 }
 
-// Select one
 export async function getMemoirById(id: string) {
   try {
     const result = await db.select().from(memoirs).where(eq(memoirs.id, id))
@@ -33,7 +30,6 @@ export async function getMemoirById(id: string) {
   }
 }
 
-// Select all
 export async function getAllMemoirs() {
   try {
     return await db.select().from(memoirs)
@@ -43,12 +39,31 @@ export async function getAllMemoirs() {
   }
 }
 
-// Delete
 export async function deleteMemoir(id: string) {
   try {
     return await db.delete(memoirs).where(eq(memoirs.id, id))
   } catch (error) {
     console.error('Failed to delete memoir:', error)
+    throw error
+  }
+}
+
+export async function upsertMemoir(memoir: MemoirInsert) {
+  try {
+    return await db.insert(memoirs).values(memoir).onConflictDoUpdate({
+      target: memoirs.id,
+      set: {
+        title: memoir.title,
+        content: memoir.content,
+        date: memoir.date,
+        updatedAt: memoir.updatedAt,
+        media: memoir.media,
+        titleVisible: memoir.titleVisible,
+        categories: memoir.categories,
+      },
+    })
+  } catch (error) {
+    console.error('Failed to upsert memoir:', error)
     throw error
   }
 }

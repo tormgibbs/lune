@@ -1,43 +1,46 @@
-import { useState } from 'react'
+// import { useState } from 'react'
 import * as ImagePicker from 'expo-image-picker'
 import { MediaAsset } from '../types/media'
 import { Alert } from 'react-native'
 import { useMemoirStore } from '@/store/memoir'
+import { deleteMediaFiles } from '@/lib/media'
 
-export const useMediaPicker = (
-  initialMedia: MediaAsset[] = [],
-  maxSelection: number = 13,
-) => {
-  const [media, setMedia] = useState<MediaAsset[]>(initialMedia)
+export const useMediaPicker = (memoirId: string, maxSelection: number = 13) => {
+  const memoir = useMemoirStore((s) => s.memoirs.find((m) => m.id === memoirId))
+
+  const media = memoir?.media ?? []
+
+  const updateMediaInStore = (newMedia: MediaAsset[]) => {
+    useMemoirStore.getState().update({ id: memoirId, media: newMedia })
+  }
 
   const addMedia = (newAssets: MediaAsset[]) => {
-    setMedia((prev) => {
-      if (prev.length >= maxSelection) {
-        Alert.alert(
-          'Attachment Limit Reached',
-          'Would you like to replace the last attachment item with the new one?',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Replace',
-              style: 'destructive',
-              onPress: () => {
-                if (newAssets.length > 0) {
-                  setMedia((current) => {
-                    const updated = [...current]
-                    updated[updated.length - 1] = newAssets[0]
-                    return updated
-                  })
-                }
-              },
+    if (!memoir) return
+
+    if (media.length >= maxSelection) {
+      Alert.alert(
+        'Attachment Limit Reached',
+        'Would you like to replace the last attachment item with the new one?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Replace',
+            style: 'destructive',
+            onPress: () => {
+              if (newAssets.length > 0) {
+                const updated = [...media]
+                updated[updated.length - 1] = newAssets[0]
+                updateMediaInStore(updated)
+              }
             },
-          ],
-        )
-        return prev
-      }
-      const combined = [...prev, ...newAssets]
-      return combined.slice(0, maxSelection)
-    })
+          },
+        ],
+      )
+      return
+    }
+
+    const combined = [...media, ...newAssets].slice(0, maxSelection)
+    updateMediaInStore(combined)
   }
 
   const pickMedia = async () => {
@@ -74,11 +77,22 @@ export const useMediaPicker = (
   }
 
   const removeMedia = (id: string) => {
-    setMedia((prev) => prev.filter((item) => item.id !== id))
+    if (!memoir) return
+    const mediaToRemove = media.find((m) => m.id === id)
+
+    if (mediaToRemove?.persisted) {
+      deleteMediaFiles([mediaToRemove]).catch((err) =>
+        console.warn('Failed to delete media file on remove', err),
+      )
+    }
+    
+    const filtered = media.filter((m) => m.id !== id)
+    updateMediaInStore(filtered)
   }
 
   const clearMedia = () => {
-    setMedia([])
+    if (!memoir) return
+    updateMediaInStore([])
   }
 
   return {
@@ -87,6 +101,5 @@ export const useMediaPicker = (
     removeMedia,
     addMedia,
     clearMedia,
-    setMedia,
   }
 }

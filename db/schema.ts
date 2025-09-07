@@ -1,7 +1,7 @@
 import { MediaAsset } from '@/types/media'
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
-export const category = ['photo', 'video', 'audio', 'text'] as const
+export const category = ['photo', 'video', 'audio', 'text', 'bookmark'] as const
 export type Category = (typeof category)[number]
 
 export const memoirs = sqliteTable('memoirs', {
@@ -13,7 +13,8 @@ export const memoirs = sqliteTable('memoirs', {
   updatedAt: text('updatedAt'),
   media: text('media', { mode: 'json'}).$type<MediaAsset[]>(),
   titleVisible: integer('titleVisible').notNull().default(1).$type<boolean>(),
-  categories: text('features', { mode: 'json' }).$type<Category[]>()
+  categories: text('features', { mode: 'json' }).$type<Category[]>(),
+  bookmark: integer('bookmark').notNull().default(0).$type<boolean>()
 })
 
 export type MemoirInsert = typeof memoirs.$inferInsert
@@ -24,4 +25,5 @@ export const CategoryLabels: Record<Category, string> = {
   video: 'Videos',
   audio: 'Recorded Audio',
   text: 'Text Only',
+  bookmark: 'Bookmarks',
 }

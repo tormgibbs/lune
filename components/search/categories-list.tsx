@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from 'react-native'
 import React from 'react'
-import { AudioLines, Image, TextIcon, Video } from 'lucide-react-native'
+import { AudioLines, Bookmark, Image, TextIcon, Video } from 'lucide-react-native'
 import { Separator } from '@/components/ui/separator'
 import { Category } from '@/db/schema'
 
@@ -14,6 +14,7 @@ const CategoriesList = ({ onSelect }: CategoriesListProps) => {
     label: string
     icon: React.JSX.Element
   }[] = [
+    {key: 'bookmark', label: 'Bookmarks', icon: <Bookmark size={20} /> },
     { key: 'photo', label: 'Photos', icon: <Image size={20} /> },
     { key: 'video', label: 'Videos', icon: <Video size={20} /> },
     { key: 'audio', label: 'Recorded Audio', icon: <AudioLines size={20} /> },

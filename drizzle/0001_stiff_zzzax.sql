@@ -1,0 +1,1 @@
+ALTER TABLE `memoirs` ADD `bookmark` integer DEFAULT 0 NOT NULL;

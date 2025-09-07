@@ -7,7 +7,7 @@ import { Memoir } from '@/db/schema'
 import { useMemoirActions } from '@/hooks/use-memoir-actions'
 
 const SearchResults = ({ results }: { results: Memoir[] }) => {
-  const { handleEdit, handleDelete } = useMemoirActions()
+  const { handleEdit, handleDelete, handleToggleBookmark, handleMediaPress } = useMemoirActions()
 
   if (results.length === 0) {
     return (
@@ -26,7 +26,13 @@ const SearchResults = ({ results }: { results: Memoir[] }) => {
     <FlashList
       data={results}
       renderItem={({ item }) => (
-        <MemoirItem memoir={item} onDelete={handleDelete} onEdit={handleEdit} />
+        <MemoirItem
+          memoir={item}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+          onMediaPress={(mediaIndex) => handleMediaPress(item.id, mediaIndex)}
+          onBookmarkPress={handleToggleBookmark}
+        />
       )}
       keyExtractor={(item) => item.id}
       keyboardShouldPersistTaps="handled"

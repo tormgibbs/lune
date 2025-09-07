@@ -43,7 +43,7 @@ const Index = () => {
 
   const { id, date } = useLocalSearchParams<{ id: string; date: string }>()
 
-  const { memoirs, update, remove } = useMemoirStore()
+  const { memoirs, update, remove, toggleBookmark } = useMemoirStore()
   const existingMemoir = memoirs.find((m) => m.id === id)
 
   const titleRef = useRef(existingMemoir?.title ?? '')
@@ -135,6 +135,7 @@ const Index = () => {
       media: finalMedia,
       titleVisible,
       categories,
+      bookmark: existingMemoir?.bookmark ?? false
     }
 
     try {
@@ -313,6 +314,12 @@ const Index = () => {
               onEditDate={handleEditDate}
               onDelete={handleDelete}
               onDone={handleDone}
+              onBookmarkPress={() => {
+                if (existingMemoir) {
+                  toggleBookmark(existingMemoir.id)
+                }
+              }}
+              bookmarked={existingMemoir?.bookmark}
               onHideTitle={() => {
                 setTitleVisible((prev) => !prev)
               }}

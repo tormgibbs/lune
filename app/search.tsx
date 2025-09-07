@@ -1,4 +1,4 @@
-import { Pressable, Text, TextInput, View, BackHandler } from 'react-native'
+import { TextInput, BackHandler } from 'react-native'
 import React, { useRef, useCallback } from 'react'
 import { router, Stack, useFocusEffect } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'

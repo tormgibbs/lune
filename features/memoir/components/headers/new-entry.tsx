@@ -6,7 +6,13 @@ import React, {
   useState,
 } from 'react'
 import { Platform, Pressable, Text, View } from 'react-native'
-import { Tag, CalendarDays, Trash2, Eye, EyeOff } from 'lucide-react-native'
+import {
+  CalendarDays,
+  Trash2,
+  Eye,
+  EyeOff,
+  Bookmark,
+} from 'lucide-react-native'
 import { CircleEllipsis } from '@/lib/icons/CircleEllipsis'
 import {
   Popover,
@@ -25,12 +31,23 @@ type HeaderProps = {
   onDelete: () => void
   onDone: () => void
   onHideTitle: () => void
+  onBookmarkPress: () => void
+  bookmarked?: boolean
   titleVisible?: boolean
 }
 
 export const Header = forwardRef(
   (
-    { dateLabel, onEditDate, onDelete, onDone, onHideTitle, titleVisible = true }: HeaderProps,
+    {
+      dateLabel,
+      onEditDate,
+      onDelete,
+      onDone,
+      onHideTitle,
+      onBookmarkPress,
+      bookmarked,
+      titleVisible = true,
+    }: HeaderProps,
     ref,
   ) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false)
@@ -57,14 +74,17 @@ export const Header = forwardRef(
             backgroundColor: '#E8E6D9',
           }}>
           <View className="relative flex-row items-center justify-between">
-            <Tag
-              color="#6C7A45"
-              size={Platform.select({
-                ios: 28,
-                android: 24,
-                default: 24,
-              })}
-            />
+            <Pressable hitSlop={10} onPress={onBookmarkPress}>
+              <Bookmark
+                color={bookmarked ? '#6C7A45' : '#6C7A45'} // darker if active
+                fill={bookmarked ? '#6C7A45' : 'none'} // filled when active
+                size={Platform.select({
+                  ios: 28,
+                  android: 24,
+                  default: 24,
+                })}
+              />
+            </Pressable>
 
             <Text
               style={CENTERED_TEXT_STYLE()}
@@ -116,7 +136,9 @@ export const Header = forwardRef(
                   <Separator className="h-[1px] bg-[#D4CDB3]" />
                   <MenuItem
                     label={titleVisible ? 'Hide Title' : 'Show Title'}
-                    icon={titleVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+                    icon={
+                      titleVisible ? <EyeOff size={20} /> : <Eye size={20} />
+                    }
                     onPress={() => {
                       triggerRef.current?.close?.()
                       onHideTitle()
@@ -137,10 +159,12 @@ export const Header = forwardRef(
                 </PopoverContent>
               </Popover>
 
-              <Pressable className="active:opacity-50" onPress={() => {
-                triggerRef.current?.close?.()
-                onDone()
-              }}>
+              <Pressable
+                className="active:opacity-50"
+                onPress={() => {
+                  triggerRef.current?.close?.()
+                  onDone()
+                }}>
                 <Text
                   className={cn(
                     'text-[#6C7A45] font-medium',

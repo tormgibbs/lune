@@ -14,6 +14,8 @@ interface MemoirStore {
 
   selectedCategory: Category | null
   setSelectedCategory: (cat: Category | null) => void
+
+  toggleBookmark: (id: string) => void
 }
 
 const computeSearchResults = (
@@ -32,7 +34,11 @@ const computeSearchResults = (
       (m.content ?? '').toLowerCase().includes(q) ||
       (m.date ?? '').toLowerCase().includes(q)
 
-    const matchesCategory = !category || (m.categories ?? []).includes(category)
+    const matchesCategory =
+      !category ||
+      (category === 'bookmark'
+        ? m.bookmark === true
+        : (m.categories ?? []).includes(category))
 
     return matchesQuery && matchesCategory
   })
@@ -114,6 +120,21 @@ export const useMemoirStore = create<MemoirStore>((set, get) => ({
         cat,
       ),
     })),
+
+  toggleBookmark: (id) =>
+    set((state) => {
+      const updated = state.memoirs.map((memoir) =>
+        memoir.id === id ? { ...memoir, bookmark: !memoir.bookmark } : memoir,
+      )
+      return {
+        memoirs: updated,
+        searchResults: computeSearchResults(
+          updated,
+          state.searchQuery,
+          state.selectedCategory,
+        ),
+      }
+    }),
 }))
 
 function toMemoir(m: MemoirInsert): Memoir {
@@ -127,6 +148,7 @@ function toMemoir(m: MemoirInsert): Memoir {
     media: (m.media ?? []).map((asset) => ({ ...asset, persisted: true })),
     titleVisible: m.titleVisible ?? true,
     categories: m.categories ?? null,
+    bookmark: m.bookmark ?? false,
   }
 }
 
@@ -141,5 +163,6 @@ export function createBlankMemoir(id: string, date: string): MemoirInsert {
     updatedAt: new Date().toISOString(),
     titleVisible: true,
     categories: [],
+    bookmark: false,
   }
 }

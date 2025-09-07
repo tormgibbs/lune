@@ -8,9 +8,7 @@ import React, {
 import { Button } from './ui/button'
 import { Bell, Cloud, Ellipsis, Search, Settings } from 'lucide-react-native'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { Separator } from './ui/separator'
 import { router } from 'expo-router'
-import MenuItem from './menu-item'
 
 interface HeaderProps {
   onPreferencesPress: () => void
@@ -48,7 +46,7 @@ const Header = forwardRef(
             <Search size={20} />
           </Button>
 
-          <Popover>
+          {/* <Popover>
             <PopoverTrigger ref={triggerRef} asChild>
               <Button
                 hitSlop={20}
@@ -88,7 +86,7 @@ const Header = forwardRef(
                 rounded="bottom"
               />
             </PopoverContent>
-          </Popover>
+          </Popover> */}
         </View>
       </View>
     )

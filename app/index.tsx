@@ -12,12 +12,11 @@ import MemoirItem from '@/components/memoir-item'
 import { View } from 'react-native'
 import dayjs from 'dayjs'
 import { useMemoirActions } from '@/hooks/use-memoir-actions'
-import * as FileSystem from 'expo-file-system'
 
 export default function Index() {
   const memoirs = useMemoirStore((s) => s.memoirs)
   const headerRef = useRef<{ closePopover: () => void }>(null)
-  const { handleEdit, handleDelete } = useMemoirActions()
+  const { handleEdit, handleDelete, handleToggleBookmark } = useMemoirActions()
 
   const visibleMemoirs = memoirs.filter(
     (m) =>
@@ -41,24 +40,23 @@ export default function Index() {
     console.log('Preferences action')
   }
 
-  async function debugListMediaFiles() {
-    console.log('Listing persisted media files...')
-    const dir = `${FileSystem.documentDirectory}media`
-    const files = await FileSystem.readDirectoryAsync(dir)
-    console.log('Persisted files:', JSON.stringify(files, null, 2))
-  }
+  // async function debugListMediaFiles() {
+  //   console.log('Listing persisted media files...')
+  //   const dir = `${FileSystem.documentDirectory}media`
+  //   const files = await FileSystem.readDirectoryAsync(dir)
+  //   console.log('Persisted files:', JSON.stringify(files, null, 2))
+  // }
 
   const handleNewEntryPress = () => {
-    debugListMediaFiles()
-    // const id = nanoid(8)
-    // const today = dayjs().format('YYYY-MM-DD')
+    const id = nanoid(8)
+    const today = dayjs().format('YYYY-MM-DD')
 
-    // useMemoirStore.getState().add(createBlankMemoir(id, today))
+    useMemoirStore.getState().add(createBlankMemoir(id, today))
 
-    // router.navigate({
-    //   pathname: '/memoirs/[id]',
-    //   params: { id, date: today },
-    // })
+    router.navigate({
+      pathname: '/memoirs/[id]',
+      params: { id, date: today },
+    })
   }
 
   return (
@@ -83,6 +81,7 @@ export default function Index() {
                 memoir={item}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onBookmarkPress={handleToggleBookmark}
                 onMediaPress={(mediaIndex) =>
                   router.push({
                     pathname: '/memoirs/[id]/media',

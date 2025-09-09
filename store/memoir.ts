@@ -3,10 +3,12 @@ import { create } from 'zustand'
 
 interface MemoirStore {
   memoirs: Memoir[]
+  loaded: boolean
   add: (m: MemoirInsert) => void
   update: (m: Partial<Memoir> & { id: string }) => void
   remove: (id: string) => void
   setMemoirs: (list: Memoir[]) => void
+  setLoaded: (val: boolean) => void
 
   searchQuery: string
   setSearchQuery: (q: string) => void
@@ -46,6 +48,8 @@ const computeSearchResults = (
 
 export const useMemoirStore = create<MemoirStore>((set, get) => ({
   memoirs: [],
+  loaded: false,
+  setLoaded: (val) => set({ loaded: val }),
   searchQuery: '',
   searchResults: [],
   selectedCategory: null,

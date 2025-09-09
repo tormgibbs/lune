@@ -15,18 +15,11 @@ import { PortalHost } from '@rn-primitives/portal'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import * as React from 'react'
+import * as SplashScreen from 'expo-splash-screen'
 import { Appearance, Platform } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
-
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
-import migrations from '@/drizzle/migrations'
-import { db } from '@/db'
-
-import { useMemoirStore } from '@/store/memoir'
-import { getAllMemoirs } from '@/db/memoir'
-
-
+import { useDBInitialization } from '@/db/use-db-initialization'
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -48,37 +41,29 @@ const usePlatformSpecificSetup = Platform.select({
   default: noop,
 })
 
+
+SplashScreen.preventAutoHideAsync()
+
 export default function RootLayout() {
   usePlatformSpecificSetup()
-  const { success, error } = useMigrations(db, migrations)
-  const setMemoirs = useMemoirStore((s) => s.setMemoirs)
   // const { isDarkColorScheme } = useColorScheme()
 
+  const [loaded] = useDBInitialization()
 
   React.useEffect(() => {
-    if (!success) return
-    ;(async () => {
-      try {
-        const memoirs = await getAllMemoirs()
-        setMemoirs(memoirs)
-      } catch (err) {
-        console.error('Failed to load memoirs:', err)
-      }
-    })()
-  }, [success])
+    if (loaded) {
+      SplashScreen.hide()
+    }
+  }, [loaded])
 
-  if (!success) return null
-
-  if (error) {
-    console.error('Database migration error:', error)
+  if (!loaded) {
+    return null
   }
-
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <KeyboardProvider
-          
           // navigationBarTranslucent={Platform.OS === 'android'}
           preserveEdgeToEdge={Platform.OS === 'android'}
           statusBarTranslucent={Platform.OS === 'android'}>

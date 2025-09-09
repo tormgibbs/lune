@@ -15,6 +15,7 @@ import { useMemoirActions } from '@/hooks/use-memoir-actions'
 
 export default function Index() {
   const memoirs = useMemoirStore((s) => s.memoirs)
+  const dbLoaded = useMemoirStore((s) => s.loaded)
   const headerRef = useRef<{ closePopover: () => void }>(null)
   const { handleEdit, handleDelete, handleToggleBookmark } = useMemoirActions()
 
@@ -24,6 +25,9 @@ export default function Index() {
       (m.content && m.content.trim() !== '') ||
       (m.media && m.media.length > 0),
   )
+
+  const showEmptyState = dbLoaded && visibleMemoirs.length === 0
+
 
   const handleBackupSyncPress = () => {
     headerRef.current?.closePopover()
@@ -59,6 +63,8 @@ export default function Index() {
     })
   }
 
+  console.log('show empty state', showEmptyState)
+
   return (
     <SafeAreaView className="relative bg-[#F5F4EF] flex-1 items-center">
       <View className="px-4 pt-4">
@@ -70,7 +76,7 @@ export default function Index() {
         />
       </View>
 
-      {visibleMemoirs.length === 0 ? (
+      {showEmptyState ? (
         <EmptyState />
       ) : (
         <View className="flex-1 w-full">

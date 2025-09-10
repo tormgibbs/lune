@@ -41,7 +41,6 @@ const usePlatformSpecificSetup = Platform.select({
   default: noop,
 })
 
-
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {

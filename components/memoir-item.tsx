@@ -1,9 +1,15 @@
 import { Memoir } from '@/db/schema'
-import { View, Text, Pressable, useWindowDimensions } from 'react-native'
+import { View, Text, useWindowDimensions, Pressable } from 'react-native'
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable'
 import { Separator } from './ui/separator'
 import { formatDate } from '@/lib/date'
-import { Bookmark, Ellipsis, Pen, Trash2 } from 'lucide-react-native'
+import {
+  Bookmark,
+  ChevronDown,
+  Ellipsis,
+  Pen,
+  Trash2,
+} from 'lucide-react-native'
 import RenderHtml, {
   HTMLContentModel,
   HTMLElementModel,
@@ -18,18 +24,16 @@ import Animated, {
   withTiming,
   useSharedValue,
 } from 'react-native-reanimated'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import MenuItem from './menu-item'
-import { ComponentRef, useEffect, useRef } from 'react'
+import { ComponentRef, useEffect, useRef, useState } from 'react'
 import ResponsiveMediaGrid from './responsive-media-grid'
 import { cn } from '@/lib/utils'
-import { Octicons } from '@expo/vector-icons'
+import { useBottomSheet } from './bottom-sheet-provider'
 
 interface MemoirItemProps {
   memoir: Memoir
   onDelete?: (id: string) => void
   onEdit?: (id: string) => void
-  onBookmarkPress: (id: string) => void
+  onBookmarkPress?: (id: string) => void
   onMediaPress: (mediaIndex: number) => void
 }
 
@@ -96,9 +100,6 @@ const renderers = {
           borderRadius: 2,
           paddingLeft: 5,
           marginVertical: 2,
-          // backgroundColor: '#F5F5F0',
-          // paddingVertical: 8,
-          // paddingRight: 8,
         }}>
         <TDefaultRenderer tnode={tnode} {...props} />
       </View>
@@ -124,6 +125,18 @@ const cleanHtml = (html: string) => {
     .trim()
 }
 
+const truncateHtmlByLines = (html: string, maxLines: number) => {
+  if (!html) return ''
+
+  // Split by common block elements
+  const lines = html.split(/<\/div>|<\/p>|<\/li>|<br\s*\/?>/i)
+
+  // Take only the first maxLines lines
+  const truncated = lines.slice(0, maxLines).join('')
+
+  return truncated
+}
+
 const MemoirItem = ({
   memoir,
   onDelete,
@@ -132,8 +145,13 @@ const MemoirItem = ({
   onBookmarkPress,
 }: MemoirItemProps) => {
   const width = useWindowDimensions().width - 32
-  const popoverRef = useRef<ComponentRef<typeof PopoverTrigger>>(null)
   const swipeableRef = useRef<ComponentRef<typeof Swipeable>>(null)
+
+  const [expanded, setExpanded] = useState(false)
+
+  const maxLines = memoir.media?.length ? 5 : 10
+
+  const { openBottomSheet } = useBottomSheet()
 
   const bookmarkScale = useSharedValue(memoir.bookmark ? 1 : 0)
 
@@ -146,7 +164,16 @@ const MemoirItem = ({
     onDelete?.(memoir.id)
   }
 
+  console.log('Raw content:', memoir.content)
+
   const cleanedContent = memoir.content ? cleanHtml(memoir.content) : ''
+  const displayedContent = expanded
+    ? cleanedContent
+    : truncateHtmlByLines(cleanedContent, maxLines)
+
+  const isTruncated = !expanded && displayedContent.length < cleanedContent.length
+
+  console.log('Cleaned content:', cleanedContent)
 
   const bookmarkStyle = useAnimatedStyle(() => ({
     transform: [{ scale: bookmarkScale.value }],
@@ -177,6 +204,8 @@ const MemoirItem = ({
             editable={false}
             mode="preview"
             onMediaPress={onMediaPress}
+            expanded={expanded}
+            setExpanded={setExpanded}
           />
           <View
             className={cn(memoir.title || memoir.content ? 'py-2' : 'py-0')}>
@@ -184,12 +213,21 @@ const MemoirItem = ({
               <Text className="text-base font-semibold">{memoir.title}</Text>
             )}
             {memoir.content && (
-              <RenderHtml
-                contentWidth={width}
-                source={{ html: cleanedContent }}
-                customHTMLElementModels={customHTMLElementModels}
-                renderers={renderers}
-              />
+              <Pressable
+                className="relative"
+                onPress={() => setExpanded(!expanded)}>
+                <RenderHtml
+                  contentWidth={width}
+                  source={{ html: displayedContent }}
+                  customHTMLElementModels={customHTMLElementModels}
+                  renderers={renderers}
+                />
+                {isTruncated && (
+                  <View className="absolute bottom-1 right-2">
+                    <ChevronDown />
+                  </View>
+                )}
+              </Pressable>
             )}
           </View>
           <Separator className="my-1 bg-[#9CA082]" />
@@ -203,63 +241,19 @@ const MemoirItem = ({
                 <Bookmark size={16} fill="#6C7A45" color="#6C7A45" />
               </Animated.View>
 
-              <Popover>
-                <PopoverTrigger ref={popoverRef} asChild>
-                  <Pressable hitSlop={15}>
-                    <Ellipsis size={20} color="gray" />
-                  </Pressable>
-                </PopoverTrigger>
-
-                <PopoverContent
-                  portalHost="root-host"
-                  side="bottom"
-                  align="end"
-                  className="w-auto py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">
-                  <MenuItem
-                    label="Edit"
-                    icon={<Pen size={16} />}
-                    rounded="top"
-                    onPress={() => {
-                      popoverRef.current?.close?.()
-                      onEdit?.(memoir.id)
-                    }}
-                  />
-
-                  <Separator className="h-[1px] bg-[#D4CDB3]" />
-
-                  <MenuItem
-                    label={memoir.bookmark ? 'Remove Bookmark' : 'Bookmark'}
-                    icon={
-                      memoir.bookmark ? (
-                        <Octicons
-                          name="bookmark-slash"
-                          size={16}
-                          color="black"
-                        />
-                      ) : (
-                        <Octicons name="bookmark" size={16} color="black" />
-                      )
-                    }
-                    onPress={() => {
-                      popoverRef.current?.close?.()
-                      onBookmarkPress?.(memoir.id)
-                    }}
-                  />
-
-                  <Separator className="h-[1px] bg-[#D4CDB3]" />
-
-                  <MenuItem
-                    label="Delete"
-                    icon={<Trash2 size={16} color="#A34B3D" />}
-                    rounded="bottom"
-                    danger
-                    onPress={() => {
-                      popoverRef.current?.close?.()
-                      onDelete?.(memoir.id)
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
+              <Pressable
+                hitSlop={15}
+                onPress={() =>
+                  openBottomSheet({
+                    id: memoir.id,
+                    isBookMarked: memoir.bookmark,
+                    onEdit,
+                    onDelete,
+                    onBookmarkPress,
+                  })
+                }>
+                <Ellipsis size={20} color="gray" />
+              </Pressable>
             </View>
           </View>
         </View>

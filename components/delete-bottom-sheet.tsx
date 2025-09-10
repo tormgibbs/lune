@@ -52,7 +52,8 @@ const DeleteBottomSheet = forwardRef<BottomSheetModal, DeleteBottomSheetProps>(
         backgroundStyle={{ backgroundColor: 'transparent' }}
         backdropComponent={renderBackdrop}
         handleComponent={null}
-        enableContentPanningGesture={false}>
+        enableContentPanningGesture={false}
+      >
         <BottomSheetView className="p-4 px-2 items-center gap-3">
           <View className="w-full bg-[#A6B57D] rounded-xl overflow-hidden">
             <Text className="py-3 px-8 w-full text-center text-sm font-medium text-[#EBEBEB]">

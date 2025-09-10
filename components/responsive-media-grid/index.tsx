@@ -15,6 +15,8 @@ interface ResponsiveMediaGridProps {
   onDeletePress?: (id: string) => void
   editable?: boolean
   mode?: 'full' | 'preview'
+  expanded?: boolean
+  setExpanded?: (expanded: boolean) => void
 }
 
 const ResponsiveMediaGrid: React.FC<ResponsiveMediaGridProps> = ({
@@ -23,8 +25,10 @@ const ResponsiveMediaGrid: React.FC<ResponsiveMediaGridProps> = ({
   onDeletePress,
   mode = 'full',
   editable = true,
+  expanded = false,
+  setExpanded,
 }) => {
-  const [expanded, setExpanded] = useState(false)
+  // const [expanded, setExpanded] = useState(false)
 
   const count = media.length
   const radius = 7
@@ -70,7 +74,7 @@ const ResponsiveMediaGrid: React.FC<ResponsiveMediaGridProps> = ({
                 <Overlay
                   count={count - 5}
                   radius={radius}
-                  onPress={() => setExpanded(true)}
+                  onPress={() => setExpanded?.(true)}
                 />
               </MediaItem>
             </View>

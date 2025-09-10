@@ -40,7 +40,7 @@ const ColourPickerSheet = ({
       enablePanDownToClose
       ref={bottomSheetRef}
       handleComponent={null}
-      backdropComponent={renderBackdrop} // <-- use custom backdrop
+      backdropComponent={renderBackdrop}
       style={{
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,

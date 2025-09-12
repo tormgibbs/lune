@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import { View } from 'react-native'
 import { MediaAsset } from '@/types/media'
 import MediaItem from './media-item'

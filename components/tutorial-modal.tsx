@@ -1,4 +1,4 @@
-import { Modal, View, Text, Pressable, } from 'react-native'
+import { Modal, View, Text, Pressable, StyleSheet, } from 'react-native'
 import { StatusBar } from 'expo-status-bar'
 import * as ExpoStatusBar from 'expo-status-bar'
 
@@ -11,22 +11,22 @@ interface TutorialModalProps {
 }
 
 const TutorialModal = ({ visible, onClose, onConfirm }: TutorialModalProps) => {
-  useEffect(() => {
-    if (!visible) {
-      ExpoStatusBar.setStatusBarTranslucent(false)
-      ExpoStatusBar.setStatusBarStyle('dark')
-    }
-  }, [visible])
+  // useEffect(() => {
+  //   if (!visible) {
+  //     ExpoStatusBar.setStatusBarTranslucent(false)
+  //     ExpoStatusBar.setStatusBarStyle('dark')
+  //   }
+  // }, [visible])
 
   return (
     <>
-      {visible && (
+      {/* {visible && (
         <StatusBar
           translucent
           backgroundColor="rgba(0,0,0,0.5)"
           style="light"
         />
-      )}
+      )} */}
 
       <Modal
         className="bg-black p-3"

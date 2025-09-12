@@ -1,6 +1,10 @@
-import { View, Text, Pressable, Animated, Alert, Linking } from 'react-native'
-import { RefObject, useRef, useState } from 'react'
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import { View, Text, Pressable, Animated, Alert, Linking, BackHandler } from 'react-native'
+import { RefObject, useEffect, useRef, useState } from 'react'
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet'
 import {
   IWaveformRef,
   PermissionStatus,
@@ -91,22 +95,40 @@ const AudioRecorderSheet = ({
   const renderBackdrop = (props: any) => (
     <BottomSheetBackdrop
       {...props}
-      pressBehavior="none"
       disappearsOnIndex={-1}
       appearsOnIndex={0}
+      pressBehavior="close"
     />
   )
+
+  useEffect(() => {
+    const backAction = () => {
+      if (audioSheetRef.current) {
+        audioSheetRef.current.dismiss() // closes the sheet
+        return true // prevents default back behavior
+      }
+      return false // let system handle it if sheet not open
+    }
+
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    )
+
+    return () => subscription.remove()
+  }, [audioSheetRef])
 
   return (
     <BottomSheetModal
       backgroundStyle={{
-        backgroundColor: '#E0DCCC'
+        backgroundColor: '#E0DCCC',
       }}
       ref={audioSheetRef}
       enablePanDownToClose
       keyboardBehavior="extend"
       backdropComponent={renderBackdrop}
       keyboardBlurBehavior="none"
+      enableOverDrag={false}
       android_keyboardInputMode="adjustResize"
       handleComponent={null}
       onDismiss={() => {
@@ -115,7 +137,22 @@ const AudioRecorderSheet = ({
             if (path && onRecordingComplete) {
               onRecordingComplete(path)
             }
+            setRecorderState(RecorderState.stopped)
+            Animated.spring(animatedValue, {
+              toValue: 0,
+              useNativeDriver: false,
+              tension: 100,
+              friction: 8,
+            }).start()
           })
+        } else {
+          setRecorderState(RecorderState.stopped)
+          Animated.spring(animatedValue, {
+            toValue: 0,
+            useNativeDriver: false,
+            tension: 100,
+            friction: 8,
+          }).start()
         }
       }}
       style={{

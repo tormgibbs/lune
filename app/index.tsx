@@ -15,6 +15,7 @@ import { useMemoirActions } from '@/hooks/use-memoir-actions'
 import { BottomSheetProvider } from '@/components/bottom-sheet-provider'
 import { useTutorial } from '@/hooks/use-tutorial'
 import TutorialModal from '@/components/tutorial-modal'
+import * as FileSystem from 'expo-file-system'
 
 export default function Index() {
   const memoirs = useMemoirStore((s) => s.memoirs)
@@ -22,9 +23,9 @@ export default function Index() {
   const headerRef = useRef<{ closePopover: () => void }>(null)
   const { handleEdit, handleDelete } = useMemoirActions()
 
-  const [showTutorialModal, setShowTutorialModal] = useState(true)
+  // const [showTutorialModal, setShowTutorialModal] = useState(true)
 
-  // const { showTutorialModal, markTutorialSeen } = useTutorial()
+  const { showTutorialModal, markTutorialSeen } = useTutorial()
 
   const visibleMemoirs = memoirs.filter(
     (m) =>
@@ -36,14 +37,14 @@ export default function Index() {
   const showEmptyState = dbLoaded && visibleMemoirs.length === 0
 
   const handleShowTutorial = async () => {
-    // await markTutorialSeen()
-    setShowTutorialModal(false)
+    await markTutorialSeen()
+    // setShowTutorialModal(false)
     router.push('/tutorial')
   }
 
   const handleSkipTutorial = async () => {
-    // await markTutorialSeen()
-    setShowTutorialModal(false)
+    await markTutorialSeen()
+    // setShowTutorialModal(false)
   }
 
   const handleBackupSyncPress = () => {
@@ -61,14 +62,15 @@ export default function Index() {
     console.log('Preferences action')
   }
 
-  // async function debugListMediaFiles() {
-  //   console.log('Listing persisted media files...')
-  //   const dir = `${FileSystem.documentDirectory}media`
-  //   const files = await FileSystem.readDirectoryAsync(dir)
-  //   console.log('Persisted files:', JSON.stringify(files, null, 2))
-  // }
+  async function debugListMediaFiles() {
+    console.log('Listing persisted media files...')
+    const dir = `${FileSystem.documentDirectory}media`
+    const files = await FileSystem.readDirectoryAsync(dir)
+    console.log('Persisted files:', JSON.stringify(files, null, 2))
+  }
 
   const handleNewEntryPress = () => {
+    // debugListMediaFiles()
     const id = nanoid(8)
     const today = dayjs().format('YYYY-MM-DD')
 

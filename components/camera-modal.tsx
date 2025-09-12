@@ -11,9 +11,10 @@ import {
   CameraType,
   useCameraPermissions,
   FlashMode,
+  CameraMode,
 } from 'expo-camera'
 import { Button } from './ui/button'
-import { RefreshCcw } from 'lucide-react-native'
+import { RefreshCcw, Video } from 'lucide-react-native'
 import MediaPreview from './media-preview'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { toast, Toaster } from 'sonner-native'
@@ -144,12 +145,46 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
       }
     }
 
+    const handleShutterPress = () => {
+      if (mode === 'picture') {
+        takePhoto()
+      } else if (mode === 'video') {
+        if (recordingRef.current) {
+          stopRecording()
+        } else {
+          isRecording.value = true
+          scale.value = withSpring(0.7)
+          borderRadius.value = withTiming(8, { duration: 200 })
+          startRecording()
+        }
+      }
+    }
+
     const toggleFlash = () => {
       setFlash((prev) => {
         if (prev === 'off') return 'on'
         if (prev === 'on') return 'auto'
         return 'off'
       })
+    }
+
+    const toggleMode = () => {
+      setMode((prev) => (prev === 'picture' ? 'video' : 'picture'))
+    }
+
+    const getModeIcon = (mode: CameraMode) => {
+      switch (mode) {
+        case 'picture':
+          return (
+            <MaterialCommunityIcons name="camera" size={30} color="white" />
+          )
+        case 'video':
+          return <MaterialCommunityIcons name="video" size={30} color="white" />
+        default:
+          return (
+            <MaterialCommunityIcons name="camera" size={30} color="white" />
+          )
+      }
     }
 
     const getFlashIcon = (flash: FlashMode) => {
@@ -219,9 +254,12 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
               mode={mode}
               flash={flash}>
               <View className="flex-1 justify-between">
-                <View className="p-4">
-                  <Pressable className="self-start p-2" onPress={toggleFlash}>
+                <View className="flex-row justify-between p-6">
+                  <Pressable className="" onPress={toggleFlash}>
                     {getFlashIcon(flash)}
+                  </Pressable>
+                  <Pressable className="" onPress={toggleMode}>
+                    {getModeIcon(mode)}
                   </Pressable>
                 </View>
                 <View className="flex-row p-4 items-center justify-between justify-self-end">
@@ -239,9 +277,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
                     className="bg-transparent items-center justify-center border-4 border-white rounded-full"
                     onPressIn={handlePressIn}
                     onPressOut={handleRelease}
-                    onLongPress={handleLongPress}
-                    delayLongPress={200}
-                    onPress={takePhoto}>
+                    onPress={handleShutterPress}>
                     <View className="p-0.5 items-center justify-center bg-transparent rounded-full">
                       <Animated.View style={animatedStyle} />
                     </View>
@@ -258,7 +294,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
                   </Button>
                 </View>
               </View>
-              <Toaster offset={80} swipeToDismissDirection='left'/>
+              <Toaster offset={80} swipeToDismissDirection="left" />
             </CameraView>
           )}
         </View>

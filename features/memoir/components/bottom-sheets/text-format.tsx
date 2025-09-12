@@ -1,5 +1,5 @@
-import { View, Text, Pressable } from 'react-native'
-import React from 'react'
+import { View, Text, Pressable, BackHandler } from 'react-native'
+import React, { useEffect } from 'react'
 import {
   Bold,
   Italic,
@@ -10,7 +10,11 @@ import {
   X,
 } from 'lucide-react-native'
 import { Button } from '@/components/ui/button'
-import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet'
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet'
 import { Separator } from '@/components/ui/separator'
 import { actions, RichEditor } from 'react-native-pell-rich-editor'
 import ColorPickerButton from '@/components/color-picker-button'
@@ -41,12 +45,22 @@ const TextFormattingSheet = ({
     // editorRef.current?.focusContentEditor?.()
   }
 
+  const renderBackdrop = (props: any) => (
+    <BottomSheetBackdrop
+      {...props}
+      pressBehavior="close"
+      disappearsOnIndex={-1}
+      appearsOnIndex={0}
+      opacity={0.1}
+    />
+  )
+
   const sendEditorAction = (action: string) => {
     const editor = editorRef.current
     if (!editor) return
-    editor.focusContentEditor?.()
     editor.sendAction(action, 'result')
   }
+
 
   const handleBoldPress = () => {
     sendEditorAction(actions.setBold)
@@ -76,6 +90,23 @@ const TextFormattingSheet = ({
     sendEditorAction(actions.insertBulletsList)
   }
 
+  useEffect(() => {
+    const backAction = () => {
+      if (bottomSheetRef.current) {
+        bottomSheetRef.current.dismiss()
+        return true
+      }
+      return false
+    }
+
+    const subscription = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction,
+    )
+
+    return () => subscription.remove()
+  }, [bottomSheetRef])
+
   return (
     <BottomSheetModal
       ref={bottomSheetRef}
@@ -84,6 +115,8 @@ const TextFormattingSheet = ({
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustPan"
       handleComponent={null}
+      backdropComponent={renderBackdrop}
+      onDismiss={() => editorRef.current?.focusContentEditor?.()}
       onChange={onChange}
       backgroundStyle={{
         backgroundColor: '#E0DCCC',

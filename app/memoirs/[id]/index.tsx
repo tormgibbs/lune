@@ -36,6 +36,7 @@ import Lazy from '@/components/lazy'
 import { persistMediaAsset } from '@/lib/media'
 import ResponsiveMediaGrid from '@/components/responsive-media-grid'
 import { useMemoirActions } from '@/hooks/use-memoir-actions'
+import { Toaster } from 'sonner-native'
 
 const Index = () => {
   const router = useRouter()
@@ -135,7 +136,7 @@ const Index = () => {
       media: finalMedia,
       titleVisible,
       categories,
-      bookmark: existingMemoir?.bookmark ?? false
+      bookmark: existingMemoir?.bookmark ?? false,
     }
 
     try {
@@ -150,24 +151,97 @@ const Index = () => {
 
   const saveMemoirRef = useRef(saveMemoir)
 
-  const handleAudioRecordPress = () => {
+  const handleAudioRecordPress = async () => {
+    // richEditorRef.current?.blurContentEditor()
+    richEditorRef.current?.injectJavascript(`
+      window.currentSelection = window.getSelection().getRangeAt(0);
+    `)
+
     richEditorRef.current?.blurContentEditor()
+    await KeyboardController.dismiss()
+
     audioSheetRef.current?.present()
+
+    richEditorRef.current?.injectJavascript(`
+      if(window.currentSelection){
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(window.currentSelection);
+      }
+    `)
   }
 
   const handleCameraPress = () => {
     cameraRef.current?.open()
   }
 
-  const handleSpeechPress = () => {
+  const handleSpeechPress = async () => {
+    // 1. Grab current selection in editor
+    richEditorRef.current?.injectJavascript(`
+      window.currentSelection = window.getSelection().getRangeAt(0);
+    `)
+
+    // 2. Dismiss native keyboard
     richEditorRef.current?.blurContentEditor()
+    await KeyboardController.dismiss()
+
+    // 3. Present voice input sheet
     voiceInputSheetRef.current?.present()
+
+    // 4. Restore selection (cursor) after sheet is open
+    richEditorRef.current?.injectJavascript(`
+      if(window.currentSelection){
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(window.currentSelection);
+      }
+    `)
   }
 
   const handleTextFormatPress = async () => {
-    console.log('Text format pressed')
-    // await KeyboardController.dismiss()
+    // richEditorRef.current?.blurContentEditor()
+    richEditorRef.current?.injectJavascript(`
+      window.currentSelection = window.getSelection().getRangeAt(0);
+    `)
+
+    richEditorRef.current?.blurContentEditor()
+    // richEditorRef.current?.dismissKeyboard()
+    await KeyboardController.dismiss()
+
+    richEditorRef.current?.injectJavascript(`
+      (function() {
+        const formats = [];
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const node = sel.anchorNode?.parentElement;
+
+          if (node) {
+            if (node.closest('b,strong')) formats.push('bold');
+            if (node.closest('i,em')) formats.push('italic');
+            if (node.closest('u')) formats.push('underline');
+            if (node.closest('strike,s')) formats.push('strikeThrough');
+            if (node.closest('blockquote')) formats.push('blockquote');
+
+            if (node.closest('ul,menu,dir')) formats.push('unorderedList');
+            if (node.closest('ol')) formats.push('orderedList');
+          }
+        }
+
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'SELECTION_CHANGE',
+          data: formats
+        }));
+      })();
+    `)
     formattingSheetRef.current?.present()
+
+    richEditorRef.current?.injectJavascript(`
+      if(window.currentSelection){
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(window.currentSelection);
+      }
+    `)
   }
 
   const titleInputRef = useRef<TextInput>(null)
@@ -241,9 +315,14 @@ const Index = () => {
 
   const handleBottomSheetClose = () => {}
 
-  const handleColorSelect = (color: string) => {
+  const handleColorSelect = async (color: string) => {
     setSelectedColor(color)
-    richEditorRef.current?.sendAction('foreColor', 'result', color)
+    richEditorRef.current?.injectJavascript(
+      `document.execCommand('foreColor', false, '${color}');`,
+    )
+    // richEditorRef.current?.sendAction('foreColor', 'result', color)
+    // richEditorRef.current?.blurContentEditor()
+    // richEditorRef.current?.dismissKeyboard()
     colorPickerSheetRef.current?.dismiss()
   }
 
@@ -369,9 +448,24 @@ const Index = () => {
       <Lazy>
         <VoiceInputSheet
           bottomSheetRef={voiceInputSheetRef}
+          onDismiss={() => {
+            // richEditorRef.current?.focusContentEditor()
+          }}
           onTranscript={(transcript) => {
             console.log('Transcript received:', transcript)
-            richEditorRef.current?.insertText(transcript + ' ')
+            richEditorRef.current?.injectJavascript(`
+              (function() {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                  const range = selection.getRangeAt(0);
+                  const textNode = document.createTextNode('${transcript} ');
+                  range.insertNode(textNode);
+                  range.setStartAfter(textNode);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                }
+              })();
+            `)
           }}
         />
       </Lazy>
@@ -382,9 +476,9 @@ const Index = () => {
           bottomSheetRef={formattingSheetRef}
           handleBottomSheetClose={handleBottomSheetClose}
           editorRef={richEditorRef}
-          onColorPickerPress={() => {
+          onColorPickerPress={async () => {
             richEditorRef.current?.blurContentEditor()
-            KeyboardController.dismiss()
+            await KeyboardController.dismiss()
             colorPickerSheetRef.current?.present()
           }}
           activeFormats={activeFormats}
@@ -398,7 +492,11 @@ const Index = () => {
         />
       </Lazy>
 
-      <KeyboardAwareScrollView ref={scrollRef} style={{ zIndex: -1 }}>
+      <KeyboardAwareScrollView
+        ref={scrollRef}
+        style={{ zIndex: -1 }}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}>
         <View className="flex-1 p-4 pt-2">
           <Lazy>
             <ResponsiveMediaGrid
@@ -437,6 +535,7 @@ const Index = () => {
             editorInitializedCallback={editorInitializedCallback}
             style={{
               flex: 1,
+              flexGrow: 1,
             }}
             placeholder="Start writing..."
             initialHeight={300}
@@ -458,6 +557,7 @@ const Index = () => {
         onImagesPress={pickMedia}
         onSpeechPress={handleSpeechPress}
       />
+      {/* <Toaster swipeToDismissDirection="left" /> */}
     </SafeAreaView>
   )
 }

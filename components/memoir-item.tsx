@@ -147,9 +147,12 @@ const MemoirItem = ({
   const width = useWindowDimensions().width - 32
   const swipeableRef = useRef<ComponentRef<typeof Swipeable>>(null)
 
-  const [expanded, setExpanded] = useState(false)
-
   const maxLines = memoir.media?.length ? 5 : 10
+
+  const cleanedContent = memoir.content ? cleanHtml(memoir.content) : ''
+  const truncatedContent = truncateHtmlByLines(cleanedContent, maxLines)
+
+  const [expanded, setExpanded] = useState(false)
 
   const { openBottomSheet } = useBottomSheet()
 
@@ -164,16 +167,14 @@ const MemoirItem = ({
     onDelete?.(memoir.id)
   }
 
-  console.log('Raw content:', memoir.content)
+  // const cleanedContent = memoir.content ? cleanHtml(memoir.content) : ''
+  const displayedContent = expanded ? cleanedContent : truncatedContent
 
-  const cleanedContent = memoir.content ? cleanHtml(memoir.content) : ''
-  const displayedContent = expanded
-    ? cleanedContent
-    : truncateHtmlByLines(cleanedContent, maxLines)
+  console.log('cleaned', cleanedContent)
+  console.log('truncated', truncatedContent)
 
-  const isTruncated = !expanded && displayedContent.length < cleanedContent.length
-
-  console.log('Cleaned content:', cleanedContent)
+  const isTruncated =
+    !expanded && truncatedContent.length < cleanedContent.length
 
   const bookmarkStyle = useAnimatedStyle(() => ({
     transform: [{ scale: bookmarkScale.value }],
@@ -223,7 +224,7 @@ const MemoirItem = ({
                   renderers={renderers}
                 />
                 {isTruncated && (
-                  <View className="absolute bottom-1 right-2">
+                  <View className="absolute bottom-[-10px] right-2">
                     <ChevronDown />
                   </View>
                 )}

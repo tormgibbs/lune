@@ -10,6 +10,7 @@
     "android": "expo start -c --android",
     "ios": "expo start -c --ios",
     "web": "expo start -c --web",
+    "build:apk": "eas build -p android --profile preview",
     "drizzle:generate": "drizzle-kit generate",
     "clean": "rm -rf .expo node_modules",
     "postinstall": "pnpm exec tailwindcss -i ./global.css -o ./node_modules/.cache/nativewind/global.css"

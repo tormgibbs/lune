@@ -62,6 +62,11 @@ export default function Index() {
     router.push('/preferences')
   }
 
+  const handleHelpPress = () => {
+    headerRef.current?.closePopover()
+    router.push('/tutorial')
+  }
+
   async function debugListMediaFiles() {
     console.log('Listing persisted media files...')
     const dir = `${FileSystem.documentDirectory}media`
@@ -99,6 +104,7 @@ export default function Index() {
             onBackupSyncPress={handleBackupSyncPress}
             onNotificationsPress={handleNotificationsPress}
             onPreferencesPress={handlePreferencesPress}
+            onHelpPress={handleHelpPress}
           />
         </View>
 

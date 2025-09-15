@@ -14,11 +14,14 @@ import { Separator } from './ui/separator'
 import { useColorScheme } from '@/lib/useColorScheme'
 import { cn } from '@/lib/utils'
 import { useFontSize } from '@/lib/use-font-size'
+import { CircleQuestionMark } from '@/lib/icons/CircleQuestionMark'
+import { Octicons } from '@expo/vector-icons'
 
 interface HeaderProps {
   onPreferencesPress: () => void
   onNotificationsPress: () => void
   onBackupSyncPress: () => void
+  onHelpPress: () => void
 }
 
 const Header = forwardRef(
@@ -27,6 +30,7 @@ const Header = forwardRef(
       onPreferencesPress,
       onNotificationsPress,
       onBackupSyncPress,
+      onHelpPress,
     }: HeaderProps,
     ref,
   ) => {
@@ -114,6 +118,25 @@ const Header = forwardRef(
               />
 
               <MenuItem
+                label="Help"
+                icon={
+                  <Octicons name="question" size={iconSize - 4} color={dark ? '#E8E6D9' : '#2B311A'} />
+                }
+                onPress={onHelpPress}
+                rounded="bottom"
+                dark={dark}
+                fontSize={fontSize}
+              />
+
+
+              {/* <Separator
+                className={cn(
+                  'h-[1px]',
+                  dark ? 'bg-[#A3B587]' : 'bg-[#D4CDB3]',
+                )}
+              />
+
+              <MenuItem
                 label="Notifications"
                 icon={<Bell size={iconSize - 4} color={dark ? '#E8E6D9' : '#2B311A'} />}
                 onPress={onNotificationsPress}
@@ -135,7 +158,7 @@ const Header = forwardRef(
                 rounded="bottom"
                 dark={dark}
                 fontSize={fontSize}
-              />
+              /> */}
             </PopoverContent>
           </Popover>
         </View>

@@ -23,14 +23,22 @@ import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react-native'
 import { toast, Toaster } from 'sonner-native'
 import { Host, Portal } from 'react-native-portalize'
+import { cn } from '@/lib/utils'
 
 interface VoiceInputSheetProps {
   bottomSheetRef: React.RefObject<BottomSheetModal | null>
   onTranscript?: (transcript: string) => void
   onDismiss?: () => void
+  dark?: boolean
 }
 
-const RippleRing = ({ delay = 0 }: { delay?: number }) => {
+const RippleRing = ({
+  delay = 0,
+  dark = false,
+}: {
+  delay?: number
+  dark?: boolean
+}) => {
   const scale = useSharedValue(0)
   const opacity = useSharedValue(1)
 
@@ -58,7 +66,12 @@ const RippleRing = ({ delay = 0 }: { delay?: number }) => {
 
   return (
     <Animated.View
-      className="absolute w-[150] h-[150] rounded-full border-2 border-[#6F7F7F] bg-[#6F7F7F] opacity-50"
+      className={cn(
+        'absolute w-[150] h-[150] rounded-full border-2 opacity-50',
+        dark
+          ? 'border-[#B5C2A3] bg-[#B5C2A3]'
+          : 'border-[#6F7F7F] bg-[#6F7F7F]',
+      )}
       style={[animatedStyle]}
     />
   )
@@ -68,6 +81,7 @@ const VoiceInputSheet = ({
   bottomSheetRef,
   onTranscript,
   onDismiss,
+  dark = false,
 }: VoiceInputSheetProps) => {
   const [isListening, setIsListening] = useState(false)
 
@@ -172,24 +186,33 @@ const VoiceInputSheet = ({
         handleComponent={null}
         onDismiss={onDismiss}
         backgroundStyle={{
-          backgroundColor: '#E0DCCC',
+          backgroundColor: dark ? '#3A4332' : '#E0DCCC',
         }}
         style={{
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
           overflow: 'hidden',
         }}>
-        <BottomSheetView className="px-4 pt-5 pb-16 items-center bg-[#E0DCCC]">
+        <BottomSheetView
+          className={cn(
+            'px-4 pt-5 pb-16 items-center',
+            dark ? 'bg-[#3A4332]' : 'bg-[#E0DCCC]',
+          )}>
           <View className="relative flex-row w-full items-center justify-end mb-12">
-            <Text className="font-medium text-lg" style={CENTERED_TEXT_STYLE()}>
+            <Text
+              className="font-medium text-lg"
+              style={CENTERED_TEXT_STYLE(dark ? '#E8E6D9' : 'black')}>
               {isListening ? 'Listening…' : 'Tap to Speak'}
             </Text>
             <Button
               onPress={handleClosePress}
               variant="secondary"
               size="icon"
-              className="bg-[#F5F2E3] rounded-full">
-              <X color="#6C7A45" />
+              className={cn(
+                'rounded-full',
+                dark ? 'bg-[#4A5340]' : 'bg-[#F5F2E3]',
+              )}>
+              <X color={dark ? '#B5C2A3' : '#6C7A45'} />
             </Button>
           </View>
           <Pressable
@@ -198,20 +221,28 @@ const VoiceInputSheet = ({
             <View className="relative items-center justify-center">
               {isListening && (
                 <>
-                  <RippleRing delay={0} />
-                  <RippleRing delay={400} />
-                  <RippleRing delay={800} />
-                  <RippleRing delay={1200} />
+                  <RippleRing delay={0} dark={dark} />
+                  <RippleRing delay={400} dark={dark} />
+                  <RippleRing delay={800} dark={dark} />
+                  <RippleRing delay={1200} dark={dark} />
                 </>
               )}
 
               {/* Microphone icon */}
-              <View className="bg-[#6F7F7F] p-6 rounded-full">
-                <View className="bg-[#2F4F4F] px-6 py-4 rounded-full">
+              <View
+                className={cn(
+                  'p-6 rounded-full',
+                  dark ? 'bg-[#B5C2A3]' : 'bg-[#6F7F7F]',
+                )}>
+                <View
+                  className={cn(
+                    'px-6 py-4 rounded-full',
+                    dark ? 'bg-[#2C3526]' : 'bg-[#2F4F4F]',
+                  )}>
                   <FontAwesome
                     name="microphone"
                     size={40}
-                    color="#FFFFFF"
+                    color={dark ? '#E8E6D9' : '#FFFFFF'}
                     style={{ zIndex: 10 }}
                   />
                 </View>

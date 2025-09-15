@@ -19,7 +19,7 @@
 
 export const NAV_THEME = {
   light: {
-    background: 'hsl(48 27% 95%)', // Warm Off-White (#F5F4EF)
+    background: '#F5F4EF', // Warm Off-White (#F5F4EF)
     border: 'hsl(49 23% 89%)', // Soft Beige-Tan (#E8E6D9)
     card: 'hsl(49 23% 89%)', // Soft Beige-Tan (#E8E6D9)
     notification: 'hsl(8 45% 44%)', // Muted Brick Red (#A34B3D)
@@ -27,7 +27,7 @@ export const NAV_THEME = {
     text: 'hsl(75 29% 15%)', // Dark Olive (#2B311A)
   },
   dark: {
-    background: 'hsl(75 29% 15%)', // Dark Olive (#2B311A)
+    background: '#46502A', // Dark Olive (#2B311A)
     border: 'hsl(78 25% 38%)', // Sage Green (#6C7A45)
     card: 'hsl(75 29% 15%)', // Dark Olive (#2B311A)
     notification: 'hsl(8 45% 44%)', // Muted Brick Red (#A34B3D)

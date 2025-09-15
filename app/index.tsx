@@ -59,7 +59,7 @@ export default function Index() {
 
   const handlePreferencesPress = () => {
     headerRef.current?.closePopover()
-    console.log('Preferences action')
+    router.push('/preferences')
   }
 
   async function debugListMediaFiles() {
@@ -85,7 +85,7 @@ export default function Index() {
   console.log('show empty state', showEmptyState)
 
   return (
-    <SafeAreaView className="relative bg-[#F5F4EF] flex-1 items-center">
+    <SafeAreaView className="relative flex-1 items-center">
       <TutorialModal
         visible={showTutorialModal}
         onClose={handleSkipTutorial}

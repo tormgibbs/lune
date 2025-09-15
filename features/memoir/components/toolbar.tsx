@@ -18,9 +18,9 @@ interface ToolbarProps {
   onTextFormatPress: () => void
   onImagesPress: () => void
   onSpeechPress: () => void
+  isEditorFocused: boolean
+  dark?: boolean
 }
-
-
 
 const Toolbar: React.FC<ToolbarProps> = ({
   className,
@@ -30,33 +30,45 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onTextFormatPress,
   onImagesPress,
   onSpeechPress,
+  isEditorFocused,
+  dark = false,
 }) => {
+  const iconColor = dark ? '#E8E6D9' : '#333333'
+
   return (
     <KeyboardStickyView
-      style={[{ zIndex: -1, backgroundColor: '#E0DCCC', borderTopColor: '#BFBDB0' }, style]}
       className={cn(
-        'p-4 flex-row items-center justify-around bg-[#E0DCCC] border-t-[#BFBDB0]',
-        className,
-      )}
-    >
-      <Pressable onPress={onTextFormatPress} hitSlop={20}>
-        <CaseSensitive size={24} />
+        'p-4 flex-row items-center justify-around border-t',
+        dark
+          ? 'bg-[#6B7A5C] border-t-[#5A6B4A]'
+          : 'bg-[#E0DCCC] border-t-[#BFBDB0]',
+      )}>
+      <Pressable
+        onPress={onTextFormatPress}
+        hitSlop={20}
+        disabled={!isEditorFocused}
+        style={{ opacity: isEditorFocused ? 1 : 0.5 }}>
+        <CaseSensitive size={24} color={iconColor} />
       </Pressable>
 
       <Pressable onPress={onImagesPress} hitSlop={20}>
-        <Images size={24} />
+        <Images size={24} color={iconColor} />
       </Pressable>
 
       <Pressable onPress={onCameraPress} hitSlop={20}>
-        <Camera size={24} />
+        <Camera size={24} color={iconColor} />
       </Pressable>
 
       <Pressable onPress={onAudioPress} hitSlop={20}>
-        <AudioLines size={24} />
+        <AudioLines size={24} color={iconColor} />
       </Pressable>
 
-      <Pressable onPress={onSpeechPress} hitSlop={20}>
-        <Speech size={24} />
+      <Pressable
+        onPress={onSpeechPress}
+        hitSlop={20}
+        disabled={!isEditorFocused}
+        style={{ opacity: isEditorFocused ? 1 : 0.5 }}>
+        <Speech size={24} color={iconColor} />
       </Pressable>
     </KeyboardStickyView>
   )

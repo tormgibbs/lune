@@ -1,12 +1,10 @@
 import '@/global.css'
-
-// import { ThemeToggle } from '@/components/ThemeToggle'
 import { setAndroidNavigationBar } from '@/lib/android-navigation-bar'
 import { NAV_THEME } from '@/lib/constants'
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet'
-// import { useColorScheme } from '@/lib/useColorScheme'
+import { useColorScheme } from '@/lib/useColorScheme'
 import {
-  // DarkTheme,
+  DarkTheme,
   DefaultTheme,
   Theme,
   ThemeProvider,
@@ -25,10 +23,11 @@ const LIGHT_THEME: Theme = {
   ...DefaultTheme,
   colors: NAV_THEME.light,
 }
-// const DARK_THEME: Theme = {
-//   ...DarkTheme,
-//   colors: NAV_THEME.dark,
-// }
+
+const DARK_THEME: Theme = {
+  ...DarkTheme,
+  colors: NAV_THEME.dark,
+}
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -37,7 +36,7 @@ export {
 
 const usePlatformSpecificSetup = Platform.select({
   web: useSetWebBackgroundClassName,
-  android: useSetAndroidNavigationBar,
+  // android: useSetAndroidNavigationBar,
   default: noop,
 })
 
@@ -45,7 +44,7 @@ SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   usePlatformSpecificSetup()
-  // const { isDarkColorScheme } = useColorScheme()
+  const { isDarkColorScheme } = useColorScheme()
 
   const [loaded] = useDBInitialization()
 
@@ -63,10 +62,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <KeyboardProvider
-          // navigationBarTranslucent={Platform.OS === 'android'}
           preserveEdgeToEdge={Platform.OS === 'android'}
           statusBarTranslucent={Platform.OS === 'android'}>
-          <ThemeProvider value={LIGHT_THEME}>
+          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
             <StatusBar style={'dark'} />
             <Stack
               screenOptions={{
@@ -97,8 +95,12 @@ export default function RootLayout() {
                   animation: 'slide_from_bottom',
                 }}
               />
+              <Stack.Screen name="preferences"
+                options={{
+                  animation: 'flip',
+                }}
+              />
             </Stack>
-            {/* <Toaster /> */}
             <PortalHost name="root-host" />
           </ThemeProvider>
         </KeyboardProvider>

@@ -15,6 +15,8 @@ import { formatDate } from '@/lib/date'
 import CalendarHeader from '@/components/calendar-header'
 import dayjs from 'dayjs'
 import { MarkedDates, Theme } from 'react-native-calendars/src/types'
+import { useColorScheme } from '@/lib/useColorScheme'
+import { cn } from '@/lib/utils'
 
 interface CalendarHeaderStyles {
   dayTextAtIndex0?: TextStyle
@@ -41,29 +43,31 @@ const dayHeaderStyle = {
   color: '#B8B4A7',
 }
 
-const calendarTheme: Theme & {
-  'stylesheet.calendar.header'?: CalendarHeaderStyles
-  'stylesheet.day.basic'?: DayBasicStyles
-  'stylesheet.calendar.main'?: CalendarMainStyles
-} = {
-  backgroundColor: '#9C988B',
-  calendarBackground: '#9C988B',
+// const calendarTheme: Theme & {
+//   'stylesheet.calendar.header'?: CalendarHeaderStyles
+//   'stylesheet.day.basic'?: DayBasicStyles
+//   'stylesheet.calendar.main'?: CalendarMainStyles
+// } = {
+//   backgroundColor: '#9C988B',
+//   calendarBackground: '#9C988B',
 
-  todayTextColor: '#E3E9B9',
-  textDayHeaderFontWeight: '400',
-  textDayFontWeight: 'medium',
+//   todayTextColor: '#E3E9B9',
+//   textDayHeaderFontWeight: '400',
+//   textDayFontWeight: 'medium',
 
-  textDisabledColor: '#8A8680',
-  dayTextColor: '#333333',
+//   textDisabledColor: '#8A8680',
+//   dayTextColor: '#333333',
 
-  'stylesheet.calendar.header': Object.fromEntries(
-    Array(7)
-      .fill(null)
-      .map((_, i) => [`dayTextAtIndex${i}`, dayHeaderStyle]),
-  ),
-}
+//   'stylesheet.calendar.header': Object.fromEntries(
+//     Array(7)
+//       .fill(null)
+//       .map((_, i) => [`dayTextAtIndex${i}`, dayHeaderStyle]),
+//   ),
+// }
 
 const EditDate = () => {
+  const { isDarkColorScheme: dark } = useColorScheme()
+
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
   const createdDate = useMemo(() => formatDate(new Date()), [])
   const createdDateISO = useMemo(
@@ -79,8 +83,6 @@ const EditDate = () => {
 
   const [localDate, setLocalDate] = useState(initialDate)
   const [currentMonth, setCurrentMonth] = useState(initialDate)
-
-
 
   const changeMonth = useCallback(
     (months: number) => {
@@ -100,7 +102,29 @@ const EditDate = () => {
     })
   }
 
-
+  const calendarTheme: Theme = useMemo(
+    () => ({
+      backgroundColor: dark ? '#4A5340' : '#9C988B',
+      calendarBackground: dark ? '#4A5340' : '#9C988B',
+      todayTextColor: dark ? '#E8E6D9' : '#E3E9B9',
+      textDayHeaderFontWeight: '400',
+      textDayFontWeight: 'medium',
+      textDisabledColor: dark ? '#5A6B4D' : '#8A8680',
+      dayTextColor: dark ? '#E8E6D9' : '#333333',
+      'stylesheet.calendar.header': Object.fromEntries(
+        Array(7)
+          .fill(null)
+          .map((_, i) => [
+            `dayTextAtIndex${i}`,
+            {
+              ...dayHeaderStyle,
+              color: dark ? '#B5C2A3' : '#B8B4A7',
+            },
+          ]),
+      ),
+    }),
+    [dark],
+  )
 
   const markedDates: MarkedDates = useMemo(
     () => ({
@@ -108,35 +132,64 @@ const EditDate = () => {
         customStyles: {
           container: {
             borderWidth: 2,
-            borderColor: localDate === today ? '#9FB26C' : '#7A8357',
+            borderColor:
+              localDate === today
+                ? dark
+                  ? '#B5C2A3'
+                  : '#9FB26C'
+                : dark
+                  ? '#657556'
+                  : '#7A8357',
             borderRadius: 20,
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: localDate === today ? '#9FB26C' : '#7A8357',
+            backgroundColor:
+              localDate === today
+                ? dark
+                  ? '#B5C2A3'
+                  : '#9FB26C'
+                : dark
+                  ? '#657556'
+                  : '#7A8357',
           },
           text: {
-            color: localDate === today ? '#FFFFFF' : '#D9E3A6',
+            color:
+              localDate === today
+                ? dark
+                  ? '#2C3526'
+                  : '#FFFFFF'
+                : dark
+                  ? '#E8E6D9'
+                  : '#D9E3A6',
             fontWeight: 'bold',
           },
         },
       },
     }),
-    [localDate, today],
+    [localDate, today, dark],
   )
 
   return (
     <SafeAreaView
-      className="flex-1 p-4 bg-[#E8E6D9]"
+      className={cn('flex-1 p-4', dark ? 'bg-[#899D78]' : 'bg-[#E8E6D9]')}
       edges={['left', 'right', 'bottom']}>
       <Stack.Screen
         options={{
           headerShown: true,
           header: (props) => (
-            <Header {...props} onCancel={handleCancel} onDone={handleDone} />
+            <Header
+              {...props}
+              onCancel={handleCancel}
+              onDone={handleDone}
+              dark={dark}
+            />
           ),
         }}
       />
-      <Text className="text-sm px-4">SELECT CUSTOM DATE</Text>
+      <Text
+        className={cn('text-sm px-4', dark ? 'text-[#E8E6D9]' : 'text-black')}>
+        SELECT CUSTOM DATE
+      </Text>
 
       <Calendar
         firstDay={1}
@@ -154,6 +207,7 @@ const EditDate = () => {
         renderHeader={(date) => (
           <CalendarHeader
             date={date}
+            dark={dark}
             onNextMonth={() => changeMonth(1)}
             onPreviousMonth={() => changeMonth(-1)}
           />
@@ -165,18 +219,43 @@ const EditDate = () => {
       />
 
       <View className="mt-10">
-        <Text className="text-sm px-4">USE DATE FROM</Text>
+        <Text
+          className={cn(
+            'text-sm px-4',
+            dark ? 'text-[#E8E6D9]' : 'text-black',
+          )}>
+          USE DATE FROM
+        </Text>
+
         <Pressable
-          className="flex-row items-center justify-between p-3 bg-[#9C988B] rounded-lg my-2"
+          className={cn(
+            'flex-row items-center justify-between p-3 rounded-lg my-2',
+            dark ? 'bg-[#4A5340]' : 'bg-[#9C988B]',
+          )}
           onPress={() => {
             setLocalDate(createdDateISO)
             setCurrentMonth(createdDateISO)
-            // setSelectedDate(createdDateISO)
           }}>
-          <Text className="text-[#DDD9CC] text-xl">Entry Created</Text>
-          <Text className="text-[#F5F4F0] text-xl">{createdDate}</Text>
+          <Text
+            className={cn(
+              'text-xl',
+              dark ? 'text-[#B5C2A3]' : 'text-[#DDD9CC]',
+            )}>
+            Entry Created
+          </Text>
+          <Text
+            className={cn(
+              'text-xl',
+              dark ? 'text-[#E8E6D9]' : 'text-[#F5F4F0]',
+            )}>
+            {createdDate}
+          </Text>
         </Pressable>
-        <Text className="text-sm px-4">
+        <Text
+          className={cn(
+            'text-sm px-4',
+            dark ? 'text-[#E8E6D9]' : 'text-black',
+          )}>
           Use the date this entry was created.
         </Text>
       </View>

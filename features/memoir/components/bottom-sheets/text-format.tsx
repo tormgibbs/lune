@@ -29,6 +29,7 @@ interface TextFormattingSheetProps {
   onChange?: (index: number) => void
   selectedColor: string
   activeFormats: string[]
+  dark?: boolean
 }
 
 const TextFormattingSheet = ({
@@ -39,6 +40,7 @@ const TextFormattingSheet = ({
   editorRef,
   selectedColor,
   activeFormats,
+  dark = false,
 }: TextFormattingSheetProps) => {
   const handleClosePress = () => {
     bottomSheetRef.current?.close()
@@ -60,7 +62,6 @@ const TextFormattingSheet = ({
     if (!editor) return
     editor.sendAction(action, 'result')
   }
-
 
   const handleBoldPress = () => {
     sendEditorAction(actions.setBold)
@@ -116,84 +117,142 @@ const TextFormattingSheet = ({
       android_keyboardInputMode="adjustPan"
       handleComponent={null}
       backdropComponent={renderBackdrop}
+      enableOverDrag={false}
       onDismiss={() => editorRef.current?.focusContentEditor?.()}
       onChange={onChange}
       backgroundStyle={{
-        backgroundColor: '#E0DCCC',
+        backgroundColor: dark ? '#3A4332' : '#E8E6D9',
       }}
       style={{
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
-        backgroundColor: '#E0DCCC',
+        backgroundColor: dark ? '#3A4332' : '#E8E6D9',
       }}>
-      <BottomSheetView className="p-4 pb-6 bg-[#E0DCCC] rounded-t-lg">
+      <BottomSheetView
+        className={cn(
+          'p-4 pb-6 rounded-t-lg',
+          dark ? 'bg-[#3A4332]' : 'bg-[#E0DCCC]',
+        )}>
         <View className="flex-row items-center justify-between">
-          <Text className="text-2xl font-medium">Format</Text>
+          <Text
+            className={cn(
+              'text-2xl font-medium',
+              dark ? 'text-[#E8E6D9]' : 'text-black',
+            )}>
+            Format
+          </Text>
           <Button
             onPress={handleClosePress}
             variant="secondary"
             size="icon"
-            className="bg-[#F5F2E3] rounded-full">
-            <X color="#6C7A45" />
+            className={cn(
+              'rounded-full',
+              dark ? 'bg-[#4A5340]' : 'bg-[#F5F2E3]',
+            )}>
+            <X color={dark ? '#B5C2A3' : '#6C7A45'} />
           </Button>
         </View>
 
-        <View className="flex-row items-center mt-4 bg-[#F5F2E3] rounded-lg">
+        <View
+          className={cn(
+            'flex-row items-center mt-4 rounded-lg',
+            dark ? 'bg-[#4A5340]' : 'bg-[#F5F2E3]',
+          )}>
           <Pressable
             className={cn(
-              'flex-1 items-center justify-center p-2 py-3',
-              activeFormats.includes('bold') && 'bg-[#C9D0B1] rounded-l-lg',
+              'flex-1 items-center justify-center p-2 py-3 rounded-l-lg',
+              activeFormats.includes('bold') &&
+                (dark ? 'bg-[#5A6B4D]' : 'bg-[#C9D0B1]'),
             )}
             onPress={handleBoldPress}>
             <Bold
-              color={activeFormats.includes('bold') ? '#2F2F2F' : '#6C7A45'}
-              size={20}
-            />
-          </Pressable>
-
-          <Separator orientation="vertical" className="bg-[#A8B594]" />
-
-          <Pressable
-            className={cn(
-              'flex-1 items-center justify-center p-2 py-3',
-              activeFormats.includes('italic') && 'bg-[#C9D0B1]',
-            )}
-            onPress={handleItalicPress}>
-            <Italic
-              color={activeFormats.includes('italic') ? '#2F2F2F' : '#6C7A45'}
-              size={20}
-            />
-          </Pressable>
-
-          <Separator orientation="vertical" className="bg-[#A8B594]" />
-
-          <Pressable
-            className={cn(
-              'flex-1 items-center justify-center p-2 py-3',
-              activeFormats.includes('underline') && 'bg-[#C9D0B1]',
-            )}
-            onPress={handleUnderlinePress}>
-            <Underline
               color={
-                activeFormats.includes('underline') ? '#2F2F2F' : '#6C7A45'
+                activeFormats.includes('bold')
+                  ? dark
+                    ? '#E8E6D9'
+                    : '#2F2F2F'
+                  : dark
+                    ? '#B5C2A3'
+                    : '#6C7A45'
               }
               size={20}
             />
           </Pressable>
 
-          <Separator orientation="vertical" className="bg-[#A8B594]" />
+          <Separator
+            orientation="vertical"
+            className={cn(dark ? 'bg-[#373E31]' : 'bg-[#A8B594]')}
+          />
 
           <Pressable
             className={cn(
               'flex-1 items-center justify-center p-2 py-3',
+              activeFormats.includes('italic') &&
+                (dark ? 'bg-[#5A6B4D]' : 'bg-[#C9D0B1]'),
+            )}
+            onPress={handleItalicPress}>
+            <Italic
+              color={
+                activeFormats.includes('italic')
+                  ? dark
+                    ? '#E8E6D9'
+                    : '#2F2F2F'
+                  : dark
+                    ? '#B5C2A3'
+                    : '#6C7A45'
+              }
+              size={20}
+            />
+          </Pressable>
+
+          <Separator
+            orientation="vertical"
+            className={cn(dark ? 'bg-[#373E31]' : 'bg-[#A8B594]')}
+          />
+
+          <Pressable
+            className={cn(
+              'flex-1 items-center justify-center p-2 py-3',
+              activeFormats.includes('underline') &&
+                (dark ? 'bg-[#5A6B4D]' : 'bg-[#C9D0B1]'),
+            )}
+            onPress={handleUnderlinePress}>
+            <Underline
+              color={
+                activeFormats.includes('underline')
+                  ? dark
+                    ? '#E8E6D9'
+                    : '#2F2F2F'
+                  : dark
+                    ? '#B5C2A3'
+                    : '#6C7A45'
+              }
+              size={20}
+            />
+          </Pressable>
+
+          <Separator
+            orientation="vertical"
+            className={cn(dark ? 'bg-[#373E31]' : 'bg-[#A8B594]')}
+          />
+
+          <Pressable
+            className={cn(
+              'flex-1 items-center justify-center p-2 py-3 rounded-r-lg',
               activeFormats.includes('strikeThrough') &&
-                'bg-[#C9D0B1] rounded-r-lg',
+                (dark ? 'bg-[#5A6B4D]' : 'bg-[#C9D0B1]'),
             )}
             onPress={handleStrikethroughPress}>
             <Strikethrough
               color={
-                activeFormats.includes('strikeThrough') ? '#2F2F2F' : '#6C7A45'
+                activeFormats.includes('strikeThrough')
+                  ? dark
+                    ? '#E8E6D9'
+                    : '#2F2F2F'
+                  : dark
+                    ? '#B5C2A3'
+                    : '#6C7A45'
               }
               size={20}
             />
@@ -201,36 +260,53 @@ const TextFormattingSheet = ({
         </View>
 
         <View className="flex-row w-full items-stretch mt-4 gap-4">
-          <View className="flex-1 flex-row bg-[#F5F2E3] rounded-lg h-auto">
+          <View
+            className={cn(
+              'flex-1 flex-row rounded-lg h-auto',
+              dark ? 'bg-[#4A5340]' : 'bg-[#F5F2E3]',
+            )}>
             <Pressable
               className={cn(
-                'flex-1 items-center justify-center p-2 py-3',
+                'flex-1 items-center justify-center p-2 py-3 rounded-l-lg',
                 activeFormats.includes('unorderedList') &&
-                  'bg-[#C9D0B1] rounded-l-lg',
+                  (dark ? 'bg-[#5A6B4D]' : 'bg-[#C9D0B1]'),
               )}
               onPress={handleBulletListPress}>
               <List
                 color={
                   activeFormats.includes('unorderedList')
-                    ? '#2F2F2F'
-                    : '#6C7A45'
+                    ? dark
+                      ? '#E8E6D9'
+                      : '#2F2F2F'
+                    : dark
+                      ? '#B5C2A3'
+                      : '#6C7A45'
                 }
                 size={20}
               />
             </Pressable>
 
-            <Separator orientation="vertical" className="bg-[#A8B594]" />
+            <Separator
+              orientation="vertical"
+              className={cn(dark ? 'bg-[#373E31]' : 'bg-[#A8B594]')}
+            />
 
             <Pressable
               className={cn(
-                'flex-1 items-center justify-center p-2 py-3',
+                'flex-1 items-center justify-center p-2 py-3 rounded-r-lg',
                 activeFormats.includes('orderedList') &&
-                  'bg-[#C9D0B1] rounded-r-lg',
+                  (dark ? 'bg-[#5A6B4D]' : 'bg-[#C9D0B1]'),
               )}
               onPress={handleOrderedListPress}>
               <ListOrdered
                 color={
-                  activeFormats.includes('orderedList') ? '#2F2F2F' : '#6C7A45'
+                  activeFormats.includes('orderedList')
+                    ? dark
+                      ? '#E8E6D9'
+                      : '#2F2F2F'
+                    : dark
+                      ? '#B5C2A3'
+                      : '#6C7A45'
                 }
                 size={20}
               />
@@ -239,9 +315,17 @@ const TextFormattingSheet = ({
 
           <View className="flex-row justify-between gap-5">
             <Pressable
-              className="items-center justify-center bg-[#F5F2E3] rounded-lg px-6 py-3 active:bg-[#C9D0B1]"
+              className={cn(
+                'items-center justify-center rounded-lg px-6 py-3',
+                dark
+                  ? 'bg-[#4A5340] active:bg-[#5A6B4D]'
+                  : 'bg-[#F5F2E3] active:bg-[#C9D0B1]',
+              )}
               onPress={handleQuotePress}>
-              <MessageSquareQuote color="#6C7A45" size={20} />
+              <MessageSquareQuote
+                color={dark ? '#B5C2A3' : '#6C7A45'}
+                size={20}
+              />
             </Pressable>
 
             <ColorPickerButton
@@ -256,3 +340,12 @@ const TextFormattingSheet = ({
 }
 
 export default TextFormattingSheet
+
+{
+  /*
+  className={cn(
+                'items-center justify-center bg-[#F5F2E3] rounded-lg px-6 py-3 active:bg-[#C9D0B1]',
+                dark ? 'bg-[#4A5340] active:bg-[#5A6B4D]' : 'bg-[#F5F2E3] active:bg-[#C9D0B1]'
+              )}
+*/
+}

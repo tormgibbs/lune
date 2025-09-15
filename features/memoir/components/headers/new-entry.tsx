@@ -34,6 +34,7 @@ type HeaderProps = {
   onBookmarkPress: () => void
   bookmarked?: boolean
   titleVisible?: boolean
+  dark?: boolean
 }
 
 export const Header = forwardRef(
@@ -47,6 +48,7 @@ export const Header = forwardRef(
       onBookmarkPress,
       bookmarked,
       titleVisible = true,
+      dark = false,
     }: HeaderProps,
     ref,
   ) => {
@@ -71,13 +73,21 @@ export const Header = forwardRef(
             }),
             paddingBottom: 10,
             paddingHorizontal: 20,
-            backgroundColor: '#E8E6D9',
+            backgroundColor: dark ? '#7B8C69' : '#E8E6D9',
           }}>
           <View className="relative flex-row items-center justify-between">
             <Pressable hitSlop={10} onPress={onBookmarkPress}>
               <Bookmark
-                color={bookmarked ? '#6C7A45' : '#6C7A45'} // darker if active
-                fill={bookmarked ? '#6C7A45' : 'none'} // filled when active
+                color={dark ? (bookmarked ? '#E8E6D9' : '#E8E6D9') : '#6C7A45'}
+                fill={
+                  dark
+                    ? bookmarked
+                      ? '#E8E6D9'
+                      : 'none'
+                    : bookmarked
+                      ? '#6C7A45'
+                      : 'none'
+                }
                 size={Platform.select({
                   ios: 28,
                   android: 24,
@@ -87,9 +97,10 @@ export const Header = forwardRef(
             </Pressable>
 
             <Text
-              style={CENTERED_TEXT_STYLE()}
+              style={CENTERED_TEXT_STYLE(dark ? '#E8E6D9' : '#2B311A')}
               className={cn(
                 'font-medium',
+                // dark ? 'text-[#E8E6D9]' : 'text-[#2B311A]',
                 // 'absolute text-[#2B311A] font-medium left-1/2 transform -translate-x-1/2',
                 Platform.select({
                   ios: 'text-xl',
@@ -105,7 +116,7 @@ export const Header = forwardRef(
                 <PopoverTrigger ref={triggerRef} asChild>
                   <Pressable className={isPopoverOpen ? 'opacity-50' : ''}>
                     <CircleEllipsis
-                      color="#6C7A45"
+                      color={dark ? '#E8E6D9' : '#6C7A45'}
                       size={Platform.select({
                         ios: 28,
                         android: 24,
@@ -122,22 +133,47 @@ export const Header = forwardRef(
                   alignOffset={-4}
                   sideOffset={8}
                   style={{ minWidth: 160, zIndex: 9999 }}
-                  className="w-auto py-0 px-0 bg-[#EDE9D5] border border-[#6C7A45]/20 rounded-2xl overflow-hidden">
+                  className={cn(
+                    'w-auto py-0 px-0 border rounded-2xl overflow-hidden',
+                    dark
+                      ? 'bg-[#6F8060] border-[#5A6B4A]/30'
+                      : 'bg-[#EDE9D5] border-[#6C7A45]/20',
+                  )}>
                   <MenuItem
                     label="Edit Date"
-                    icon={<CalendarDays size={20} />}
+                    icon={
+                      <CalendarDays
+                        size={20}
+                        color={dark ? '#E8E6D9' : '#2B311A'}
+                      />
+                    }
                     onPress={() => {
                       triggerRef.current?.close?.()
                       onEditDate()
                     }}
                     rounded="top"
+                    dark={dark}
                   />
 
-                  <Separator className="h-[1px] bg-[#D4CDB3]" />
+                  <Separator
+                    className={cn(
+                      'h-[1px]',
+                      dark ? 'bg-[#A3B587]' : 'bg-[#D4CDB3]',
+                    )}
+                  />
+
                   <MenuItem
                     label={titleVisible ? 'Hide Title' : 'Show Title'}
+                    dark={dark}
                     icon={
-                      titleVisible ? <EyeOff size={20} /> : <Eye size={20} />
+                      titleVisible ? (
+                        <EyeOff
+                          size={20}
+                          color={dark ? '#E8E6D9' : '#2B311A'}
+                        />
+                      ) : (
+                        <Eye size={20} color={dark ? '#E8E6D9' : '#2B311A'} />
+                      )
                     }
                     onPress={() => {
                       triggerRef.current?.close?.()
@@ -145,16 +181,23 @@ export const Header = forwardRef(
                     }}
                   />
 
-                  <Separator className="h-[1px] bg-[#D4CDB3]" />
+                  <Separator
+                    className={cn(
+                      'h-[1px]',
+                      dark ? 'bg-[#A3B587]' : 'bg-[#D4CDB3]',
+                    )}
+                  />
+
                   <MenuItem
                     label="Delete"
-                    icon={<Trash2 size={20} color="#A34B3D" />}
+                    icon={<Trash2 size={20} color="#DC2626" />}
                     onPress={() => {
                       triggerRef.current?.close?.()
                       onDelete()
                     }}
                     danger
                     rounded="bottom"
+                    dark={dark}
                   />
                 </PopoverContent>
               </Popover>
@@ -167,7 +210,8 @@ export const Header = forwardRef(
                 }}>
                 <Text
                   className={cn(
-                    'text-[#6C7A45] font-medium',
+                    'font-medium',
+                    dark ? 'text-[#D4E6C7]' : 'text-[#6C7A45]',
                     Platform.select({
                       ios: 'text-xl',
                       android: 'text-lg',

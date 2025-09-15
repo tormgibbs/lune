@@ -5,7 +5,7 @@ import TextFormattingSheet from '@/features/memoir/components/bottom-sheets/text
 import { Header } from '@/features/memoir/components/headers/new-entry'
 import Toolbar from '@/features/memoir/components/toolbar'
 import { formatDate } from '@/lib/date'
-import { deriveCategories, normalizeColor } from '@/lib/utils'
+import { cn, deriveCategories, normalizeColor } from '@/lib/utils'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
 import {
@@ -37,10 +37,12 @@ import { persistMediaAsset } from '@/lib/media'
 import ResponsiveMediaGrid from '@/components/responsive-media-grid'
 import { useMemoirActions } from '@/hooks/use-memoir-actions'
 import { Toaster } from 'sonner-native'
+import { useColorScheme } from '@/lib/useColorScheme'
 
 const Index = () => {
   const router = useRouter()
   const navigation = useNavigation()
+  const { isDarkColorScheme: dark } = useColorScheme()
 
   const { id, date } = useLocalSearchParams<{ id: string; date: string }>()
 
@@ -72,6 +74,7 @@ const Index = () => {
 
   const [selectedColor, setSelectedColor] = useState<string>('#6C7A45')
   const [activeFormats, setActiveFormats] = useState<string[]>([])
+  const [editorFocused, setEditorFocused] = useState(false)
   // const [titleVisible, setTitleVisible] = useState(
   //   existingMemoir?.titleVisible ?? true,
   // )
@@ -381,7 +384,10 @@ const Index = () => {
 
   return (
     <SafeAreaView
-      className="flex-1 bg-[#E8E6D9]"
+      className={cn(
+        'flex-1',
+        dark ? 'bg-[#899D78]' : 'bg-[#E8E6D9]',
+      )}
       edges={['left', 'right', 'bottom']}>
       <PortalHost name="memoirs-host" />
       <Stack.Screen
@@ -393,6 +399,7 @@ const Index = () => {
               onEditDate={handleEditDate}
               onDelete={handleDelete}
               onDone={handleDone}
+              dark={dark}
               onBookmarkPress={() => {
                 if (existingMemoir) {
                   toggleBookmark(existingMemoir.id)
@@ -442,12 +449,14 @@ const Index = () => {
           bottomSheetRef={colorPickerSheetRef}
           onColorSelect={handleColorSelect}
           selectedColor={selectedColor}
+          dark={dark}
         />
       </Lazy>
 
       <Lazy>
         <VoiceInputSheet
           bottomSheetRef={voiceInputSheetRef}
+          dark={dark}
           onDismiss={() => {
             // richEditorRef.current?.focusContentEditor()
           }}
@@ -482,6 +491,7 @@ const Index = () => {
             colorPickerSheetRef.current?.present()
           }}
           activeFormats={activeFormats}
+          dark={dark}
         />
       </Lazy>
 
@@ -489,13 +499,14 @@ const Index = () => {
         <AudioRecorderSheet
           audioSheetRef={audioSheetRef}
           onRecordingComplete={handleRecordingComplete}
+          dark={dark}
         />
       </Lazy>
 
       <KeyboardAwareScrollView
         ref={scrollRef}
         style={{ zIndex: -1 }}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         nestedScrollEnabled={true}>
         <View className="flex-1 p-4 pt-2">
           <Lazy>
@@ -528,6 +539,8 @@ const Index = () => {
             keyboardDisplayRequiresUserAction={false}
             useContainer={true}
             initialContentHTML={contentRef.current}
+            onFocus={() => setEditorFocused(true)}
+            onBlur={() => setEditorFocused(false)}
             onCursorPosition={(scrollY) => {
               scrollRef.current?.scrollTo({ y: scrollY - 30, animated: true })
             }}
@@ -551,11 +564,13 @@ const Index = () => {
         </View>
       </KeyboardAwareScrollView>
       <Toolbar
+        isEditorFocused={editorFocused}
         onAudioPress={handleAudioRecordPress}
         onCameraPress={handleCameraPress}
         onTextFormatPress={handleTextFormatPress}
         onImagesPress={pickMedia}
         onSpeechPress={handleSpeechPress}
+        dark={dark}
       />
       {/* <Toaster swipeToDismissDirection="left" /> */}
     </SafeAreaView>

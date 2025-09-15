@@ -1,4 +1,12 @@
-import { View, Text, Pressable, Animated, Alert, Linking, BackHandler } from 'react-native'
+import {
+  View,
+  Text,
+  Pressable,
+  Animated,
+  Alert,
+  Linking,
+  BackHandler,
+} from 'react-native'
 import { RefObject, useEffect, useRef, useState } from 'react'
 import {
   BottomSheetBackdrop,
@@ -13,15 +21,18 @@ import {
   Waveform,
   useAudioPermission,
 } from '@simform_solutions/react-native-audio-waveform'
+import { cn } from '@/lib/utils'
 
 interface AudioRecorderSheetProps {
   audioSheetRef: RefObject<BottomSheetModal | null>
   onRecordingComplete?: (path: string) => void
+  dark?: boolean
 }
 
 const AudioRecorderSheet = ({
   audioSheetRef,
   onRecordingComplete,
+  dark = false,
 }: AudioRecorderSheetProps) => {
   const waveformRef = useRef<IWaveformRef>(null)
   const [recorderState, setRecorderState] = useState(RecorderState.stopped)
@@ -120,9 +131,9 @@ const AudioRecorderSheet = ({
 
   return (
     <BottomSheetModal
-      backgroundStyle={{
-        backgroundColor: '#E0DCCC',
-      }}
+      // backgroundStyle={{
+      //   backgroundColor: '#E0DCCC',
+      // }}
       ref={audioSheetRef}
       enablePanDownToClose
       keyboardBehavior="extend"
@@ -160,11 +171,19 @@ const AudioRecorderSheet = ({
         borderTopRightRadius: 20,
         overflow: 'hidden',
       }}>
-      <BottomSheetView className="px-4 pb-6 pt-8 bg-[#E0DCCC]">
+      <BottomSheetView
+        className={cn(
+          'px-4 pb-6 pt-8',
+          dark ? 'bg-[#3A4332]' : 'bg-[#E0DCCC]',
+        )}>
         <View className="relative mb-2">
           {!isRecording && (
             <View className="absolute w-full h-[100px] items-center justify-center">
-              <Text className="text-lg text-[#6C7A45]">
+              <Text
+                className={cn(
+                  'text-lg',
+                  dark ? 'text-[#B5C2A3]' : 'text-[#6C7A45]',
+                )}>
                 Start Audio Recording
               </Text>
             </View>
@@ -177,7 +196,7 @@ const AudioRecorderSheet = ({
             candleWidth={4}
             candleHeightScale={10}
             maxCandlesToRender={500}
-            waveColor="#6C7A45"
+            waveColor={dark ? '#B5C2A3' : '#6C7A45'}
             onRecorderStateChange={setRecorderState}
             containerStyle={{
               backgroundColor: 'transparent',
@@ -189,9 +208,16 @@ const AudioRecorderSheet = ({
 
         <View className="items-center p-4">
           <Pressable
-            className="p-1 bg-[#6C7A45] rounded-full"
+            className={cn(
+              'p-1 rounded-full',
+              dark ? 'bg-[#B5C2A3]' : 'bg-[#6C7A45]',
+            )}
             onPress={handleRecorderAction}>
-            <View className="p-1 rounded-full bg-[#E0DCCC]">
+            <View
+              className={cn(
+                'p-1 rounded-full',
+                dark ? 'bg-[#3A4332]' : 'bg-[#E0DCCC]',
+              )}>
               <Animated.View
                 className="p-8 bg-red-500"
                 style={{

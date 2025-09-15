@@ -7,8 +7,12 @@ import { useMemoirStore } from '@/store/memoir'
 import CategoriesList from '@/components/search/categories-list'
 import SearchResults from '@/components/search/search-results'
 import SearchBar from '@/components/search/search-bar'
+import { useColorScheme } from '@/lib/useColorScheme'
+import { BottomSheetProvider } from '@/components/bottom-sheet-provider'
 
 const Search = () => {
+  const { isDarkColorScheme: dark } = useColorScheme()
+
   const searchQuery = useMemoirStore((s) => s.searchQuery)
   const setSearchQuery = useMemoirStore((s) => s.setSearchQuery)
   const results = useMemoirStore((s) => s.searchResults)
@@ -41,7 +45,6 @@ const Search = () => {
     }, [handleBack, setSearchQuery, setSelectedCategory]),
   )
 
-
   return (
     <SafeAreaView className="flex-1">
       <Stack.Screen
@@ -49,20 +52,23 @@ const Search = () => {
           animation: 'slide_from_bottom',
         }}
       />
-      <SearchBar
-        inputRef={inputRef}
-        setSearchQuery={setSearchQuery}
-        searchQuery={searchQuery}
-        onCancel={handleBack}
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
+      <BottomSheetProvider>
+        <SearchBar
+          dark={dark}
+          inputRef={inputRef}
+          setSearchQuery={setSearchQuery}
+          searchQuery={searchQuery}
+          onCancel={handleBack}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+        />
 
-      {!hasQuery ? (
-        <CategoriesList onSelect={setSelectedCategory} />
-      ) : (
-        <SearchResults results={results} />
-      )}
+        {!hasQuery ? (
+          <CategoriesList onSelect={setSelectedCategory} dark={dark} />
+        ) : (
+          <SearchResults results={results} dark={dark} />
+        )}
+      </BottomSheetProvider>
     </SafeAreaView>
   )
 }

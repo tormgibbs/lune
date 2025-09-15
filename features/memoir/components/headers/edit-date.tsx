@@ -7,9 +7,10 @@ import { CENTERED_TEXT_STYLE } from '@/lib/constants'
 interface HeaderProps {
   onCancel: () => void
   onDone: () => void
+  dark?: boolean
 }
 
-const Header = ({ onCancel, onDone }: HeaderProps) => {
+const Header = ({ onCancel, onDone, dark }: HeaderProps) => {
   const insets = useSafeAreaInsets()
   return (
     <View
@@ -21,14 +22,14 @@ const Header = ({ onCancel, onDone }: HeaderProps) => {
         }),
         paddingBottom: 10,
         paddingHorizontal: 20,
-        backgroundColor: '#E8E6D9',
+        backgroundColor: dark ? '#899D78' : '#E8E6D9',
       }}
     >
       <View className="relative flex-row items-center justify-between">
         <Pressable className="active:opacity-50" onPress={onCancel}>
           <Text
             className={cn(
-              'text-[#6C7A45]',
+              dark ? 'text-[#E8E6D9]' : 'text-[#6C7A45]',
               Platform.select({
                 ios: 'text-xl',
                 android: 'text-lg',
@@ -39,7 +40,7 @@ const Header = ({ onCancel, onDone }: HeaderProps) => {
           </Text>
         </Pressable>
         <Text
-          style={CENTERED_TEXT_STYLE()}
+          style={CENTERED_TEXT_STYLE(dark ? '#E8E6D9' : '#2B311A')}
           className={cn(
             // 'text-[#2B311A] absolute left-1/2 transform -translate-x-1/2',
             Platform.select({
@@ -53,7 +54,7 @@ const Header = ({ onCancel, onDone }: HeaderProps) => {
         <Pressable className="active:opacity-50" onPress={onDone}>
           <Text
             className={cn(
-              'text-[#6C7A45]',
+              dark ? 'text-[#E8E6D9]' : 'text-[#6C7A45]',
               Platform.select({
                 ios: 'text-xl font-medium',
                 android: 'text-lg font-medium',
@@ -69,11 +70,3 @@ const Header = ({ onCancel, onDone }: HeaderProps) => {
 }
 
 export default Header
-
-const styles = StyleSheet.create({
-  header: {
-    position: 'absolute',
-    left: '50%',
-    transform: [{ translateX: -50 }],
-  }
-})

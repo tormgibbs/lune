@@ -28,6 +28,7 @@ import { ComponentRef, useEffect, useRef, useState } from 'react'
 import ResponsiveMediaGrid from './responsive-media-grid'
 import { cn } from '@/lib/utils'
 import { useBottomSheet } from './bottom-sheet-provider'
+import { useColorScheme } from '@/lib/useColorScheme'
 
 interface MemoirItemProps {
   memoir: Memoir
@@ -42,69 +43,6 @@ const customHTMLElementModels = {
     tagName: 'font',
     contentModel: HTMLContentModel.mixed,
   }),
-}
-
-const renderers = {
-  font: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
-    const { color, size, face } = tnode.attributes
-    const style = {
-      color: color || undefined,
-      fontSize: size ? parseInt(size) : undefined,
-      fontFamily: face || undefined,
-    }
-
-    return (
-      <Text style={style}>
-        <TDefaultRenderer tnode={tnode} {...props} />
-      </Text>
-    )
-  },
-  b: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
-    return (
-      <Text style={{ fontWeight: 'bold' }}>
-        <TDefaultRenderer tnode={tnode} {...props} />
-      </Text>
-    )
-  },
-  i: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
-    return (
-      <Text style={{ fontStyle: 'italic' }}>
-        <TDefaultRenderer tnode={tnode} {...props} />
-      </Text>
-    )
-  },
-  u: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
-    return (
-      <Text style={{ textDecorationLine: 'underline' }}>
-        <TDefaultRenderer tnode={tnode} {...props} />
-      </Text>
-    )
-  },
-  strike: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
-    return (
-      <Text style={{ textDecorationLine: 'line-through' }}>
-        <TDefaultRenderer tnode={tnode} {...props} />
-      </Text>
-    )
-  },
-  blockquote: ({
-    tnode,
-    TDefaultRenderer,
-    ...props
-  }: CustomRendererProps<any>) => {
-    return (
-      <View
-        style={{
-          borderLeftWidth: 4,
-          borderLeftColor: '#9CA082',
-          borderRadius: 2,
-          paddingLeft: 5,
-          marginVertical: 2,
-        }}>
-        <TDefaultRenderer tnode={tnode} {...props} />
-      </View>
-    )
-  },
 }
 
 const cleanHtml = (html: string) => {
@@ -144,6 +82,8 @@ const MemoirItem = ({
   onMediaPress,
   onBookmarkPress,
 }: MemoirItemProps) => {
+  const { isDarkColorScheme: dark } = useColorScheme()
+
   const width = useWindowDimensions().width - 32
   const swipeableRef = useRef<ComponentRef<typeof Swipeable>>(null)
 
@@ -178,8 +118,78 @@ const MemoirItem = ({
 
   const bookmarkStyle = useAnimatedStyle(() => ({
     transform: [{ scale: bookmarkScale.value }],
-    opacity: bookmarkScale.value, // optional fade
+    opacity: bookmarkScale.value,
   }))
+
+
+  const renderers = {
+    font: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+      const { color, size, face } = tnode.attributes
+      const style = {
+        color: color ?? undefined,
+        fontSize: size ? parseInt(size) : undefined,
+        fontFamily: face || undefined,
+      }
+
+      console.log('font tag', tnode.attributes, style)
+
+      return (
+        <Text style={style}>
+          <TDefaultRenderer tnode={tnode} {...props} />
+        </Text>
+      )
+    },
+    b: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+      return (
+        <Text style={{ fontWeight: 'bold' }}>
+          <TDefaultRenderer tnode={tnode} {...props} />
+        </Text>
+      )
+    },
+    i: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+      return (
+        <Text style={{ fontStyle: 'italic' }}>
+          <TDefaultRenderer tnode={tnode} {...props} />
+        </Text>
+      )
+    },
+    u: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
+      return (
+        <Text style={{ textDecorationLine: 'underline' }}>
+          <TDefaultRenderer tnode={tnode} {...props} />
+        </Text>
+      )
+    },
+    strike: ({
+      tnode,
+      TDefaultRenderer,
+      ...props
+    }: CustomRendererProps<any>) => {
+      return (
+        <Text style={{ textDecorationLine: 'line-through' }}>
+          <TDefaultRenderer tnode={tnode} {...props} />
+        </Text>
+      )
+    },
+    blockquote: ({
+      tnode,
+      TDefaultRenderer,
+      ...props
+    }: CustomRendererProps<any>) => {
+      return (
+        <View
+          style={{
+            borderLeftWidth: 4,
+            borderLeftColor: '#9CA082',
+            borderRadius: 2,
+            paddingLeft: 5,
+            marginVertical: 2,
+          }}>
+          <TDefaultRenderer tnode={tnode} {...props} />
+        </View>
+      )
+    },
+  }
 
   useEffect(() => {
     bookmarkScale.value = memoir.bookmark
@@ -196,10 +206,15 @@ const MemoirItem = ({
           onEdit={handleEdit}
           onDelete={handleDelete}
           memoirId={memoir.id}
+          dark={dark}
         />
       )}>
       <View className="px-4">
-        <View className="px-2 py-2 bg-[#E6E9D8] rounded-xl">
+        <View
+          className={cn(
+            'px-2 py-2 rounded-xl',
+            dark ? 'bg-[#D5D6AA]/30' : 'bg-[#E6E9D8]',
+          )}>
           <ResponsiveMediaGrid
             media={memoir.media ?? []}
             editable={false}
@@ -211,7 +226,13 @@ const MemoirItem = ({
           <View
             className={cn(memoir.title || memoir.content ? 'py-2' : 'py-0')}>
             {memoir.title && memoir.titleVisible && (
-              <Text className="text-base font-semibold">{memoir.title}</Text>
+              <Text
+                className={cn(
+                  'text-base font-semibold',
+                  dark ? 'text-[#E8E5D8]' : 'text-black',
+                )}>
+                {memoir.title}
+              </Text>
             )}
             {memoir.content && (
               <Pressable
@@ -222,6 +243,9 @@ const MemoirItem = ({
                   source={{ html: displayedContent }}
                   customHTMLElementModels={customHTMLElementModels}
                   renderers={renderers}
+                  // baseStyle={{
+                  //   color: dark ? '#F5F4EF' : '#000000',
+                  // }}
                 />
                 {isTruncated && (
                   <View className="absolute bottom-[-10px] right-2">
@@ -231,15 +255,25 @@ const MemoirItem = ({
               </Pressable>
             )}
           </View>
-          <Separator className="my-1 bg-[#9CA082]" />
+          <Separator
+            className={cn('my-1', dark ? 'bg-[#B5C599]' : 'bg-[#9CA082]')}
+          />
           <View className="flex-row items-center justify-between">
-            <Text className="text-sm font-medium text-gray-500">
+            <Text
+              className={cn(
+                'text-sm font-medium',
+                dark ? 'text-[#A3B587]' : 'text-gray-500',
+              )}>
               {formatDate(memoir.date)}
             </Text>
 
             <View className="flex-row items-center gap-5">
               <Animated.View style={bookmarkStyle}>
-                <Bookmark size={16} fill="#6C7A45" color="#6C7A45" />
+                <Bookmark
+                  size={16}
+                  fill={dark ? '#D8E0CC' : '#6C7A45'}
+                  color={dark ? '#D8E0CC' : '#6C7A45'}
+                />
               </Animated.View>
 
               <Pressable
@@ -253,7 +287,7 @@ const MemoirItem = ({
                     onBookmarkPress,
                   })
                 }>
-                <Ellipsis size={20} color="gray" />
+                <Ellipsis size={20} color={dark ? '#D8E0CC' : '#6C7A45'} />
               </Pressable>
             </View>
           </View>
@@ -270,11 +304,13 @@ const RightActions = ({
   onEdit,
   onDelete,
   memoirId,
+  dark = false,
 }: {
   progress: SharedValue<number>
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
   memoirId: string
+  dark: boolean
 }) => {
   const editStyle = useAnimatedStyle(() => ({
     transform: [
@@ -296,7 +332,10 @@ const RightActions = ({
         <Button
           size="icon"
           variant="secondary"
-          className="rounded-full p-7 bg-[#2b311a]"
+          className={cn(
+            'rounded-full p-7',
+            dark ? 'bg-[#8B9C6B]' : 'bg-[#2b311a]',
+          )}
           onPress={() => onEdit?.(memoirId)}>
           <Pen color="white" size={28} />
         </Button>

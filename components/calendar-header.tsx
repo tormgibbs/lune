@@ -9,19 +9,22 @@ interface CalendarHeaderProps {
   date: Date
   onNextMonth: () => void
   onPreviousMonth: () => void
+  dark?: boolean
 }
 
 const CalendarHeader = ({
   date,
   onNextMonth,
   onPreviousMonth,
+  dark = false,
 }: CalendarHeaderProps) => {
   return (
     <View>
       <View className="w-full flex-row items-center justify-between">
         <Text
           className={cn(
-            'text-[#2B311A] font-medium',
+            'font-medium',
+            dark ? 'text-[#E8E6D9]' : 'text-[#2B311A]',
             Platform.select({
               ios: 'text-xl',
               android: 'text-lg',
@@ -33,7 +36,7 @@ const CalendarHeader = ({
         <View className="flex-row">
           <Button onPress={onPreviousMonth} size="icon" variant="link">
             <ChevronLeft
-              color='#2B311A'
+              color={dark ? '#E8E6D9' : '#2B311A'}
               size={Platform.select({
                 ios: 28,
                 android: 24,
@@ -44,7 +47,7 @@ const CalendarHeader = ({
 
           <Button onPress={onNextMonth} size="icon" variant="link">
             <ChevronRight
-              color='#2B311A'
+              color={dark ? '#E8E6D9' : '#2B311A'}
               size={Platform.select({
                 ios: 28,
                 android: 24,

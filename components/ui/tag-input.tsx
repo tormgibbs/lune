@@ -1,4 +1,5 @@
 import { Category, CategoryLabels } from '@/db/schema'
+import { cn } from '@/lib/utils'
 import { X } from 'lucide-react-native'
 import React, { useRef } from 'react'
 import {
@@ -16,6 +17,7 @@ interface TagInputProps {
   placeholder?: string
   onChangeTags: (tags: Category[]) => void
   setSearchQuery: (query: string) => void
+  dark?: boolean
 }
 
 const TagInput = ({
@@ -24,6 +26,7 @@ const TagInput = ({
   placeholder,
   setSearchQuery,
   searchQuery,
+  dark = false,
 }: TagInputProps) => {
   const selectionRef = useRef({ start: 0, end: 0 })
 
@@ -54,20 +57,30 @@ const TagInput = ({
   }
 
   return (
-    <View className="flex-row flex-1 items-center bg-[#E8E6D9] rounded-lg p-0">
+    <View
+      className={cn(
+        'flex-row flex-1 items-center rounded-lg p-0',
+        dark ? 'bg-[#4A5340]' : 'bg-[#E8E6D9]',
+      )}>
       {tags.map((tag) => (
         <View
           key={tag}
-          className="flex-row items-center gap-0.5 bg-[#D4D2C7] p-1 px-1.5 rounded-md">
-          <Text className="text-sm">{CategoryLabels[tag]}</Text>
+          className={cn(
+            'flex-row items-center gap-0.5 p-1 px-1.5 rounded-md',
+            dark ? 'bg-[#5A6B4D]' : 'bg-[#D4D2C7]',
+          )}>
+          <Text
+            className={cn('text-sm', dark ? 'text-[#E8E6D9]' : 'text-black')}>
+            {CategoryLabels[tag]}
+          </Text>
           <Pressable hitSlop={8} onPress={() => handleRemoveTag(tag)}>
-            <X size={12} />
+            <X size={12} color={dark ? '#E8E6D9' : 'black'} />
           </Pressable>
         </View>
       ))}
       <TextInput
         autoFocus
-        className="flex-1 text-black px-0.5"
+        className={cn('flex-1 px-0.5', dark ? 'text-[#E8E6D9]' : 'text-black')}
         value={searchQuery}
         onChangeText={setSearchQuery}
         onSubmitEditing={handleAddTag}
@@ -76,7 +89,7 @@ const TagInput = ({
         }}
         onKeyPress={handleKeyPress}
         placeholder={placeholder}
-        placeholderTextColor="#666"
+        placeholderTextColor={dark ? '#B5C2A3' : '#666'}
         returnKeyType="done"
       />
     </View>

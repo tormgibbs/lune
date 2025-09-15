@@ -12,6 +12,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({
   onPress,
 }) => {
   const { isDarkColorScheme: dark } = useColorScheme()
+
   return (
     <Button
       variant="secondary"

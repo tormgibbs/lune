@@ -10,13 +10,26 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Category } from '@/db/schema'
 import { cn } from '@/lib/utils'
+import { FontSize } from '@/lib/use-font-size'
 
 interface CategoriesListProps {
   onSelect: (cat: Category) => void
   dark?: boolean
+  fontSize?: FontSize
 }
 
-const CategoriesList = ({ onSelect, dark = false }: CategoriesListProps) => {
+const CategoriesList = ({
+  onSelect,
+  dark = false,
+  fontSize = 'medium',
+}: CategoriesListProps) => {
+  const iconSize = fontSize === 'small' ? 18 : fontSize === 'medium' ? 20 : 24
+  const textClass = cn(
+    fontSize === 'small' && 'text-base',
+    fontSize === 'medium' && 'text-lg',
+    fontSize === 'large' && 'text-xl',
+  )
+
   const categories: {
     key: Category
     label: string
@@ -25,35 +38,38 @@ const CategoriesList = ({ onSelect, dark = false }: CategoriesListProps) => {
     {
       key: 'bookmark',
       label: 'Bookmarks',
-      icon: <Bookmark size={20} color={dark ? '#B5C2A3' : '#6C7A45'} />,
+      icon: <Bookmark color={dark ? '#B5C2A3' : '#6C7A45'} />,
     },
     {
       key: 'photo',
       label: 'Photos',
-      icon: <Image size={20} color={dark ? '#B5C2A3' : '#6C7A45'} />,
+      icon: <Image color={dark ? '#B5C2A3' : '#6C7A45'} />,
     },
     {
       key: 'video',
       label: 'Videos',
-      icon: <Video size={20} color={dark ? '#B5C2A3' : '#6C7A45'} />,
+      icon: <Video color={dark ? '#B5C2A3' : '#6C7A45'} />,
     },
     {
       key: 'audio',
       label: 'Recorded Audio',
-      icon: <AudioLines size={20} color={dark ? '#B5C2A3' : '#6C7A45'} />,
+      icon: <AudioLines color={dark ? '#B5C2A3' : '#6C7A45'} />,
     },
     {
       key: 'text',
       label: 'Text Only',
-      icon: <TextIcon size={20} color={dark ? '#B5C2A3' : '#6C7A45'} />,
+      icon: <TextIcon color={dark ? '#B5C2A3' : '#6C7A45'} />,
     },
   ]
 
   return (
-    <View className="flex-1 px-4">
+    <View className="flex-1 px-4 gap-3">
       <Text
         className={cn(
-          'font-bold text-xl',
+          'font-bold',
+          fontSize === 'small' && 'text-lg',
+          fontSize === 'medium' && 'text-xl',
+          fontSize === 'large' && 'text-2xl',
           dark ? 'text-[#E8E6D9]' : 'text-[#2C3526]',
         )}>
         Categories
@@ -64,10 +80,10 @@ const CategoriesList = ({ onSelect, dark = false }: CategoriesListProps) => {
             <Pressable
               onPress={() => onSelect(cat.key)}
               className="flex-row items-center py-3 gap-1 active:opacity-70">
-              {cat.icon}
+              {React.cloneElement(cat.icon, { size: iconSize })}
               <Text
                 className={cn(
-                  'text-lg',
+                  textClass,
                   dark ? 'text-[#E8E6D9]' : 'text-[#4A5340]',
                 )}>
                 {cat.label}

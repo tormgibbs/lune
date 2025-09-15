@@ -13,6 +13,7 @@ import MenuItem from './menu-item'
 import { Separator } from './ui/separator'
 import { useColorScheme } from '@/lib/useColorScheme'
 import { cn } from '@/lib/utils'
+import { useFontSize } from '@/lib/use-font-size'
 
 interface HeaderProps {
   onPreferencesPress: () => void
@@ -30,7 +31,16 @@ const Header = forwardRef(
     ref,
   ) => {
     const { isDarkColorScheme: dark } = useColorScheme()
+    const { fontSize } = useFontSize()
     const triggerRef = useRef<ComponentRef<typeof PopoverTrigger>>(null)
+
+    const titleClass = cn(
+      fontSize === 'small' && 'text-xl',
+      fontSize === 'medium' && 'text-2xl',
+      fontSize === 'large' && 'text-3xl',
+    )
+
+    const iconSize = fontSize === 'small' ? 20 : fontSize === 'medium' ? 24 : 28
 
     useImperativeHandle(ref, () => ({
       closePopover: () => {
@@ -43,7 +53,8 @@ const Header = forwardRef(
       <View className="justify-between items-center flex-row w-full mb-4">
         <Text
           className={cn(
-            'text-3xl font-bold',
+            'font-bold',
+            titleClass,
             dark ? 'text-[#F5F4EF]' : 'text-[#2B311A]',
           )}>
           Lune
@@ -52,11 +63,12 @@ const Header = forwardRef(
           <Button
             size="icon"
             className={cn(
-              'rounded-full',
+              'rounded-full ',
+              fontSize === 'large' && 'p-6',
               dark ? 'bg-[#94A479]' : 'bg-[#EDE9D5]',
             )}
             onPress={() => router.push('/search')}>
-            <Search size={20} />
+            <Search size={iconSize - 2} />
           </Button>
 
           <Popover>
@@ -66,9 +78,10 @@ const Header = forwardRef(
                 size="icon"
                 className={cn(
                   'rounded-full',
+                  fontSize === 'large' && 'p-6',
                   dark ? 'bg-[#94A479]' : 'bg-[#EDE9D5]',
                 )}>
-                <Ellipsis size={20} />
+                <Ellipsis size={iconSize - 2} />
               </Button>
             </PopoverTrigger>
 
@@ -84,10 +97,13 @@ const Header = forwardRef(
               )}>
               <MenuItem
                 label="Preferences"
-                icon={<Settings size={20} color={dark ? '#E8E6D9' : '#2B311A'} />}
+                icon={
+                  <Settings size={iconSize - 4} color={dark ? '#E8E6D9' : '#2B311A'} />
+                }
                 onPress={onPreferencesPress}
                 rounded="top"
                 dark={dark}
+                fontSize={fontSize}
               />
 
               <Separator
@@ -99,9 +115,10 @@ const Header = forwardRef(
 
               <MenuItem
                 label="Notifications"
-                icon={<Bell size={20} color={dark ? '#E8E6D9' : '#2B311A'} />}
+                icon={<Bell size={iconSize - 4} color={dark ? '#E8E6D9' : '#2B311A'} />}
                 onPress={onNotificationsPress}
                 dark={dark}
+                fontSize={fontSize}
               />
 
               <Separator
@@ -113,10 +130,11 @@ const Header = forwardRef(
 
               <MenuItem
                 label="Backup & Sync"
-                icon={<Cloud size={20} color={dark ? '#E8E6D9' : '#2B311A'} />}
+                icon={<Cloud size={iconSize - 4} color={dark ? '#E8E6D9' : '#2B311A'} />}
                 onPress={onBackupSyncPress}
                 rounded="bottom"
                 dark={dark}
+                fontSize={fontSize}
               />
             </PopoverContent>
           </Popover>

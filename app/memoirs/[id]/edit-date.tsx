@@ -17,6 +17,7 @@ import dayjs from 'dayjs'
 import { MarkedDates, Theme } from 'react-native-calendars/src/types'
 import { useColorScheme } from '@/lib/useColorScheme'
 import { cn } from '@/lib/utils'
+import { useFontSize } from '@/lib/use-font-size'
 
 interface CalendarHeaderStyles {
   dayTextAtIndex0?: TextStyle
@@ -67,6 +68,7 @@ const dayHeaderStyle = {
 
 const EditDate = () => {
   const { isDarkColorScheme: dark } = useColorScheme()
+  const { fontSize } = useFontSize()
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
   const createdDate = useMemo(() => formatDate(new Date()), [])
@@ -76,8 +78,6 @@ const EditDate = () => {
   )
 
   const { id, date } = useLocalSearchParams<{ id: string; date?: string }>()
-  console.log('Editing memoir entry with id:', id, 'and date:', date)
-  console.log('today:', today)
 
   const initialDate = date ?? today
 
@@ -102,29 +102,101 @@ const EditDate = () => {
     })
   }
 
-  const calendarTheme: Theme = useMemo(
-    () => ({
-      backgroundColor: dark ? '#4A5340' : '#9C988B',
-      calendarBackground: dark ? '#4A5340' : '#9C988B',
-      todayTextColor: dark ? '#E8E6D9' : '#E3E9B9',
-      textDayHeaderFontWeight: '400',
-      textDayFontWeight: 'medium',
-      textDisabledColor: dark ? '#5A6B4D' : '#8A8680',
-      dayTextColor: dark ? '#E8E6D9' : '#333333',
-      'stylesheet.calendar.header': Object.fromEntries(
-        Array(7)
-          .fill(null)
-          .map((_, i) => [
-            `dayTextAtIndex${i}`,
-            {
-              ...dayHeaderStyle,
-              color: dark ? '#B5C2A3' : '#B8B4A7',
-            },
-          ]),
-      ),
-    }),
-    [dark],
+  const sectionLabelClass = cn(
+    fontSize === 'small' && 'text-xs',
+    fontSize === 'medium' && 'text-base',
+    fontSize === 'large' && 'text-lg',
   )
+
+  const entryTitleClass = cn(
+    fontSize === 'small' && 'text-base',
+    fontSize === 'medium' && 'text-lg',
+    fontSize === 'large' && 'text-2xl',
+  )
+
+  const entryDateClass = cn(
+    fontSize === 'small' && 'text-base',
+    fontSize === 'medium' && 'text-lg',
+    fontSize === 'large' && 'text-xl',
+  )
+
+  const helperTextClass = cn(
+    fontSize === 'small' && 'text-xs',
+    fontSize === 'medium' && 'text-base',
+    fontSize === 'large' && 'text-lg',
+  )
+
+  const calendarTheme: Theme = useMemo(
+    () => {
+      const calendarFontSizes = {
+        day: fontSize === 'small' ? 14 : fontSize === 'medium' ? 16 : 18,
+        header: fontSize === 'small' ? 12 : fontSize === 'medium' ? 14 : 16,
+        month: fontSize === 'small' ? 16 : fontSize === 'medium' ? 18 : 20,
+      }
+
+      return {
+        backgroundColor: dark ? '#4A5340' : '#9C988B',
+        calendarBackground: dark ? '#4A5340' : '#9C988B',
+
+        todayTextColor: dark ? '#E8E6D9' : '#E3E9B9',
+        textDisabledColor: dark ? '#5A6B4D' : '#8A8680',
+        dayTextColor: dark ? '#E8E6D9' : '#333333',
+
+        textDayFontSize: calendarFontSizes.day,
+        textDayHeaderFontSize: calendarFontSizes.header,
+        textMonthFontSize: calendarFontSizes.month,
+
+        textDayHeaderFontWeight: '400',
+        textDayFontWeight: 'medium',
+
+        'stylesheet.calendar.header': Object.fromEntries(
+          Array(7)
+            .fill(null)
+            .map((_, i) => [
+              `dayTextAtIndex${i}`,
+              {
+                ...dayHeaderStyle,
+                color: dark ? '#B5C2A3' : '#B8B4A7',
+                fontSize: calendarFontSizes.header,
+              },
+            ]),
+        ),
+      }
+    },
+    [dark, fontSize], // Remove calendarFontSizes from deps
+  )
+
+  // const calendarTheme: Theme = useMemo(
+  //   () => ({
+  //     backgroundColor: dark ? '#4A5340' : '#9C988B',
+  //     calendarBackground: dark ? '#4A5340' : '#9C988B',
+
+  //     todayTextColor: dark ? '#E8E6D9' : '#E3E9B9',
+  //     textDisabledColor: dark ? '#5A6B4D' : '#8A8680',
+  //     dayTextColor: dark ? '#E8E6D9' : '#333333',
+
+  //     textDayFontSize: calendarFontSizes.day,
+  //     textDayHeaderFontSize: calendarFontSizes.header,
+  //     textMonthFontSize: calendarFontSizes.month,
+
+  //     textDayHeaderFontWeight: '400',
+  //     textDayFontWeight: 'medium',
+
+  //     'stylesheet.calendar.header': Object.fromEntries(
+  //       Array(7)
+  //         .fill(null)
+  //         .map((_, i) => [
+  //           `dayTextAtIndex${i}`,
+  //           {
+  //             ...dayHeaderStyle,
+  //             color: dark ? '#B5C2A3' : '#B8B4A7',
+  //             fontSize: calendarFontSizes.header,
+  //           },
+  //         ]),
+  //     ),
+  //   }),
+  //   [dark, fontSize],
+  // )
 
   const markedDates: MarkedDates = useMemo(
     () => ({
@@ -182,12 +254,17 @@ const EditDate = () => {
               onCancel={handleCancel}
               onDone={handleDone}
               dark={dark}
+              fontSize={fontSize}
             />
           ),
         }}
       />
       <Text
-        className={cn('text-sm px-4', dark ? 'text-[#E8E6D9]' : 'text-black')}>
+        className={cn(
+          'px-4',
+          sectionLabelClass,
+          dark ? 'text-[#E8E6D9]' : 'text-black',
+        )}>
         SELECT CUSTOM DATE
       </Text>
 
@@ -208,6 +285,7 @@ const EditDate = () => {
           <CalendarHeader
             date={date}
             dark={dark}
+            fontSize={fontSize}
             onNextMonth={() => changeMonth(1)}
             onPreviousMonth={() => changeMonth(-1)}
           />
@@ -221,7 +299,8 @@ const EditDate = () => {
       <View className="mt-10">
         <Text
           className={cn(
-            'text-sm px-4',
+            'px-4',
+            sectionLabelClass,
             dark ? 'text-[#E8E6D9]' : 'text-black',
           )}>
           USE DATE FROM
@@ -238,14 +317,14 @@ const EditDate = () => {
           }}>
           <Text
             className={cn(
-              'text-xl',
+              entryTitleClass,
               dark ? 'text-[#B5C2A3]' : 'text-[#DDD9CC]',
             )}>
             Entry Created
           </Text>
           <Text
             className={cn(
-              'text-xl',
+              entryTitleClass,
               dark ? 'text-[#E8E6D9]' : 'text-[#F5F4F0]',
             )}>
             {createdDate}
@@ -253,7 +332,8 @@ const EditDate = () => {
         </Pressable>
         <Text
           className={cn(
-            'text-sm px-4',
+            'px-4',
+            helperTextClass,
             dark ? 'text-[#E8E6D9]' : 'text-black',
           )}>
           Use the date this entry was created.

@@ -38,11 +38,13 @@ import ResponsiveMediaGrid from '@/components/responsive-media-grid'
 import { useMemoirActions } from '@/hooks/use-memoir-actions'
 import { Toaster } from 'sonner-native'
 import { useColorScheme } from '@/lib/useColorScheme'
+import { useFontSize } from '@/lib/use-font-size'
 
 const Index = () => {
   const router = useRouter()
   const navigation = useNavigation()
   const { isDarkColorScheme: dark } = useColorScheme()
+  const { fontSize } = useFontSize()
 
   const { id, date } = useLocalSearchParams<{ id: string; date: string }>()
 
@@ -89,6 +91,15 @@ const Index = () => {
   // const { media, pickMedia, removeMedia, addMedia } = useMediaPicker(id)
 
   const { handleDelete: deleteMemoir } = useMemoirActions()
+
+  const titleClass = cn(
+    fontSize === 'small' && 'text-sm',
+    fontSize === 'medium' && 'text-lg',
+    fontSize === 'large' && 'text-xl',
+    'text-[#55584A]',
+  )
+
+  const contentFontSize = fontSize === 'small' ? 15 : fontSize === 'medium' ? 17 : 19
 
   const saveMemoir = async () => {
     const title = titleRef.current.trim()
@@ -384,10 +395,7 @@ const Index = () => {
 
   return (
     <SafeAreaView
-      className={cn(
-        'flex-1',
-        dark ? 'bg-[#899D78]' : 'bg-[#E8E6D9]',
-      )}
+      className={cn('flex-1', dark ? 'bg-[#899D78]' : 'bg-[#E8E6D9]')}
       edges={['left', 'right', 'bottom']}>
       <PortalHost name="memoirs-host" />
       <Stack.Screen
@@ -400,6 +408,7 @@ const Index = () => {
               onDelete={handleDelete}
               onDone={handleDone}
               dark={dark}
+              fontSize={fontSize}
               onBookmarkPress={() => {
                 if (existingMemoir) {
                   toggleBookmark(existingMemoir.id)
@@ -526,8 +535,10 @@ const Index = () => {
                   setTitle(text)
                   titleRef.current = text
                 }}
-                // autoFocus
-                className="bg-transparent border-0 px-1 text-lg font-medium text-[#55584A]"
+                className={cn(
+                  'bg-transparent border-0 px-1 font-medium text-[#55584A]',
+                  titleClass
+                )}
                 placeholder="Title"
                 placeholderClassName="text-[#7A7A7A]"
               />
@@ -555,7 +566,7 @@ const Index = () => {
             editorStyle={{
               backgroundColor: 'transparent',
               color: '#55584A',
-              contentCSSText: 'padding: 10px 4px;',
+              contentCSSText: `padding: 10px 4px; font-size: ${contentFontSize}px;`,
             }}
             onChange={(html) => {
               contentRef.current = html
@@ -571,6 +582,7 @@ const Index = () => {
         onImagesPress={pickMedia}
         onSpeechPress={handleSpeechPress}
         dark={dark}
+        fontSize={fontSize}
       />
       {/* <Toaster swipeToDismissDirection="left" /> */}
     </SafeAreaView>

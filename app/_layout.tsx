@@ -18,6 +18,7 @@ import { Appearance, Platform } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { useDBInitialization } from '@/db/use-db-initialization'
+import { FontSizeProvider } from '@/lib/use-font-size'
 
 const LIGHT_THEME: Theme = {
   ...DefaultTheme,
@@ -64,45 +65,48 @@ export default function RootLayout() {
         <KeyboardProvider
           preserveEdgeToEdge={Platform.OS === 'android'}
           statusBarTranslucent={Platform.OS === 'android'}>
-          <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
-            <StatusBar style={'dark'} />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-              }}>
-              <Stack.Screen name="index" />
-              <Stack.Screen
-                name="memoirs/[id]/index"
-                options={{
-                  presentation: Platform.select({
-                    ios: 'modal',
-                    android: 'formSheet',
-                    default: 'formSheet',
-                  }),
-                  gestureDirection: 'vertical',
-                  animation: 'slide_from_bottom',
-                }}
-              />
-              <Stack.Screen
-                name="memoirs/[id]/edit-date"
-                options={{
-                  presentation: Platform.select({
-                    ios: 'modal',
-                    android: 'formSheet',
-                    default: 'formSheet',
-                  }),
-                  gestureDirection: 'vertical',
-                  animation: 'slide_from_bottom',
-                }}
-              />
-              <Stack.Screen name="preferences"
-                options={{
-                  animation: 'flip',
-                }}
-              />
-            </Stack>
-            <PortalHost name="root-host" />
-          </ThemeProvider>
+          <FontSizeProvider>
+            <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
+              <StatusBar style={'dark'} />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen
+                  name="memoirs/[id]/index"
+                  options={{
+                    presentation: Platform.select({
+                      ios: 'modal',
+                      android: 'formSheet',
+                      default: 'formSheet',
+                    }),
+                    gestureDirection: 'vertical',
+                    animation: 'slide_from_bottom',
+                  }}
+                />
+                <Stack.Screen
+                  name="memoirs/[id]/edit-date"
+                  options={{
+                    presentation: Platform.select({
+                      ios: 'modal',
+                      android: 'formSheet',
+                      default: 'formSheet',
+                    }),
+                    gestureDirection: 'vertical',
+                    animation: 'slide_from_bottom',
+                  }}
+                />
+                <Stack.Screen
+                  name="preferences"
+                  options={{
+                    animation: 'flip',
+                  }}
+                />
+              </Stack>
+              <PortalHost name="root-host" />
+            </ThemeProvider>
+          </FontSizeProvider>
         </KeyboardProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

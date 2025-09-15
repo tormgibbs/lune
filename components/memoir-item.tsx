@@ -29,6 +29,7 @@ import ResponsiveMediaGrid from './responsive-media-grid'
 import { cn } from '@/lib/utils'
 import { useBottomSheet } from './bottom-sheet-provider'
 import { useColorScheme } from '@/lib/useColorScheme'
+import { FontSize, useFontSize } from '@/lib/use-font-size'
 
 interface MemoirItemProps {
   memoir: Memoir
@@ -63,17 +64,6 @@ const cleanHtml = (html: string) => {
     .trim()
 }
 
-const truncateHtmlByLines = (html: string, maxLines: number) => {
-  if (!html) return ''
-
-  // Split by common block elements
-  const lines = html.split(/<\/div>|<\/p>|<\/li>|<br\s*\/?>/i)
-
-  // Take only the first maxLines lines
-  const truncated = lines.slice(0, maxLines).join('')
-
-  return truncated
-}
 
 const MemoirItem = ({
   memoir,
@@ -83,16 +73,17 @@ const MemoirItem = ({
   onBookmarkPress,
 }: MemoirItemProps) => {
   const { isDarkColorScheme: dark } = useColorScheme()
+  const { fontSize } = useFontSize()
 
   const width = useWindowDimensions().width - 32
   const swipeableRef = useRef<ComponentRef<typeof Swipeable>>(null)
 
-  const maxLines = memoir.media?.length ? 5 : 10
-
   const cleanedContent = memoir.content ? cleanHtml(memoir.content) : ''
-  const truncatedContent = truncateHtmlByLines(cleanedContent, maxLines)
 
   const [expanded, setExpanded] = useState(false)
+  const [contentHeight, setContentHeight] = useState(0)
+  const maxHeight = memoir.media?.length ? 120 : 200 // tweak these
+  const isTruncated = !expanded && contentHeight > maxHeight
 
   const { openBottomSheet } = useBottomSheet()
 
@@ -107,20 +98,35 @@ const MemoirItem = ({
     onDelete?.(memoir.id)
   }
 
-  // const cleanedContent = memoir.content ? cleanHtml(memoir.content) : ''
-  const displayedContent = expanded ? cleanedContent : truncatedContent
+  const titleClass = cn(
+    fontSize === 'small' && 'text-sm',
+    fontSize === 'medium' && 'text-base',
+    fontSize === 'large' && 'text-lg',
+  )
 
-  console.log('cleaned', cleanedContent)
-  console.log('truncated', truncatedContent)
+  const contentClass = cn(
+    fontSize === 'small' && 'text-sm',
+    fontSize === 'medium' && 'text-base',
+    fontSize === 'large' && 'text-lg',
+  )
 
-  const isTruncated =
-    !expanded && truncatedContent.length < cleanedContent.length
+  const dateClass = cn(
+    fontSize === 'small' && 'text-xs',
+    fontSize === 'medium' && 'text-sm',
+    fontSize === 'large' && 'text-base',
+  )
+
+  // console.log(
+  //   'cleaned',
+  //   cleanedContent,
+  //   'length',
+  //   getTextContent(cleanedContent).length,
+  // )
 
   const bookmarkStyle = useAnimatedStyle(() => ({
     transform: [{ scale: bookmarkScale.value }],
     opacity: bookmarkScale.value,
   }))
-
 
   const renderers = {
     font: ({ tnode, TDefaultRenderer, ...props }: CustomRendererProps<any>) => {
@@ -130,8 +136,6 @@ const MemoirItem = ({
         fontSize: size ? parseInt(size) : undefined,
         fontFamily: face || undefined,
       }
-
-      console.log('font tag', tnode.attributes, style)
 
       return (
         <Text style={style}>
@@ -207,6 +211,7 @@ const MemoirItem = ({
           onDelete={handleDelete}
           memoirId={memoir.id}
           dark={dark}
+          fontSize={fontSize}
         />
       )}>
       <View className="px-4">
@@ -228,7 +233,8 @@ const MemoirItem = ({
             {memoir.title && memoir.titleVisible && (
               <Text
                 className={cn(
-                  'text-base font-semibold',
+                  'font-semibold',
+                  titleClass,
                   dark ? 'text-[#E8E5D8]' : 'text-black',
                 )}>
                 {memoir.title}
@@ -238,15 +244,40 @@ const MemoirItem = ({
               <Pressable
                 className="relative"
                 onPress={() => setExpanded(!expanded)}>
-                <RenderHtml
-                  contentWidth={width}
-                  source={{ html: displayedContent }}
-                  customHTMLElementModels={customHTMLElementModels}
-                  renderers={renderers}
-                  // baseStyle={{
-                  //   color: dark ? '#F5F4EF' : '#000000',
-                  // }}
-                />
+                {/* Wrapper with maxHeight */}
+                <View
+                  style={{
+                    maxHeight: expanded ? undefined : maxHeight,
+                    overflow: 'hidden',
+                  }}>
+                  {/* Inner view only for measuring full content height */}
+                  <View
+                    onLayout={(e) =>
+                      setContentHeight(e.nativeEvent.layout.height)
+                    }>
+                    <RenderHtml
+                      contentWidth={width}
+                      source={{ html: cleanedContent }}
+                      customHTMLElementModels={customHTMLElementModels}
+                      renderers={renderers}
+                      baseStyle={{
+                        fontSize:
+                          fontSize === 'small'
+                            ? 14
+                            : fontSize === 'medium'
+                              ? 16
+                              : 18,
+                        lineHeight:
+                          fontSize === 'small'
+                            ? 18
+                            : fontSize === 'medium'
+                              ? 20
+                              : 22,
+                      }}
+                    />
+                  </View>
+                </View>
+
                 {isTruncated && (
                   <View className="absolute bottom-[-10px] right-2">
                     <ChevronDown />
@@ -261,7 +292,8 @@ const MemoirItem = ({
           <View className="flex-row items-center justify-between">
             <Text
               className={cn(
-                'text-sm font-medium',
+                'font-medium',
+                dateClass,
                 dark ? 'text-[#A3B587]' : 'text-gray-500',
               )}>
               {formatDate(memoir.date)}
@@ -305,12 +337,14 @@ const RightActions = ({
   onDelete,
   memoirId,
   dark = false,
+  fontSize = 'medium',
 }: {
   progress: SharedValue<number>
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
   memoirId: string
   dark: boolean
+  fontSize: FontSize
 }) => {
   const editStyle = useAnimatedStyle(() => ({
     transform: [
@@ -326,6 +360,10 @@ const RightActions = ({
     opacity: interpolate(progress.value, [0, 0.6], [0, 1], 'clamp'),
   }))
 
+  const iconSize = fontSize === 'small' ? 20 : fontSize === 'medium' ? 24 : 28
+  const buttonPadding =
+    fontSize === 'small' ? 'p-5' : fontSize === 'medium' ? 'p-6' : 'p-7'
+
   return (
     <View className="flex-row gap-4 items-center pr-4 pl-1">
       <Animated.View style={editStyle}>
@@ -333,11 +371,12 @@ const RightActions = ({
           size="icon"
           variant="secondary"
           className={cn(
-            'rounded-full p-7',
+            'rounded-full',
+            buttonPadding,
             dark ? 'bg-[#8B9C6B]' : 'bg-[#2b311a]',
           )}
           onPress={() => onEdit?.(memoirId)}>
-          <Pen color="white" size={28} />
+          <Pen color="white" size={iconSize} />
         </Button>
       </Animated.View>
 
@@ -345,9 +384,9 @@ const RightActions = ({
         <Button
           size="icon"
           variant="destructive"
-          className="rounded-full p-7"
+          className={cn('rounded-full', buttonPadding)}
           onPress={() => onDelete?.(memoirId)}>
-          <Trash2 color="white" size={28} />
+          <Trash2 color="white" size={iconSize} />
         </Button>
       </Animated.View>
     </View>

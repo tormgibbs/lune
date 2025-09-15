@@ -9,9 +9,11 @@ import SearchResults from '@/components/search/search-results'
 import SearchBar from '@/components/search/search-bar'
 import { useColorScheme } from '@/lib/useColorScheme'
 import { BottomSheetProvider } from '@/components/bottom-sheet-provider'
+import { useFontSize } from '@/lib/use-font-size'
 
 const Search = () => {
   const { isDarkColorScheme: dark } = useColorScheme()
+  const { fontSize } = useFontSize()
 
   const searchQuery = useMemoirStore((s) => s.searchQuery)
   const setSearchQuery = useMemoirStore((s) => s.setSearchQuery)
@@ -55,6 +57,7 @@ const Search = () => {
       <BottomSheetProvider>
         <SearchBar
           dark={dark}
+          fontSize={fontSize}
           inputRef={inputRef}
           setSearchQuery={setSearchQuery}
           searchQuery={searchQuery}
@@ -64,9 +67,9 @@ const Search = () => {
         />
 
         {!hasQuery ? (
-          <CategoriesList onSelect={setSelectedCategory} dark={dark} />
+          <CategoriesList onSelect={setSelectedCategory} dark={dark} fontSize={fontSize} />
         ) : (
-          <SearchResults results={results} dark={dark} />
+          <SearchResults results={results} dark={dark} fontSize={fontSize} />
         )}
       </BottomSheetProvider>
     </SafeAreaView>

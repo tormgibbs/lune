@@ -1,45 +1,42 @@
-// font-size-segmented-control.tsx
-import React, { useState } from 'react'
+import React from 'react'
 import { StyleSheet } from 'react-native'
 import SegmentedControl from '@react-native-segmented-control/segmented-control'
+import { useFontSize } from '@/lib/use-font-size'
 
-type FontSizeOption = 'Small' | 'Medium' | 'Large'
+const FONT_SIZES = ['small', 'medium', 'large'] as const
+const LABELS = ['Small', 'Medium', 'Large']
 
 interface Props {
-  value?: FontSizeOption
-  onChange?: (value: FontSizeOption) => void
   dark?: boolean
 }
 
-const options: FontSizeOption[] = ['Small', 'Medium', 'Large']
+const FontSizeControl: React.FC<Props> = ({ dark = false }) => {
+  const { fontSize, setFontSize } = useFontSize()
 
-const FontSizeControl: React.FC<Props> = ({
-  value = 'Medium',
-  onChange,
-  dark = false,
-}) => {
-  const initialIndex = options.indexOf(value)
-  const [selectedIndex, setSelectedIndex] = useState(initialIndex)
+  const selectedIndex = FONT_SIZES.indexOf(fontSize)
 
   const handleChange = (event: any) => {
     const index = event.nativeEvent.selectedSegmentIndex
-    setSelectedIndex(index)
-    onChange?.(options[index])
+    setFontSize(FONT_SIZES[index])
   }
+
+  const labelSize = fontSize === 'small' ? 14 : fontSize === 'medium' ? 16 : 18
+  const containerHeight = fontSize === 'small' ? 40 : fontSize === 'medium' ? 45 : 50
 
   return (
     <SegmentedControl
-      values={options}
+      values={LABELS}
       selectedIndex={selectedIndex}
       onChange={handleChange}
       style={[
         styles.segmentedControl,
-        { backgroundColor: dark ? '#4A5340' : '#E8E6D9' },
+        { backgroundColor: dark ? '#4A5340' : '#E8E6D9', height: containerHeight },
       ]}
       tintColor={dark ? '#899D78' : '#6C7A45'}
-      fontStyle={{ ...styles.font, color: dark ? '#B5C2A3' : '#333' }}
+      fontStyle={{ ...styles.font, fontSize: labelSize, color: dark ? '#B5C2A3' : '#333' }}
       activeFontStyle={{
         ...styles.activeFont,
+        fontSize: labelSize,
         color: dark ? '#E8E6D9' : 'white',
       }}
     />

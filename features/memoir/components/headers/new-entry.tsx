@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import MenuItem from '@/components/menu-item'
 import { cn } from '@/lib/utils'
 import { CENTERED_TEXT_STYLE } from '@/lib/constants'
+import { FontSize } from '@/lib/use-font-size'
 
 type HeaderProps = {
   dateLabel: string
@@ -35,6 +36,7 @@ type HeaderProps = {
   bookmarked?: boolean
   titleVisible?: boolean
   dark?: boolean
+  fontSize?: FontSize
 }
 
 export const Header = forwardRef(
@@ -49,12 +51,27 @@ export const Header = forwardRef(
       bookmarked,
       titleVisible = true,
       dark = false,
+      fontSize = 'medium',
     }: HeaderProps,
     ref,
   ) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false)
     const triggerRef = useRef<ComponentRef<typeof PopoverTrigger>>(null)
     const insets = useSafeAreaInsets()
+
+    const iconSize = fontSize === 'small' ? 20 : fontSize === 'medium' ? 24 : 28
+
+    const titleClass = cn(
+      fontSize === 'small' && 'text-base',
+      fontSize === 'medium' && 'text-xl',
+      fontSize === 'large' && 'text-2xl',
+    )
+
+    const doneClass = cn(
+      fontSize === 'small' && 'text-sm',
+      fontSize === 'medium' && 'text-lg',
+      fontSize === 'large' && 'text-xl',
+    )
 
     useImperativeHandle(ref, () => ({
       closePopover: () => {
@@ -88,11 +105,7 @@ export const Header = forwardRef(
                       ? '#6C7A45'
                       : 'none'
                 }
-                size={Platform.select({
-                  ios: 28,
-                  android: 24,
-                  default: 24,
-                })}
+                size={iconSize}
               />
             </Pressable>
 
@@ -100,13 +113,14 @@ export const Header = forwardRef(
               style={CENTERED_TEXT_STYLE(dark ? '#E8E6D9' : '#2B311A')}
               className={cn(
                 'font-medium',
+                titleClass,
                 // dark ? 'text-[#E8E6D9]' : 'text-[#2B311A]',
                 // 'absolute text-[#2B311A] font-medium left-1/2 transform -translate-x-1/2',
-                Platform.select({
-                  ios: 'text-xl',
-                  android: 'text-xl',
-                  default: 'text-xl',
-                }),
+                // Platform.select({
+                //   ios: 'text-xl',
+                //   android: 'text-xl',
+                //   default: 'text-xl',
+                // }),
               )}>
               {dateLabel}
             </Text>
@@ -117,11 +131,7 @@ export const Header = forwardRef(
                   <Pressable className={isPopoverOpen ? 'opacity-50' : ''}>
                     <CircleEllipsis
                       color={dark ? '#E8E6D9' : '#6C7A45'}
-                      size={Platform.select({
-                        ios: 28,
-                        android: 24,
-                        default: 24,
-                      })}
+                      size={iconSize}
                     />
                   </Pressable>
                 </PopoverTrigger>
@@ -143,7 +153,7 @@ export const Header = forwardRef(
                     label="Edit Date"
                     icon={
                       <CalendarDays
-                        size={20}
+                        size={iconSize - 4}
                         color={dark ? '#E8E6D9' : '#2B311A'}
                       />
                     }
@@ -153,6 +163,7 @@ export const Header = forwardRef(
                     }}
                     rounded="top"
                     dark={dark}
+                    fontSize={fontSize}
                   />
 
                   <Separator
@@ -165,14 +176,18 @@ export const Header = forwardRef(
                   <MenuItem
                     label={titleVisible ? 'Hide Title' : 'Show Title'}
                     dark={dark}
+                    fontSize={fontSize}
                     icon={
                       titleVisible ? (
                         <EyeOff
-                          size={20}
+                          size={iconSize - 4}
                           color={dark ? '#E8E6D9' : '#2B311A'}
                         />
                       ) : (
-                        <Eye size={20} color={dark ? '#E8E6D9' : '#2B311A'} />
+                        <Eye
+                          size={iconSize - 4}
+                          color={dark ? '#E8E6D9' : '#2B311A'}
+                        />
                       )
                     }
                     onPress={() => {
@@ -190,7 +205,7 @@ export const Header = forwardRef(
 
                   <MenuItem
                     label="Delete"
-                    icon={<Trash2 size={20} color="#DC2626" />}
+                    icon={<Trash2 size={iconSize - 4} color="#DC2626" />}
                     onPress={() => {
                       triggerRef.current?.close?.()
                       onDelete()
@@ -198,6 +213,7 @@ export const Header = forwardRef(
                     danger
                     rounded="bottom"
                     dark={dark}
+                    fontSize={fontSize}
                   />
                 </PopoverContent>
               </Popover>
@@ -211,12 +227,13 @@ export const Header = forwardRef(
                 <Text
                   className={cn(
                     'font-medium',
+                    doneClass,
                     dark ? 'text-[#D4E6C7]' : 'text-[#6C7A45]',
-                    Platform.select({
-                      ios: 'text-xl',
-                      android: 'text-lg',
-                      default: 'text-lg',
-                    }),
+                    // Platform.select({
+                    //   ios: 'text-xl',
+                    //   android: 'text-lg',
+                    //   default: 'text-lg',
+                    // }),
                   )}>
                   Done
                 </Text>

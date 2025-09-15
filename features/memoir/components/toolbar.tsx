@@ -9,6 +9,7 @@ import {
 } from 'lucide-react-native'
 import { cn } from '@/lib/utils'
 import { KeyboardStickyView } from 'react-native-keyboard-controller'
+import { FontSize } from '@/lib/use-font-size'
 
 interface ToolbarProps {
   className?: string
@@ -20,6 +21,7 @@ interface ToolbarProps {
   onSpeechPress: () => void
   isEditorFocused: boolean
   dark?: boolean
+  fontSize?: FontSize
 }
 
 const Toolbar: React.FC<ToolbarProps> = ({
@@ -32,8 +34,11 @@ const Toolbar: React.FC<ToolbarProps> = ({
   onSpeechPress,
   isEditorFocused,
   dark = false,
+  fontSize = 'medium',
 }) => {
   const iconColor = dark ? '#E8E6D9' : '#333333'
+
+  const iconSize = fontSize === 'small' ? 20 : fontSize === 'medium' ? 24 : 28
 
   return (
     <KeyboardStickyView
@@ -48,19 +53,19 @@ const Toolbar: React.FC<ToolbarProps> = ({
         hitSlop={20}
         disabled={!isEditorFocused}
         style={{ opacity: isEditorFocused ? 1 : 0.5 }}>
-        <CaseSensitive size={24} color={iconColor} />
+        <CaseSensitive size={iconSize} color={iconColor} />
       </Pressable>
 
       <Pressable onPress={onImagesPress} hitSlop={20}>
-        <Images size={24} color={iconColor} />
+        <Images size={iconSize} color={iconColor} />
       </Pressable>
 
       <Pressable onPress={onCameraPress} hitSlop={20}>
-        <Camera size={24} color={iconColor} />
+        <Camera size={iconSize} color={iconColor} />
       </Pressable>
 
       <Pressable onPress={onAudioPress} hitSlop={20}>
-        <AudioLines size={24} color={iconColor} />
+        <AudioLines size={iconSize} color={iconColor} />
       </Pressable>
 
       <Pressable
@@ -68,7 +73,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         hitSlop={20}
         disabled={!isEditorFocused}
         style={{ opacity: isEditorFocused ? 1 : 0.5 }}>
-        <Speech size={24} color={iconColor} />
+        <Speech size={iconSize} color={iconColor} />
       </Pressable>
     </KeyboardStickyView>
   )

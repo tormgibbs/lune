@@ -1,14 +1,15 @@
 import { Category, CategoryLabels } from '@/db/schema'
+import { FontSize } from '@/lib/use-font-size'
 import { cn } from '@/lib/utils'
 import { X } from 'lucide-react-native'
 import React, { useRef } from 'react'
 import {
-  View,
+  NativeSyntheticEvent,
+  Pressable,
   Text,
   TextInput,
-  Pressable,
-  NativeSyntheticEvent,
   TextInputKeyPressEventData,
+  View,
 } from 'react-native'
 
 interface TagInputProps {
@@ -18,6 +19,7 @@ interface TagInputProps {
   onChangeTags: (tags: Category[]) => void
   setSearchQuery: (query: string) => void
   dark?: boolean
+  fontSize?: FontSize
 }
 
 const TagInput = ({
@@ -27,8 +29,16 @@ const TagInput = ({
   setSearchQuery,
   searchQuery,
   dark = false,
+  fontSize = 'medium',
 }: TagInputProps) => {
   const selectionRef = useRef({ start: 0, end: 0 })
+
+  const iconSize = fontSize === 'small' ? 10 : fontSize === 'medium' ? 12 : 16
+  const textClass = cn(
+    fontSize === 'small' && 'text-xs',
+    fontSize === 'medium' && 'text-sm',
+    fontSize === 'large' && 'text-base',
+  )
 
   const handleKeyPress = (
     e: NativeSyntheticEvent<TextInputKeyPressEventData>,
@@ -70,11 +80,11 @@ const TagInput = ({
             dark ? 'bg-[#5A6B4D]' : 'bg-[#D4D2C7]',
           )}>
           <Text
-            className={cn('text-sm', dark ? 'text-[#E8E6D9]' : 'text-black')}>
+            className={cn(textClass, dark ? 'text-[#E8E6D9]' : 'text-black')}>
             {CategoryLabels[tag]}
           </Text>
           <Pressable hitSlop={8} onPress={() => handleRemoveTag(tag)}>
-            <X size={12} color={dark ? '#E8E6D9' : 'black'} />
+            <X size={iconSize} color={dark ? '#E8E6D9' : 'black'} />
           </Pressable>
         </View>
       ))}

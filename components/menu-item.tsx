@@ -2,6 +2,7 @@ import { Text, Pressable, Platform } from 'react-native'
 import React from 'react'
 import { cn } from '@/lib/utils'
 import { useColorScheme } from '@/lib/useColorScheme'
+import { FontSize } from '@/lib/use-font-size'
 
 interface MenuItemProps {
   label: string
@@ -10,6 +11,7 @@ interface MenuItemProps {
   danger?: boolean
   rounded?: 'top' | 'bottom' | 'full'
   dark?: boolean
+  fontSize?: FontSize
 }
 const MenuItem: React.FC<MenuItemProps> = ({
   label,
@@ -18,8 +20,14 @@ const MenuItem: React.FC<MenuItemProps> = ({
   danger,
   rounded,
   dark = false,
+  fontSize = 'medium',
 }) => {
-  // const { isDarkColorScheme: dark } = useColorScheme()
+  const textClass = cn(
+    fontSize === 'small' && 'text-sm',
+    fontSize === 'medium' && 'text-base',
+    fontSize === 'large' && 'text-xl',
+  )
+
   return (
     <Pressable
       className={cn(
@@ -32,17 +40,17 @@ const MenuItem: React.FC<MenuItemProps> = ({
       onPress={onPress}>
       <Text
         className={cn(
-          'text-base',
+          textClass,
           danger
             ? 'text-[#DC2626]'
             : dark
               ? 'text-[#E8E6D9]'
               : 'text-[#2B311A]',
-          Platform.select({
-            ios: 'text-xl',
-            android: 'text-lg',
-            default: 'text-lg',
-          }),
+          // Platform.select({
+          //   ios: 'text-xl',
+          //   android: 'text-lg',
+          //   default: 'text-lg',
+          // }),
         )}>
         {label}
       </Text>

@@ -14,7 +14,6 @@ import { MemoirInsert } from '@/db/schema'
 import { useMediaPicker } from '@/hooks/use-media-picker'
 import { useMemoirActions } from '@/hooks/use-memoir-actions'
 import { formatDate } from '@/lib/date'
-import { persistMediaAsset } from '@/lib/media'
 import { useFontSize } from '@/lib/use-font-size'
 import { useColorScheme } from '@/lib/useColorScheme'
 import { cn, deriveCategories, normalizeColor } from '@/lib/utils'
@@ -38,6 +37,7 @@ import {
 } from 'react-native-keyboard-controller'
 import { RichEditor } from 'react-native-pell-rich-editor'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { debounce } from '@/lib/debounce'
 
 const Index = () => {
   const router = useRouter()
@@ -122,23 +122,7 @@ const Index = () => {
       return
     }
 
-    const { newMedia, persistedMedia } = currentMedia.reduce(
-      (acc, m) => {
-        if (m.persisted) acc.persistedMedia.push(m)
-        else acc.newMedia.push(m)
-        return acc
-      },
-      { newMedia: [] as MediaAsset[], persistedMedia: [] as MediaAsset[] },
-    )
-
-    const savedNewMedia = await Promise.all(newMedia.map(persistMediaAsset))
-
-    const finalMedia = [
-      ...persistedMedia,
-      ...savedNewMedia.map((m) => ({ ...m, persisted: true })),
-    ]
-
-    const categories = deriveCategories(title, content, finalMedia)
+    const categories = deriveCategories(title, content, currentMedia)
 
     const memoir: MemoirInsert = {
       id,
@@ -147,7 +131,7 @@ const Index = () => {
       date: selectedDate,
       createdAt: existingMemoir?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      media: finalMedia,
+      media: currentMedia,
       titleVisible,
       categories,
       bookmark: existingMemoir?.bookmark ?? false,
@@ -370,18 +354,26 @@ const Index = () => {
     mediaRef.current = media
   }, [media])
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (titleRef.current !== existingMemoir?.title) {
-        update({ id, title: titleRef.current })
-      }
-      if (contentRef.current !== existingMemoir?.content) {
-        update({ id, content: contentRef.current })
-      }
-    }, 300)
+  const debouncedUpdate = useMemo(
+    () =>
+      debounce((fields: Partial<MemoirInsert>) => {
+        update({ id, ...fields })
+      }, 500),
+    [id, update],
+  )
 
-    return () => clearInterval(interval)
-  }, [id, update, existingMemoir?.title, existingMemoir?.content])
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (titleRef.current !== existingMemoir?.title) {
+  //       update({ id, title: titleRef.current })
+  //     }
+  //     if (contentRef.current !== existingMemoir?.content) {
+  //       update({ id, content: contentRef.current })
+  //     }
+  //   }, 300)
+
+  //   return () => clearInterval(interval)
+  // }, [id, update, existingMemoir?.title, existingMemoir?.content])
 
   saveMemoirRef.current = saveMemoir
 
@@ -416,7 +408,12 @@ const Index = () => {
               }}
               bookmarked={existingMemoir?.bookmark}
               onHideTitle={() => {
-                setTitleVisible((prev) => !prev)
+                setTitleVisible((prev) => {
+                  const next = !prev
+                  titleVisibleRef.current = next
+                  update({ id, titleVisible: next })
+                  return next
+                })
               }}
               titleVisible={titleVisible}
               {...props}
@@ -534,6 +531,7 @@ const Index = () => {
                 onChangeText={(text) => {
                   setTitle(text)
                   titleRef.current = text
+                  debouncedUpdate({ title: text })
                 }}
                 className={cn(
                   'bg-transparent border-0 px-1 font-medium text-[#55584A]',
@@ -570,6 +568,7 @@ const Index = () => {
             }}
             onChange={(html) => {
               contentRef.current = html
+              debouncedUpdate({ content: html })
             }}
           />
         </View>

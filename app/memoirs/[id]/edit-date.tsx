@@ -4,6 +4,7 @@ import { formatDate } from '@/lib/date'
 import { useFontSize } from '@/lib/use-font-size'
 import { useColorScheme } from '@/lib/useColorScheme'
 import { cn } from '@/lib/utils'
+import { useMemoirStore } from '@/store/memoir'
 import dayjs from 'dayjs'
 import { router, Stack, useLocalSearchParams } from 'expo-router'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -49,6 +50,7 @@ const dayHeaderStyle = {
 const EditDate = () => {
   const { isDarkColorScheme: dark } = useColorScheme()
   const { fontSize } = useFontSize()
+  const { update } = useMemoirStore()
 
   const today = useMemo(() => new Date().toISOString().split('T')[0], [])
   const createdDate = useMemo(() => formatDate(new Date()), [])
@@ -75,7 +77,9 @@ const EditDate = () => {
   )
 
   const handleCancel = useCallback(() => router.back(), [])
+
   const handleDone = () => {
+    update({ id, date: localDate })
     router.dismissTo({
       pathname: '/memoirs/[id]',
       params: { id, date: localDate },

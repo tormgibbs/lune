@@ -1,4 +1,6 @@
 import { Category, Memoir, MemoirInsert } from '@/db/schema'
+import { persistMediaAsset } from '@/lib/media'
+import { MediaAsset } from '@/types/media'
 import { create } from 'zustand'
 
 interface MemoirStore {
@@ -54,9 +56,12 @@ export const useMemoirStore = create<MemoirStore>((set, get) => ({
   searchResults: [],
   selectedCategory: null,
 
-  add: (m) =>
+  add: async (m) => {
+    const finalMedia = await persistAllMedia(m.media ?? [])
+    const withPersisted = { ...m, media: finalMedia }
+
     set((state) => {
-      const newMemoirs = [...state.memoirs, toMemoir(m)]
+      const newMemoirs = [...state.memoirs, toMemoir(withPersisted)]
       return {
         memoirs: newMemoirs,
         searchResults: computeSearchResults(
@@ -65,12 +70,17 @@ export const useMemoirStore = create<MemoirStore>((set, get) => ({
           state.selectedCategory,
         ),
       }
-    }),
+    })
+  },
 
-  update: (m: Partial<Memoir> & { id: string }) =>
+  update: async (m: Partial<Memoir> & { id: string }) => {
+    let media = m.media
+    if (media) {
+      media = await persistAllMedia(media)
+    }
     set((state) => {
       const updated = state.memoirs.map((memoir) =>
-        memoir.id === m.id ? { ...memoir, ...m } : memoir,
+        memoir.id === m.id ? { ...memoir, ...m, ...(media ? { media } : {}) } : memoir,
       )
       return {
         memoirs: updated,
@@ -80,7 +90,8 @@ export const useMemoirStore = create<MemoirStore>((set, get) => ({
           state.selectedCategory,
         ),
       }
-    }),
+    })
+  },
 
   remove: (id) =>
     set((state) => {
@@ -169,4 +180,22 @@ export function createBlankMemoir(id: string, date: string): MemoirInsert {
     categories: [],
     bookmark: false,
   }
+}
+
+async function persistAllMedia(media: MediaAsset[]): Promise<MediaAsset[]> {
+  const { newMedia, persistedMedia } = media.reduce(
+    (acc, m) => {
+      if (m.persisted) acc.persistedMedia.push(m)
+      else acc.newMedia.push(m)
+      return acc
+    },
+    { newMedia: [] as MediaAsset[], persistedMedia: [] as MediaAsset[] },
+  )
+
+  const savedNewMedia = await Promise.all(newMedia.map(persistMediaAsset))
+
+  return [
+    ...persistedMedia,
+    ...savedNewMedia.map((m) => ({ ...m, persisted: true })),
+  ]
 }

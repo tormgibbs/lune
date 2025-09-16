@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { getAllMemoirs } from '@/db/memoir'
 import { db } from '@/db'
 import migrations from '@/drizzle/migrations'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import { useMemoirStore } from '@/store/memoir'
+import * as SplashScreen from 'expo-splash-screen'
 
 export function useDBInitialization() {
   const { success, error } = useMigrations(db, migrations)
@@ -16,10 +17,11 @@ export function useDBInitialization() {
 
         const memoirs = await getAllMemoirs()
         setMemoirs(memoirs)
+
+        useMemoirStore.getState().setLoaded(true)
+        SplashScreen.hide()
       } catch (err) {
         console.error('Failed to load memoirs:', err)
-      } finally {
-        useMemoirStore.getState().setLoaded(true)
       }
     }
 

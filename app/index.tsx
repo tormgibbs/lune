@@ -35,6 +35,7 @@ export default function Index() {
   )
 
   const showEmptyState = dbLoaded && visibleMemoirs.length === 0
+  
 
   const handleShowTutorial = async () => {
     await markTutorialSeen()
@@ -75,7 +76,7 @@ export default function Index() {
   }
 
   const handleNewEntryPress = () => {
-    // debugListMediaFiles()
+    debugListMediaFiles()
     const id = nanoid(8)
     const today = dayjs().format('YYYY-MM-DD')
 
@@ -87,7 +88,6 @@ export default function Index() {
     })
   }
 
-  console.log('show empty state', showEmptyState)
 
   return (
     <SafeAreaView className="relative flex-1 items-center">

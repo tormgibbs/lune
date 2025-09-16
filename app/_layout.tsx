@@ -49,11 +49,11 @@ export default function RootLayout() {
 
   const [loaded] = useDBInitialization()
 
-  React.useEffect(() => {
-    if (loaded) {
-      SplashScreen.hide()
-    }
-  }, [loaded])
+  // React.useEffect(() => {
+  //   if (loaded) {
+  //     SplashScreen.hide()
+  //   }
+  // }, [loaded])
 
   if (!loaded) {
     return null

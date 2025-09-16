@@ -5,6 +5,7 @@ import {
   CameraView,
   FlashMode,
   useCameraPermissions,
+  useMicrophonePermissions,
 } from 'expo-camera'
 import { RefreshCcw } from 'lucide-react-native'
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
@@ -35,6 +36,7 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
     const [visible, setVisible] = useState(false)
     const [facing, setFacing] = useState<CameraType>('back')
     const [permission, requestPermission] = useCameraPermissions()
+    const [micPermission, requestMicPermission] = useMicrophonePermissions()
     const [mode, setMode] = useState<'picture' | 'video'>('picture')
     const [capturedMediaType, setCapturedMediaType] = useState<
       'image' | 'video'
@@ -211,6 +213,12 @@ const CameraModal = forwardRef<CameraModalRef, CameraModalProps>(
           const { granted } = await requestPermission()
           if (!granted) return
         }
+
+        if (!micPermission?.granted) {
+          const { granted } = await requestMicPermission()
+          if (!granted) return
+        }
+
         setVisible(true)
       },
       close: () => setVisible(false),

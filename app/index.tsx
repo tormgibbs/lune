@@ -76,7 +76,6 @@ export default function Index() {
   }
 
   const handleNewEntryPress = () => {
-    debugListMediaFiles()
     const id = nanoid(8)
     const today = dayjs().format('YYYY-MM-DD')
 

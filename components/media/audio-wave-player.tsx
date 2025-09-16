@@ -1,5 +1,4 @@
-import { View, Text, StyleProp, ViewStyle } from 'react-native'
-import React, { useRef, useState } from 'react'
+import { denormalizeUri, formatDuration } from '@/lib/utils'
 import { MediaAsset } from '@/types/media'
 import {
   FinishMode,
@@ -7,9 +6,10 @@ import {
   PlayerState,
   Waveform,
 } from '@simform_solutions/react-native-audio-waveform'
-import { denormalizeUri, formatDuration } from '@/lib/utils'
-import { Button } from './ui/button'
 import { Pause, Play } from 'lucide-react-native'
+import React, { useRef, useState } from 'react'
+import { StyleProp, Text, View, ViewStyle } from 'react-native'
+import { Button } from '../ui/button'
 
 interface AudioWavePlayerProps {
   audio: MediaAsset

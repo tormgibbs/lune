@@ -1,10 +1,10 @@
+import { Header } from '@/components/headers/entry-header'
+import { formatDate } from '@/lib/date'
+import { PortalHost } from '@rn-primitives/portal'
+import { Stack, useRouter } from 'expo-router'
+import { useRef } from 'react'
 import { Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Stack, useRouter } from 'expo-router'
-import { formatDate } from '@/lib/date'
-import { Header } from '@/features/memoir/components/headers/new-entry'
-import { useRef } from 'react'
-import { PortalHost } from '@rn-primitives/portal'
 
 const Entry = () => {
   const router = useRouter()

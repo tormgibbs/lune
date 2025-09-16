@@ -1,12 +1,12 @@
+import { MediaType } from '@/types/media'
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetView,
 } from '@gorhom/bottom-sheet'
 import { forwardRef } from 'react'
-import { View, Text, Pressable } from 'react-native'
-import { Separator } from './ui/separator'
-import { MediaType } from '@/types/media'
+import { Pressable, Text, View } from 'react-native'
+import { Separator } from '../ui/separator'
 
 
 interface DeleteBottomSheetProps {

@@ -1,3 +1,12 @@
+import CalendarHeader from '@/components/headers/calendar-header'
+import Header from '@/components/headers/edit-date-header'
+import { formatDate } from '@/lib/date'
+import { useFontSize } from '@/lib/use-font-size'
+import { useColorScheme } from '@/lib/useColorScheme'
+import { cn } from '@/lib/utils'
+import dayjs from 'dayjs'
+import { router, Stack, useLocalSearchParams } from 'expo-router'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
   Pressable,
   StyleSheet,
@@ -6,18 +15,9 @@ import {
   View,
   ViewStyle,
 } from 'react-native'
-import React, { useCallback, useMemo, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { router, Stack, useLocalSearchParams } from 'expo-router'
-import Header from '@/features/memoir/components/headers/edit-date'
 import { Calendar } from 'react-native-calendars'
-import { formatDate } from '@/lib/date'
-import CalendarHeader from '@/components/calendar-header'
-import dayjs from 'dayjs'
 import { MarkedDates, Theme } from 'react-native-calendars/src/types'
-import { useColorScheme } from '@/lib/useColorScheme'
-import { cn } from '@/lib/utils'
-import { useFontSize } from '@/lib/use-font-size'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 interface CalendarHeaderStyles {
   dayTextAtIndex0?: TextStyle
@@ -44,27 +44,7 @@ const dayHeaderStyle = {
   color: '#B8B4A7',
 }
 
-// const calendarTheme: Theme & {
-//   'stylesheet.calendar.header'?: CalendarHeaderStyles
-//   'stylesheet.day.basic'?: DayBasicStyles
-//   'stylesheet.calendar.main'?: CalendarMainStyles
-// } = {
-//   backgroundColor: '#9C988B',
-//   calendarBackground: '#9C988B',
 
-//   todayTextColor: '#E3E9B9',
-//   textDayHeaderFontWeight: '400',
-//   textDayFontWeight: 'medium',
-
-//   textDisabledColor: '#8A8680',
-//   dayTextColor: '#333333',
-
-//   'stylesheet.calendar.header': Object.fromEntries(
-//     Array(7)
-//       .fill(null)
-//       .map((_, i) => [`dayTextAtIndex${i}`, dayHeaderStyle]),
-//   ),
-// }
 
 const EditDate = () => {
   const { isDarkColorScheme: dark } = useColorScheme()
@@ -114,11 +94,6 @@ const EditDate = () => {
     fontSize === 'large' && 'text-2xl',
   )
 
-  const entryDateClass = cn(
-    fontSize === 'small' && 'text-base',
-    fontSize === 'medium' && 'text-lg',
-    fontSize === 'large' && 'text-xl',
-  )
 
   const helperTextClass = cn(
     fontSize === 'small' && 'text-xs',
@@ -163,40 +138,8 @@ const EditDate = () => {
         ),
       }
     },
-    [dark, fontSize], // Remove calendarFontSizes from deps
+    [dark, fontSize],
   )
-
-  // const calendarTheme: Theme = useMemo(
-  //   () => ({
-  //     backgroundColor: dark ? '#4A5340' : '#9C988B',
-  //     calendarBackground: dark ? '#4A5340' : '#9C988B',
-
-  //     todayTextColor: dark ? '#E8E6D9' : '#E3E9B9',
-  //     textDisabledColor: dark ? '#5A6B4D' : '#8A8680',
-  //     dayTextColor: dark ? '#E8E6D9' : '#333333',
-
-  //     textDayFontSize: calendarFontSizes.day,
-  //     textDayHeaderFontSize: calendarFontSizes.header,
-  //     textMonthFontSize: calendarFontSizes.month,
-
-  //     textDayHeaderFontWeight: '400',
-  //     textDayFontWeight: 'medium',
-
-  //     'stylesheet.calendar.header': Object.fromEntries(
-  //       Array(7)
-  //         .fill(null)
-  //         .map((_, i) => [
-  //           `dayTextAtIndex${i}`,
-  //           {
-  //             ...dayHeaderStyle,
-  //             color: dark ? '#B5C2A3' : '#B8B4A7',
-  //             fontSize: calendarFontSizes.header,
-  //           },
-  //         ]),
-  //     ),
-  //   }),
-  //   [dark, fontSize],
-  // )
 
   const markedDates: MarkedDates = useMemo(
     () => ({

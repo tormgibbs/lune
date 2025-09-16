@@ -1,13 +1,28 @@
+import ColourPickerSheet from '@/components/modals/color-picker-sheet'
+import { EntryHeader } from '@/components/headers/entry-header'
+import Lazy from '@/components/lazy'
+import AudioRecorderSheet from '@/components/media/audio-recorder'
+import CameraModal, { CameraModalRef } from '@/components/modals/camera-modal'
+import TextFormattingSheet from '@/components/modals/text-formatting-sheet'
+import VoiceInputSheet from '@/components/modals/voice-input-sheet'
+import ResponsiveMediaGrid from '@/components/responsive-media-grid'
+import Toolbar from '@/components/toolbar'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import ColourPickerSheet from '@/features/memoir/components/bottom-sheets/color-picker'
-import TextFormattingSheet from '@/features/memoir/components/bottom-sheets/text-format'
-import { Header } from '@/features/memoir/components/headers/new-entry'
-import Toolbar from '@/features/memoir/components/toolbar'
+import { upsertMemoir } from '@/db/memoir'
+import { MemoirInsert } from '@/db/schema'
+import { useMediaPicker } from '@/hooks/use-media-picker'
+import { useMemoirActions } from '@/hooks/use-memoir-actions'
 import { formatDate } from '@/lib/date'
+import { persistMediaAsset } from '@/lib/media'
+import { useFontSize } from '@/lib/use-font-size'
+import { useColorScheme } from '@/lib/useColorScheme'
 import { cn, deriveCategories, normalizeColor } from '@/lib/utils'
+import { useMemoirStore } from '@/store/memoir'
+import { MediaAsset } from '@/types/media'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { PortalHost } from '@rn-primitives/portal'
+import { createAudioPlayer } from 'expo-audio'
 import {
   Stack,
   useLocalSearchParams,
@@ -23,22 +38,6 @@ import {
 } from 'react-native-keyboard-controller'
 import { RichEditor } from 'react-native-pell-rich-editor'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useMediaPicker } from '@/hooks/use-media-picker'
-import AudioRecorderSheet from '@/features/memoir/components/bottom-sheets/audio-recorder'
-import { MediaAsset } from '@/types/media'
-import { createAudioPlayer } from 'expo-audio'
-import CameraModal, { CameraModalRef } from '@/components/camera-modal'
-import VoiceInputSheet from '@/features/memoir/components/bottom-sheets/voice-input'
-import { useMemoirStore } from '@/store/memoir'
-import { MemoirInsert } from '@/db/schema'
-import { upsertMemoir } from '@/db/memoir'
-import Lazy from '@/components/lazy'
-import { persistMediaAsset } from '@/lib/media'
-import ResponsiveMediaGrid from '@/components/responsive-media-grid'
-import { useMemoirActions } from '@/hooks/use-memoir-actions'
-import { Toaster } from 'sonner-native'
-import { useColorScheme } from '@/lib/useColorScheme'
-import { useFontSize } from '@/lib/use-font-size'
 
 const Index = () => {
   const router = useRouter()
@@ -99,7 +98,8 @@ const Index = () => {
     'text-[#55584A]',
   )
 
-  const contentFontSize = fontSize === 'small' ? 15 : fontSize === 'medium' ? 17 : 19
+  const contentFontSize =
+    fontSize === 'small' ? 15 : fontSize === 'medium' ? 17 : 19
 
   const saveMemoir = async () => {
     const title = titleRef.current.trim()
@@ -402,7 +402,7 @@ const Index = () => {
         options={{
           headerShown: true,
           header: (props) => (
-            <Header
+            <EntryHeader
               dateLabel={formatDate(new Date(selectedDate))}
               onEditDate={handleEditDate}
               onDelete={handleDelete}
@@ -537,7 +537,7 @@ const Index = () => {
                 }}
                 className={cn(
                   'bg-transparent border-0 px-1 font-medium text-[#55584A]',
-                  titleClass
+                  titleClass,
                 )}
                 placeholder="Title"
                 placeholderClassName="text-[#7A7A7A]"

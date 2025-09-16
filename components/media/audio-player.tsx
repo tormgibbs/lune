@@ -1,5 +1,4 @@
-import { View, Text, Pressable } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import { denormalizeUri } from '@/lib/utils'
 import { MediaAsset } from '@/types/media'
 import {
   FinishMode,
@@ -7,10 +6,10 @@ import {
   PlayerState,
   Waveform,
 } from '@simform_solutions/react-native-audio-waveform'
-import { denormalizeUri, formatDuration, formatDurationWithDecimals } from '@/lib/utils'
 import { Pause, Play } from 'lucide-react-native'
-import { Button } from './ui/button'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import React, { useEffect, useRef, useState } from 'react'
+import { View } from 'react-native'
+import { Button } from '../ui/button'
 
 interface AudioPlayerProps {
   isActive: boolean

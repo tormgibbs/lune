@@ -1,12 +1,12 @@
 import { cn, formatDuration } from '@/lib/utils'
 import { MediaAsset } from '@/types/media'
 import { Image } from 'expo-image'
-import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native'
-import AudioWavePlayer from '../audio-wave-player'
-import { Button } from '../ui/button'
 import { X } from 'lucide-react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import Animated, { LinearTransition } from 'react-native-reanimated'
+import AudioWavePlayer from '../media/audio-wave-player'
+import { Button } from '../ui/button'
 import { useMediaGrid } from './media-grid-context'
-import Animated, { JumpingTransition, LinearTransition } from 'react-native-reanimated'
 
 interface MediaItemProps {
   media: MediaAsset

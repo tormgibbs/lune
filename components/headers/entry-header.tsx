@@ -26,7 +26,7 @@ import { cn } from '@/lib/utils'
 import { CENTERED_TEXT_STYLE } from '@/lib/constants'
 import { FontSize } from '@/lib/use-font-size'
 
-type HeaderProps = {
+type EntryHeaderProps = {
   dateLabel: string
   onEditDate: () => void
   onDelete: () => void
@@ -39,7 +39,7 @@ type HeaderProps = {
   fontSize?: FontSize
 }
 
-export const Header = forwardRef(
+export const EntryHeader = forwardRef(
   (
     {
       dateLabel,
@@ -52,7 +52,7 @@ export const Header = forwardRef(
       titleVisible = true,
       dark = false,
       fontSize = 'medium',
-    }: HeaderProps,
+    }: EntryHeaderProps,
     ref,
   ) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false)
@@ -125,7 +125,10 @@ export const Header = forwardRef(
               {dateLabel}
             </Text>
 
-            <View className="flex-row items-center gap-3">
+            <View className={cn(
+              'flex-row items-center',
+              fontSize === 'large' ? 'gap-1' : 'gap-3',
+            )}>
               <Popover onOpenChange={setIsPopoverOpen}>
                 <PopoverTrigger ref={triggerRef} asChild>
                   <Pressable className={isPopoverOpen ? 'opacity-50' : ''}>
@@ -246,4 +249,4 @@ export const Header = forwardRef(
   },
 )
 
-Header.displayName = 'Header'
+EntryHeader.displayName = 'EntryHeader'

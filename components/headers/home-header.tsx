@@ -1,37 +1,36 @@
-import { View, Text } from 'react-native'
+import { useFontSize } from '@/lib/use-font-size'
+import { useColorScheme } from '@/lib/useColorScheme'
+import { cn } from '@/lib/utils'
+import { Octicons } from '@expo/vector-icons'
+import { router } from 'expo-router'
+import { Ellipsis, Search, Settings } from 'lucide-react-native'
 import React, {
   ComponentRef,
   forwardRef,
   useImperativeHandle,
   useRef,
 } from 'react'
-import { Button } from './ui/button'
-import { Bell, Cloud, Ellipsis, Search, Settings } from 'lucide-react-native'
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { router } from 'expo-router'
-import MenuItem from './menu-item'
-import { Separator } from './ui/separator'
-import { useColorScheme } from '@/lib/useColorScheme'
-import { cn } from '@/lib/utils'
-import { useFontSize } from '@/lib/use-font-size'
-import { CircleQuestionMark } from '@/lib/icons/CircleQuestionMark'
-import { Octicons } from '@expo/vector-icons'
+import { Text, View } from 'react-native'
+import MenuItem from '../menu-item'
+import { Button } from '../ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
+import { Separator } from '../ui/separator'
 
-interface HeaderProps {
+interface HomeHeaderProps {
   onPreferencesPress: () => void
   onNotificationsPress: () => void
   onBackupSyncPress: () => void
   onHelpPress: () => void
 }
 
-const Header = forwardRef(
+const HomeHeader = forwardRef(
   (
     {
       onPreferencesPress,
       onNotificationsPress,
       onBackupSyncPress,
       onHelpPress,
-    }: HeaderProps,
+    }: HomeHeaderProps,
     ref,
   ) => {
     const { isDarkColorScheme: dark } = useColorScheme()
@@ -167,6 +166,6 @@ const Header = forwardRef(
   },
 )
 
-export default Header
+export default HomeHeader
 
-Header.displayName = 'Header'
+HomeHeader.displayName = 'HomeHeader'

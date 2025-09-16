@@ -1,19 +1,19 @@
-import { View, StyleSheet, Dimensions } from 'react-native'
-import React, { useRef, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import MediaHeader from '@/components/headers/media-header'
+import AudioPlayer from '@/components/media/audio-player'
+import DeleteBottomSheet from '@/components/modals/delete-bottom-sheet'
+import VideoPlayer from '@/components/media/video-player'
+import { deleteMemoir, updateMemoir } from '@/db/memoir'
+import { deleteMediaFiles } from '@/lib/media'
+import { useMemoirStore } from '@/store/memoir'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { Image } from 'expo-image'
 import { router, Stack, useLocalSearchParams } from 'expo-router'
+import React, { useRef, useState } from 'react'
+import { Dimensions, StyleSheet, View } from 'react-native'
 import PagerView, {
   PagerViewOnPageSelectedEvent,
 } from 'react-native-pager-view'
-import { useMemoirStore } from '@/store/memoir'
-import { Image } from 'expo-image'
-import VideoPlayer from '@/features/memoir/components/video-player'
-import AudioPlayer from '@/components/audio-player'
-import MediaHeader from '@/components/media-header'
-import { BottomSheetModal } from '@gorhom/bottom-sheet'
-import DeleteBottomSheet from '@/components/delete-bottom-sheet'
-import { deleteMemoir, updateMemoir } from '@/db/memoir'
-import { deleteMediaFiles } from '@/lib/media'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const MediaViewer = () => {
   const { id, mediaIndex } = useLocalSearchParams<{

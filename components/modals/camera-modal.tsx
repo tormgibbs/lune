@@ -1,23 +1,23 @@
-import { useState, forwardRef, useImperativeHandle, useRef } from 'react'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import {
+  CameraMode,
+  CameraType,
+  CameraView,
+  FlashMode,
+  useCameraPermissions,
+} from 'expo-camera'
+import { RefreshCcw } from 'lucide-react-native'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { Modal, Pressable, Text, View } from 'react-native'
 import Animated, {
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
-import {
-  CameraView,
-  CameraType,
-  useCameraPermissions,
-  FlashMode,
-  CameraMode,
-} from 'expo-camera'
-import { Button } from './ui/button'
-import { RefreshCcw, Video } from 'lucide-react-native'
-import MediaPreview from './media-preview'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { toast, Toaster } from 'sonner-native'
+import MediaPreview from '../media/media-preview'
+import { Button } from '../ui/button'
 
 type CameraModalProps = {
   onClose?: () => void
